@@ -1,0 +1,1372 @@
+ 0000                   cpu LMM
+                        .module calcs.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./calcs.c
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\calcs.c
+ 0000                   .dbfunc e Calculate_Swr _Calculate_Swr fi
+ 0000           ;    dwNumerator -> X+6
+ 0000           ;  dwDenominator -> X+2
+ 0000           ;           wSwr -> X+0
+ 0000           ;           dwVr -> X-11
+ 0000           ;           dwVf -> X-7
+ 0000           _Calculate_Swr::
+ 0000                   .dbline -1
+ 0000 10                push X
+ 0001 4F                mov X,SP
+ 0002 380A              add SP,10
+ 0004                   .dbline 74
+ 0004           ; //*****************************************************************************/
+ 0004           ; //  This file is a part of the "SARK100 SWR Analyzer firmware"
+ 0004           ; //
+ 0004           ; //  Copyright © 2010 Melchor Varela - EA4FRB.  All rights reserved.
+ 0004           ; //  Melchor Varela, Madrid, Spain.
+ 0004           ; //  melchor.varela@gmail.com
+ 0004           ; //
+ 0004           ; //  "SARK100 SWR Analyzer firmware" is free software: you can redistribute it
+ 0004           ; //  and/or modify it under the terms of the GNU General Public License as
+ 0004           ; //  published by the Free Software Foundation, either version 3 of the License,
+ 0004           ; //  or (at your option) any later version.
+ 0004           ; //
+ 0004           ; //  "SARK100 SWR Analyzer firmware" is distributed in the hope that it will be
+ 0004           ; //  useful,  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 0004           ; //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ 0004           ; //  GNU General Public License for more details.
+ 0004           ; //
+ 0004           ; //  You should have received a copy of the GNU General Public License
+ 0004           ; //  along with "SARK100 SWR Analyzer firmware".  If not,
+ 0004           ; //  see <http://www.gnu.org/licenses/>.
+ 0004           ; //*****************************************************************************/
+ 0004           ; //*****************************************************************************/
+ 0004           ; //
+ 0004           ; //    PROJECT:        SARK100 SWR Analyzer
+ 0004           ; //    FILE NAME:      CALCS.C
+ 0004           ; //    AUTHOR:         EA4FRB - Melchor Varela
+ 0004           ; //
+ 0004           ; //    DESCRIPTION
+ 0004           ; //
+ 0004           ; //    SWR and impedance calculation routines
+ 0004           ; //
+ 0004           ; //    HISTORY
+ 0004           ; //
+ 0004           ; //    NAME    DATE            REMARKS
+ 0004           ; //
+ 0004           ; //    MVM             DEC 2009        Creation
+ 0004           ; //
+ 0004           ; //*****************************************************************************/
+ 0004           ; 
+ 0004           ; #include <m8c.h>        // part specific constants and macros
+ 0004           ; #include <math.h>
+ 0004           ; 
+ 0004           ; #include "PSoCAPI.h"
+ 0004           ; #include "psocgpioint.h"
+ 0004           ; #include "glb_data.h"
+ 0004           ; #include "calibrate_reflectometer.h"
+ 0004           ; 
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; //  Prototypes
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; static WORD Calc_Sqrt (DWORD dwN);
+ 0004           ; 
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; //  FUNCTION NAME:    Calculate_Swr
+ 0004           ; //
+ 0004           ; //  DESCRIPTION:
+ 0004           ; //
+ 0004           ; //    Calculates SWR based on VF and VR values
+ 0004           ; //    Notice that wVf value is x2 because it is measured at the bridge input, and
+ 0004           ; //    wVr is also x2 because the PGA gain is set to double, so both compensates and
+ 0004           ; //    it is not needed further calculation
+ 0004           ; //
+ 0004           ; //    SWR = (Vf+Vr/Vf-Vr)*100
+ 0004           ; //
+ 0004           ; //  ARGUMENTS:
+ 0004           ; //            dwVf
+ 0004           ; //            dwVr
+ 0004           ; //
+ 0004           ; //  RETURNS:
+ 0004           ; //     SWR
+ 0004           ; //
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; WORD Calculate_Swr (DWORD dwVf, DWORD dwVr)
+ 0004           ; {
+ 0004                   .dbline 79
+ 0004           ;       DWORD dwDenominator;
+ 0004           ;       DWORD dwNumerator;
+ 0004           ;       WORD wSwr;
+ 0004           ; 
+ 0004           ;       if (dwVf>dwVr)
+ 0004 52F8              mov A,[X-8]
+ 0006 13FC              sub A,[X-4]
+ 0008 52F7              mov A,[X-9]
+ 000A 1BFB              sbb A,[X-5]
+ 000C 52F6              mov A,[X-10]
+ 000E 1BFA              sbb A,[X-6]
+ 0010 52F5              mov A,[X-11]
+ 0012 1BF9              sbb A,[X-7]
+ 0014 D01B              jnc L14
+ 0016           X0:
+ 0016                   .dbline 80
+ 0016           ;               dwDenominator = dwVf-dwVr;
+ 0016 52FC              mov A,[X-4]
+ 0018 13F8              sub A,[X-8]
+ 001A 5405              mov [X+5],A
+ 001C 52FB              mov A,[X-5]
+ 001E 1BF7              sbb A,[X-9]
+ 0020 5404              mov [X+4],A
+ 0022 52FA              mov A,[X-6]
+ 0024 1BF6              sbb A,[X-10]
+ 0026 5403              mov [X+3],A
+ 0028 52F9              mov A,[X-7]
+ 002A 1BF5              sbb A,[X-11]
+ 002C 5402              mov [X+2],A
+ 002E 800D              xjmp L15
+ 0030           L14:
+ 0030                   .dbline 82
+ 0030           ;       else
+ 0030           ;               dwDenominator = 1;
+ 0030 560200            mov [X+2],0
+ 0033 560300            mov [X+3],0
+ 0036 560400            mov [X+4],0
+ 0039 560501            mov [X+5],1
+ 003C           L15:
+ 003C                   .dbline 84
+ 003C           ; 
+ 003C           ;       dwNumerator = (dwVf+dwVr)*100;
+ 003C 62D000            mov REG[0xd0],>__r0
+ 003F 52FC              mov A,[X-4]
+ 0041 03F8              add A,[X-8]
+ 0043 5300              mov [__r3],A
+ 0045 52FB              mov A,[X-5]
+ 0047 0BF7              adc A,[X-9]
+ 0049 5300              mov [__r2],A
+ 004B 52FA              mov A,[X-6]
+ 004D 0BF6              adc A,[X-10]
+ 004F 5300              mov [__r1],A
+ 0051 52F9              mov A,[X-7]
+ 0053 0BF5              adc A,[X-11]
+ 0055 08                push A
+ 0056 5100              mov A,[__r1]
+ 0058 08                push A
+ 0059 5100              mov A,[__r2]
+ 005B 08                push A
+ 005C 5100              mov A,[__r3]
+ 005E 08                push A
+ 005F 5000              mov A,0
+ 0061 08                push A
+ 0062 08                push A
+ 0063 08                push A
+ 0064 5064              mov A,100
+ 0066 08                push A
+ 0067 7C0000            xcall __mul_32X32_32
+ 006A 38FC              add SP,-4
+ 006C 18                pop A
+ 006D 5409              mov [X+9],A
+ 006F 18                pop A
+ 0070 5408              mov [X+8],A
+ 0072 18                pop A
+ 0073 5407              mov [X+7],A
+ 0075 18                pop A
+ 0076 5406              mov [X+6],A
+ 0078                   .dbline 85
+ 0078           ;       wSwr = (dwNumerator/dwDenominator);
+ 0078 5202              mov A,[X+2]
+ 007A 08                push A
+ 007B 5203              mov A,[X+3]
+ 007D 08                push A
+ 007E 5204              mov A,[X+4]
+ 0080 08                push A
+ 0081 5205              mov A,[X+5]
+ 0083 08                push A
+ 0084 5206              mov A,[X+6]
+ 0086 08                push A
+ 0087 5207              mov A,[X+7]
+ 0089 08                push A
+ 008A 5208              mov A,[X+8]
+ 008C 08                push A
+ 008D 5209              mov A,[X+9]
+ 008F 08                push A
+ 0090 7C0000            xcall __divmodu_32X32_32
+ 0093 18                pop A
+ 0094 5300              mov [__r3],A
+ 0096 18                pop A
+ 0097 5300              mov [__r2],A
+ 0099 18                pop A
+ 009A 18                pop A
+ 009B 38FC              add SP,-4
+ 009D 5100              mov A,[__r3]
+ 009F 5300              mov [__r1],A
+ 00A1 5100              mov A,[__r2]
+ 00A3 5300              mov [__r0],A
+ 00A5 5100              mov A,[__r1]
+ 00A7 5401              mov [X+1],A
+ 00A9 5100              mov A,[__r0]
+ 00AB 5400              mov [X+0],A
+ 00AD                   .dbline 87
+ 00AD           ; 
+ 00AD           ;       if (wSwr > SWR_MAX)
+ 00AD 50E7              mov A,-25
+ 00AF 1301              sub A,[X+1]
+ 00B1 5003              mov A,3
+ 00B3 1B00              sbb A,[X+0]
+ 00B5 D007              jnc L16
+ 00B7           X1:
+ 00B7                   .dbline 88
+ 00B7           ;               wSwr = SWR_MAX;
+ 00B7 5601E7            mov [X+1],-25
+ 00BA 560003            mov [X+0],3
+ 00BD           L16:
+ 00BD                   .dbline 90
+ 00BD           ; 
+ 00BD           ;       return wSwr;
+ 00BD 62D000            mov REG[0xd0],>__r0
+ 00C0 5201              mov A,[X+1]
+ 00C2 5300              mov [__r1],A
+ 00C4 5200              mov A,[X+0]
+ 00C6 5300              mov [__r0],A
+ 00C8                   .dbline -2
+ 00C8           L13:
+ 00C8 38F6              add SP,-10
+ 00CA 20                pop X
+ 00CB                   .dbline 0 ; func end
+ 00CB 7F                ret
+ 00CC                   .dbsym l dwNumerator 6 l
+ 00CC                   .dbsym l dwDenominator 2 l
+ 00CC                   .dbsym l wSwr 0 i
+ 00CC                   .dbsym l dwVr -11 l
+ 00CC                   .dbsym l dwVf -7 l
+ 00CC                   .dbend
+ 00CC                   .dbfunc e Calculate_Z _Calculate_Z fi
+ 00CC           ;            dwZ -> X+0
+ 00CC           ;           dwVa -> X-11
+ 00CC           ;           dwVz -> X-7
+ 00CC           _Calculate_Z::
+ 00CC                   .dbline -1
+ 00CC 10                push X
+ 00CD 4F                mov X,SP
+ 00CE 3804              add SP,4
+ 00D0                   .dbline 111
+ 00D0           ; }
+ 00D0           ; 
+ 00D0           ; //-----------------------------------------------------------------------------
+ 00D0           ; //  FUNCTION NAME:    Calculate_Z
+ 00D0           ; //
+ 00D0           ; //  DESCRIPTION:
+ 00D0           ; //
+ 00D0           ; //    Calculates impedance
+ 00D0           ; //
+ 00D0           ; //    Z = (50 * Vz)/Va;
+ 00D0           ; //
+ 00D0           ; //  ARGUMENTS:
+ 00D0           ; //            dwVz
+ 00D0           ; //            dwVa
+ 00D0           ; //
+ 00D0           ; //  RETURNS:
+ 00D0           ; //     Z
+ 00D0           ; //
+ 00D0           ; //-----------------------------------------------------------------------------
+ 00D0           ; WORD Calculate_Z (DWORD dwVz, DWORD dwVa)
+ 00D0           ; {
+ 00D0                   .dbline 114
+ 00D0           ;       DWORD dwZ;
+ 00D0           ; 
+ 00D0           ;       if (dwVa == 0)                                          // Avoids divide by zero
+ 00D0 3DF500            cmp [X-11],0
+ 00D3 B01C              jnz L19
+ 00D5 3DF600            cmp [X-10],0
+ 00D8 B017              jnz L19
+ 00DA 3DF700            cmp [X-9],0
+ 00DD B012              jnz L19
+ 00DF 3DF800            cmp [X-8],0
+ 00E2 B00D              jnz L19
+ 00E4           X2:
+ 00E4                   .dbline 115
+ 00E4           ;               dwVa = 1;
+ 00E4 56F500            mov [X-11],0
+ 00E7 56F600            mov [X-10],0
+ 00EA 56F700            mov [X-9],0
+ 00ED 56F801            mov [X-8],1
+ 00F0           L19:
+ 00F0                   .dbline 117
+ 00F0           ; 
+ 00F0           ;       dwZ = ((DWORD)(dwVz * (DWORD)50))/dwVa;
+ 00F0 62D000            mov REG[0xd0],>__r0
+ 00F3 52F9              mov A,[X-7]
+ 00F5 08                push A
+ 00F6 52FA              mov A,[X-6]
+ 00F8 08                push A
+ 00F9 52FB              mov A,[X-5]
+ 00FB 08                push A
+ 00FC 52FC              mov A,[X-4]
+ 00FE 08                push A
+ 00FF 5000              mov A,0
+ 0101 08                push A
+ 0102 08                push A
+ 0103 08                push A
+ 0104 5032              mov A,50
+ 0106 08                push A
+ 0107 7C0000            xcall __mul_32X32_32
+ 010A 38FC              add SP,-4
+ 010C 18                pop A
+ 010D 5300              mov [__r3],A
+ 010F 18                pop A
+ 0110 5300              mov [__r2],A
+ 0112 18                pop A
+ 0113 5300              mov [__r1],A
+ 0115 18                pop A
+ 0116 5300              mov [__r0],A
+ 0118 52F5              mov A,[X-11]
+ 011A 08                push A
+ 011B 52F6              mov A,[X-10]
+ 011D 08                push A
+ 011E 52F7              mov A,[X-9]
+ 0120 08                push A
+ 0121 52F8              mov A,[X-8]
+ 0123 08                push A
+ 0124 5100              mov A,[__r0]
+ 0126 08                push A
+ 0127 5100              mov A,[__r1]
+ 0129 08                push A
+ 012A 5100              mov A,[__r2]
+ 012C 08                push A
+ 012D 5100              mov A,[__r3]
+ 012F 08                push A
+ 0130 7C0000            xcall __divmodu_32X32_32
+ 0133 18                pop A
+ 0134 5403              mov [X+3],A
+ 0136 18                pop A
+ 0137 5402              mov [X+2],A
+ 0139 18                pop A
+ 013A 5401              mov [X+1],A
+ 013C 18                pop A
+ 013D 5400              mov [X+0],A
+ 013F 38FC              add SP,-4
+ 0141                   .dbline 119
+ 0141           ; 
+ 0141           ;       if (dwZ > 2000)
+ 0141 50D0              mov A,-48
+ 0143 1303              sub A,[X+3]
+ 0145 5007              mov A,7
+ 0147 1B02              sbb A,[X+2]
+ 0149 5000              mov A,0
+ 014B 1B01              sbb A,[X+1]
+ 014D 5000              mov A,0
+ 014F 1B00              sbb A,[X+0]
+ 0151 D00D              jnc L21
+ 0153           X3:
+ 0153                   .dbline 120
+ 0153           ;               dwZ = 2000;
+ 0153 560000            mov [X+0],0
+ 0156 560100            mov [X+1],0
+ 0159 560207            mov [X+2],7
+ 015C 5603D0            mov [X+3],-48
+ 015F           L21:
+ 015F                   .dbline 122
+ 015F           ; 
+ 015F           ;       return (WORD)dwZ;
+ 015F 62D000            mov REG[0xd0],>__r0
+ 0162 5203              mov A,[X+3]
+ 0164 5300              mov [__r1],A
+ 0166 5202              mov A,[X+2]
+ 0168 5300              mov [__r0],A
+ 016A                   .dbline -2
+ 016A           L18:
+ 016A 38FC              add SP,-4
+ 016C 20                pop X
+ 016D                   .dbline 0 ; func end
+ 016D 7F                ret
+ 016E                   .dbsym l dwZ 0 l
+ 016E                   .dbsym l dwVa -11 l
+ 016E                   .dbsym l dwVz -7 l
+ 016E                   .dbend
+ 016E                   .dbfunc e Calculate_R _Calculate_R fi
+ 016E           ;             wR -> X+8
+ 016E           ;  dwDenominator -> X+4
+ 016E           ;    dwNumerator -> X+0
+ 016E           ;           wSwr -> X-7
+ 016E           ;             wZ -> X-5
+ 016E           _Calculate_R::
+ 016E                   .dbline -1
+ 016E 10                push X
+ 016F 4F                mov X,SP
+ 0170 380A              add SP,10
+ 0172                   .dbline 149
+ 0172           ; }
+ 0172           ; 
+ 0172           ; //-----------------------------------------------------------------------------
+ 0172           ; //  FUNCTION NAME:    Calculate_R
+ 0172           ; //
+ 0172           ; //  DESCRIPTION:
+ 0172           ; //
+ 0172           ; //    Calculates resistance
+ 0172           ; //
+ 0172           ; //               (2500 + Z^2) * SWR
+ 0172           ; //           R = ------------------
+ 0172           ; //                50 * (SWR^2 + 1)
+ 0172           ; //
+ 0172           ; //      OR ...
+ 0172           ; //                 (2500+Z^2)*SWR
+ 0172           ; //           R =  --------------------
+ 0172           ; //                  ((SWR^2)/2)+5000
+ 0172           ; //  ARGUMENTS:
+ 0172           ; //     wZ
+ 0172           ; //       wSwr
+ 0172           ; //
+ 0172           ; //  RETURNS:
+ 0172           ; //     R
+ 0172           ; //
+ 0172           ; //-----------------------------------------------------------------------------
+ 0172           ; WORD Calculate_R (WORD wZ, WORD wSwr)
+ 0172           ; {
+ 0172                   .dbline 154
+ 0172           ;       DWORD dwNumerator;
+ 0172           ;       DWORD dwDenominator;
+ 0172           ;       WORD wR;
+ 0172           ; 
+ 0172           ;       dwDenominator = (((DWORD)wSwr*wSwr)/2)+5000;
+ 0172 62D000            mov REG[0xd0],>__r0
+ 0175 52FA              mov A,[X-6]
+ 0177 5300              mov [__r3],A
+ 0179 52F9              mov A,[X-7]
+ 017B 5300              mov [__r2],A
+ 017D 52FA              mov A,[X-6]
+ 017F 5300              mov [__r7],A
+ 0181 52F9              mov A,[X-7]
+ 0183 5300              mov [__r6],A
+ 0185 5000              mov A,0
+ 0187 08                push A
+ 0188 08                push A
+ 0189 5100              mov A,[__r2]
+ 018B 08                push A
+ 018C 5100              mov A,[__r3]
+ 018E 08                push A
+ 018F 5000              mov A,0
+ 0191 08                push A
+ 0192 08                push A
+ 0193 5100              mov A,[__r6]
+ 0195 08                push A
+ 0196 5100              mov A,[__r7]
+ 0198 08                push A
+ 0199 7C0000            xcall __mul_32X32_32
+ 019C 38FC              add SP,-4
+ 019E 18                pop A
+ 019F 5300              mov [__r3],A
+ 01A1 18                pop A
+ 01A2 5300              mov [__r2],A
+ 01A4 18                pop A
+ 01A5 5300              mov [__r1],A
+ 01A7 18                pop A
+ 01A8 5300              mov [__r0],A
+ 01AA 70FB              and F,-5
+ 01AC 6E00              rrc [__r0]
+ 01AE 6E00              rrc [__r1]
+ 01B0 6E00              rrc [__r2]
+ 01B2 6E00              rrc [__r3]
+ 01B4 5100              mov A,[__r3]
+ 01B6 0188              add A,-120
+ 01B8 5407              mov [X+7],A
+ 01BA 5100              mov A,[__r2]
+ 01BC 0913              adc A,19
+ 01BE 5406              mov [X+6],A
+ 01C0 5100              mov A,[__r1]
+ 01C2 0900              adc A,0
+ 01C4 5405              mov [X+5],A
+ 01C6 5100              mov A,[__r0]
+ 01C8 0900              adc A,0
+ 01CA 5404              mov [X+4],A
+ 01CC                   .dbline 155
+ 01CC           ;       dwNumerator = (((DWORD)wZ*wZ) + 2500) * (DWORD)wSwr;
+ 01CC 52FC              mov A,[X-4]
+ 01CE 5300              mov [__r3],A
+ 01D0 52FB              mov A,[X-5]
+ 01D2 5300              mov [__r2],A
+ 01D4 52FC              mov A,[X-4]
+ 01D6 5300              mov [__r7],A
+ 01D8 52FB              mov A,[X-5]
+ 01DA 5300              mov [__r6],A
+ 01DC 5000              mov A,0
+ 01DE 08                push A
+ 01DF 08                push A
+ 01E0 5100              mov A,[__r2]
+ 01E2 08                push A
+ 01E3 5100              mov A,[__r3]
+ 01E5 08                push A
+ 01E6 5000              mov A,0
+ 01E8 08                push A
+ 01E9 08                push A
+ 01EA 5100              mov A,[__r6]
+ 01EC 08                push A
+ 01ED 5100              mov A,[__r7]
+ 01EF 08                push A
+ 01F0 7C0000            xcall __mul_32X32_32
+ 01F3 38FC              add SP,-4
+ 01F5 18                pop A
+ 01F6 5300              mov [__r3],A
+ 01F8 18                pop A
+ 01F9 5300              mov [__r2],A
+ 01FB 18                pop A
+ 01FC 5300              mov [__r1],A
+ 01FE 18                pop A
+ 01FF 5300              mov [__r0],A
+ 0201 0600C4            add [__r3],-60
+ 0204 0E0009            adc [__r2],9
+ 0207 0E0000            adc [__r1],0
+ 020A 0E0000            adc [__r0],0
+ 020D 52FA              mov A,[X-6]
+ 020F 5300              mov [__r7],A
+ 0211 52F9              mov A,[X-7]
+ 0213 5300              mov [__r6],A
+ 0215 5000              mov A,0
+ 0217 08                push A
+ 0218 08                push A
+ 0219 5100              mov A,[__r6]
+ 021B 08                push A
+ 021C 5100              mov A,[__r7]
+ 021E 08                push A
+ 021F 5100              mov A,[__r0]
+ 0221 08                push A
+ 0222 5100              mov A,[__r1]
+ 0224 08                push A
+ 0225 5100              mov A,[__r2]
+ 0227 08                push A
+ 0228 5100              mov A,[__r3]
+ 022A 08                push A
+ 022B 7C0000            xcall __mul_32X32_32
+ 022E 38FC              add SP,-4
+ 0230 18                pop A
+ 0231 5403              mov [X+3],A
+ 0233 18                pop A
+ 0234 5402              mov [X+2],A
+ 0236 18                pop A
+ 0237 5401              mov [X+1],A
+ 0239 18                pop A
+ 023A 5400              mov [X+0],A
+ 023C                   .dbline 157
+ 023C           ; 
+ 023C           ;       wR = dwNumerator/dwDenominator;
+ 023C 5204              mov A,[X+4]
+ 023E 08                push A
+ 023F 5205              mov A,[X+5]
+ 0241 08                push A
+ 0242 5206              mov A,[X+6]
+ 0244 08                push A
+ 0245 5207              mov A,[X+7]
+ 0247 08                push A
+ 0248 5200              mov A,[X+0]
+ 024A 08                push A
+ 024B 5201              mov A,[X+1]
+ 024D 08                push A
+ 024E 5202              mov A,[X+2]
+ 0250 08                push A
+ 0251 5203              mov A,[X+3]
+ 0253 08                push A
+ 0254 7C0000            xcall __divmodu_32X32_32
+ 0257 18                pop A
+ 0258 5300              mov [__r3],A
+ 025A 18                pop A
+ 025B 5300              mov [__r2],A
+ 025D 18                pop A
+ 025E 18                pop A
+ 025F 38FC              add SP,-4
+ 0261 5100              mov A,[__r3]
+ 0263 5300              mov [__r1],A
+ 0265 5100              mov A,[__r2]
+ 0267 5300              mov [__r0],A
+ 0269 5100              mov A,[__r1]
+ 026B 5409              mov [X+9],A
+ 026D 5100              mov A,[__r0]
+ 026F 5408              mov [X+8],A
+ 0271                   .dbline 159
+ 0271           ; 
+ 0271           ;       return wR;
+ 0271 5209              mov A,[X+9]
+ 0273 5300              mov [__r1],A
+ 0275 5208              mov A,[X+8]
+ 0277 5300              mov [__r0],A
+ 0279                   .dbline -2
+ 0279           L23:
+ 0279 38F6              add SP,-10
+ 027B 20                pop X
+ 027C                   .dbline 0 ; func end
+ 027C 7F                ret
+ 027D                   .dbsym l wR 8 i
+ 027D                   .dbsym l dwDenominator 4 l
+ 027D                   .dbsym l dwNumerator 0 l
+ 027D                   .dbsym l wSwr -7 i
+ 027D                   .dbsym l wZ -5 i
+ 027D                   .dbend
+ 027D                   .dbfunc e Calculate_X _Calculate_X fi
+ 027D           ;             wX -> X+4
+ 027D           ;         dwTemp -> X+0
+ 027D           ;             wR -> X-7
+ 027D           ;             wZ -> X-5
+ 027D           _Calculate_X::
+ 027D                   .dbline -1
+ 027D 10                push X
+ 027E 4F                mov X,SP
+ 027F 3806              add SP,6
+ 0281                   .dbline 180
+ 0281           ; }
+ 0281           ; 
+ 0281           ; //-----------------------------------------------------------------------------
+ 0281           ; //  FUNCTION NAME:    Calculate_X
+ 0281           ; //
+ 0281           ; //  DESCRIPTION:
+ 0281           ; //
+ 0281           ; //    Calculates impedance
+ 0281           ; //
+ 0281           ; //           X = SQRT ( Z^2 - R^2 )
+ 0281           ; //
+ 0281           ; //  ARGUMENTS:
+ 0281           ; //            wZ
+ 0281           ; //            wR
+ 0281           ; //
+ 0281           ; //  RETURNS:
+ 0281           ; //     X
+ 0281           ; //
+ 0281           ; //-----------------------------------------------------------------------------
+ 0281           ; WORD Calculate_X (WORD wZ, WORD wR)
+ 0281           ; {
+ 0281                   .dbline 184
+ 0281           ;       DWORD dwTemp;
+ 0281           ;       WORD wX;
+ 0281           ; 
+ 0281           ;       if (((signed long)wZ-(signed long)wR)<=1)
+ 0281 62D000            mov REG[0xd0],>__r0
+ 0284 52FA              mov A,[X-6]
+ 0286 5300              mov [__r3],A
+ 0288 52F9              mov A,[X-7]
+ 028A 5300              mov [__r2],A
+ 028C 550000            mov [__r1],0
+ 028F 550000            mov [__r0],0
+ 0292 52FC              mov A,[X-4]
+ 0294 5300              mov [__r7],A
+ 0296 52FB              mov A,[X-5]
+ 0298 5300              mov [__r6],A
+ 029A 5100              mov A,[__r7]
+ 029C 1200              sub A,[__r3]
+ 029E 5300              mov [__r3],A
+ 02A0 5100              mov A,[__r6]
+ 02A2 1A00              sbb A,[__r2]
+ 02A4 5300              mov [__r2],A
+ 02A6 5000              mov A,0
+ 02A8 1A00              sbb A,[__r1]
+ 02AA 5300              mov [__r1],A
+ 02AC 5000              mov A,0
+ 02AE 1A00              sbb A,[__r0]
+ 02B0 5300              mov [__r0],A
+ 02B2 5001              mov A,1
+ 02B4 1200              sub A,[__r3]
+ 02B6 5000              mov A,0
+ 02B8 1A00              sbb A,[__r2]
+ 02BA 5000              mov A,0
+ 02BC 1A00              sbb A,[__r1]
+ 02BE 5100              mov A,[__r0]
+ 02C0 3180              xor A,-128
+ 02C2 5300              mov [__rX],A
+ 02C4 5080              mov A,(0 ^ 0x80)
+ 02C6 1A00              sbb A,[__rX]
+ 02C8 C00C              jc L25
+ 02CA           X4:
+ 02CA                   .dbline 185
+ 02CA           ;               return 0;
+ 02CA 62D000            mov REG[0xd0],>__r0
+ 02CD 550000            mov [__r1],0
+ 02D0 550000            mov [__r0],0
+ 02D3 80A9              xjmp L24
+ 02D5           L25:
+ 02D5                   .dbline 186
+ 02D5           ;       dwTemp = ((DWORD)wZ*wZ)-((DWORD)wR*wR);
+ 02D5 62D000            mov REG[0xd0],>__r0
+ 02D8 52FA              mov A,[X-6]
+ 02DA 5300              mov [__r3],A
+ 02DC 52F9              mov A,[X-7]
+ 02DE 5300              mov [__r2],A
+ 02E0 52FA              mov A,[X-6]
+ 02E2 5300              mov [__r7],A
+ 02E4 52F9              mov A,[X-7]
+ 02E6 5300              mov [__r6],A
+ 02E8 5000              mov A,0
+ 02EA 08                push A
+ 02EB 08                push A
+ 02EC 5100              mov A,[__r2]
+ 02EE 08                push A
+ 02EF 5100              mov A,[__r3]
+ 02F1 08                push A
+ 02F2 5000              mov A,0
+ 02F4 08                push A
+ 02F5 08                push A
+ 02F6 5100              mov A,[__r6]
+ 02F8 08                push A
+ 02F9 5100              mov A,[__r7]
+ 02FB 08                push A
+ 02FC 7C0000            xcall __mul_32X32_32
+ 02FF 38FC              add SP,-4
+ 0301 18                pop A
+ 0302 5300              mov [__r3],A
+ 0304 18                pop A
+ 0305 5300              mov [__r2],A
+ 0307 18                pop A
+ 0308 5300              mov [__r1],A
+ 030A 18                pop A
+ 030B 5300              mov [__r0],A
+ 030D 52FC              mov A,[X-4]
+ 030F 5300              mov [__r7],A
+ 0311 52FB              mov A,[X-5]
+ 0313 5300              mov [__r6],A
+ 0315 52FC              mov A,[X-4]
+ 0317 5300              mov [__r11],A
+ 0319 52FB              mov A,[X-5]
+ 031B 5300              mov [__r10],A
+ 031D 5000              mov A,0
+ 031F 08                push A
+ 0320 08                push A
+ 0321 5100              mov A,[__r6]
+ 0323 08                push A
+ 0324 5100              mov A,[__r7]
+ 0326 08                push A
+ 0327 5000              mov A,0
+ 0329 08                push A
+ 032A 08                push A
+ 032B 5100              mov A,[__r10]
+ 032D 08                push A
+ 032E 5100              mov A,[__r11]
+ 0330 08                push A
+ 0331 7C0000            xcall __mul_32X32_32
+ 0334 38FC              add SP,-4
+ 0336 18                pop A
+ 0337 5300              mov [__r7],A
+ 0339 18                pop A
+ 033A 5300              mov [__r6],A
+ 033C 18                pop A
+ 033D 5300              mov [__r5],A
+ 033F 18                pop A
+ 0340 5300              mov [__r4],A
+ 0342 5100              mov A,[__r7]
+ 0344 1200              sub A,[__r3]
+ 0346 5403              mov [X+3],A
+ 0348 5100              mov A,[__r6]
+ 034A 1A00              sbb A,[__r2]
+ 034C 5402              mov [X+2],A
+ 034E 5100              mov A,[__r5]
+ 0350 1A00              sbb A,[__r1]
+ 0352 5401              mov [X+1],A
+ 0354 5100              mov A,[__r4]
+ 0356 1A00              sbb A,[__r0]
+ 0358 5400              mov [X+0],A
+ 035A                   .dbline 188
+ 035A           ; 
+ 035A           ;       wX = Calc_Sqrt(dwTemp);
+ 035A 5200              mov A,[X+0]
+ 035C 08                push A
+ 035D 5201              mov A,[X+1]
+ 035F 08                push A
+ 0360 5202              mov A,[X+2]
+ 0362 08                push A
+ 0363 5203              mov A,[X+3]
+ 0365 08                push A
+ 0366 91C6              xcall _Calc_Sqrt
+ 0368 38FC              add SP,-4
+ 036A 62D000            mov REG[0xd0],>__r0
+ 036D 5100              mov A,[__r1]
+ 036F 5405              mov [X+5],A
+ 0371 5100              mov A,[__r0]
+ 0373 5404              mov [X+4],A
+ 0375                   .dbline 190
+ 0375           ; 
+ 0375           ;       return wX;
+ 0375 5205              mov A,[X+5]
+ 0377 5300              mov [__r1],A
+ 0379 5204              mov A,[X+4]
+ 037B 5300              mov [__r0],A
+ 037D                   .dbline -2
+ 037D           L24:
+ 037D 38FA              add SP,-6
+ 037F 20                pop X
+ 0380                   .dbline 0 ; func end
+ 0380 7F                ret
+ 0381                   .dbsym l wX 4 i
+ 0381                   .dbsym l dwTemp 0 l
+ 0381                   .dbsym l wR -7 i
+ 0381                   .dbsym l wZ -5 i
+ 0381                   .dbend
+ 0381                   .dbfunc e Calculate_L _Calculate_L fi
+ 0381           ;         dwTemp -> X+0
+ 0381           ;         dwFreq -> X-9
+ 0381           ;             wX -> X-5
+ 0381           _Calculate_L::
+ 0381                   .dbline -1
+ 0381 10                push X
+ 0382 4F                mov X,SP
+ 0383 3804              add SP,4
+ 0385                   .dbline 211
+ 0385           ; }
+ 0385           ; 
+ 0385           ; //-----------------------------------------------------------------------------
+ 0385           ; //  FUNCTION NAME:    Calculate_L
+ 0385           ; //
+ 0385           ; //  DESCRIPTION:
+ 0385           ; //
+ 0385           ; //    Calculates inductance
+ 0385           ; //
+ 0385           ; //    L=10^6*X/2*PI*freq
+ 0385           ; //
+ 0385           ; //  ARGUMENTS:
+ 0385           ; //            wX
+ 0385           ; //            dwFreq
+ 0385           ; //
+ 0385           ; //  RETURNS:
+ 0385           ; //     Inductance value in *10 uH.
+ 0385           ; //
+ 0385           ; //-----------------------------------------------------------------------------
+ 0385           ; WORD Calculate_L (WORD wX, DWORD dwFreq)
+ 0385           ; {
+ 0385                   .dbline 214
+ 0385           ;       DWORD dwTemp;
+ 0385           ; 
+ 0385           ;       dwFreq /= 1000;                                         // Hz to Khz
+ 0385 5000              mov A,0
+ 0387 08                push A
+ 0388 08                push A
+ 0389 5003              mov A,3
+ 038B 08                push A
+ 038C 50E8              mov A,-24
+ 038E 08                push A
+ 038F 52F7              mov A,[X-9]
+ 0391 08                push A
+ 0392 52F8              mov A,[X-8]
+ 0394 08                push A
+ 0395 52F9              mov A,[X-7]
+ 0397 08                push A
+ 0398 52FA              mov A,[X-6]
+ 039A 08                push A
+ 039B 62D000            mov REG[0xd0],>__r0
+ 039E 7C0000            xcall __divmodu_32X32_32
+ 03A1 18                pop A
+ 03A2 54FA              mov [X-6],A
+ 03A4 18                pop A
+ 03A5 54F9              mov [X-7],A
+ 03A7 18                pop A
+ 03A8 54F8              mov [X-8],A
+ 03AA 18                pop A
+ 03AB 54F7              mov [X-9],A
+ 03AD 38FC              add SP,-4
+ 03AF                   .dbline 216
+ 03AF           ; 
+ 03AF           ;       dwTemp = ((DWORD)wX*100000)/63;
+ 03AF 52FC              mov A,[X-4]
+ 03B1 5300              mov [__r3],A
+ 03B3 52FB              mov A,[X-5]
+ 03B5 5300              mov [__r2],A
+ 03B7 5000              mov A,0
+ 03B9 08                push A
+ 03BA 08                push A
+ 03BB 5100              mov A,[__r2]
+ 03BD 08                push A
+ 03BE 5100              mov A,[__r3]
+ 03C0 08                push A
+ 03C1 5000              mov A,0
+ 03C3 08                push A
+ 03C4 5001              mov A,1
+ 03C6 08                push A
+ 03C7 5086              mov A,-122
+ 03C9 08                push A
+ 03CA 50A0              mov A,-96
+ 03CC 08                push A
+ 03CD 7C0000            xcall __mul_32X32_32
+ 03D0 38FC              add SP,-4
+ 03D2 18                pop A
+ 03D3 5300              mov [__r3],A
+ 03D5 18                pop A
+ 03D6 5300              mov [__r2],A
+ 03D8 18                pop A
+ 03D9 5300              mov [__r1],A
+ 03DB 18                pop A
+ 03DC 5300              mov [__r0],A
+ 03DE 5000              mov A,0
+ 03E0 08                push A
+ 03E1 08                push A
+ 03E2 08                push A
+ 03E3 503F              mov A,63
+ 03E5 08                push A
+ 03E6 5100              mov A,[__r0]
+ 03E8 08                push A
+ 03E9 5100              mov A,[__r1]
+ 03EB 08                push A
+ 03EC 5100              mov A,[__r2]
+ 03EE 08                push A
+ 03EF 5100              mov A,[__r3]
+ 03F1 08                push A
+ 03F2 7C0000            xcall __divmodu_32X32_32
+ 03F5 18                pop A
+ 03F6 5403              mov [X+3],A
+ 03F8 18                pop A
+ 03F9 5402              mov [X+2],A
+ 03FB 18                pop A
+ 03FC 5401              mov [X+1],A
+ 03FE 18                pop A
+ 03FF 5400              mov [X+0],A
+ 0401 38FC              add SP,-4
+ 0403                   .dbline 217
+ 0403           ;       return dwTemp / dwFreq;
+ 0403 52F7              mov A,[X-9]
+ 0405 08                push A
+ 0406 52F8              mov A,[X-8]
+ 0408 08                push A
+ 0409 52F9              mov A,[X-7]
+ 040B 08                push A
+ 040C 52FA              mov A,[X-6]
+ 040E 08                push A
+ 040F 5200              mov A,[X+0]
+ 0411 08                push A
+ 0412 5201              mov A,[X+1]
+ 0414 08                push A
+ 0415 5202              mov A,[X+2]
+ 0417 08                push A
+ 0418 5203              mov A,[X+3]
+ 041A 08                push A
+ 041B 7C0000            xcall __divmodu_32X32_32
+ 041E 18                pop A
+ 041F 5300              mov [__r3],A
+ 0421 18                pop A
+ 0422 5300              mov [__r2],A
+ 0424 18                pop A
+ 0425 18                pop A
+ 0426 38FC              add SP,-4
+ 0428 5100              mov A,[__r3]
+ 042A 5300              mov [__r1],A
+ 042C 5100              mov A,[__r2]
+ 042E 5300              mov [__r0],A
+ 0430                   .dbline -2
+ 0430           L27:
+ 0430 38FC              add SP,-4
+ 0432 20                pop X
+ 0433                   .dbline 0 ; func end
+ 0433 7F                ret
+ 0434                   .dbsym l dwTemp 0 l
+ 0434                   .dbsym l dwFreq -9 l
+ 0434                   .dbsym l wX -5 i
+ 0434                   .dbend
+ 0434                   .dbfunc e Calculate_C _Calculate_C fi
+ 0434           ;         dwFreq -> X-9
+ 0434           ;             wX -> X-5
+ 0434           _Calculate_C::
+ 0434                   .dbline -1
+ 0434 10                push X
+ 0435 4F                mov X,SP
+ 0436                   .dbline 238
+ 0436           ; }
+ 0436           ; 
+ 0436           ; //-----------------------------------------------------------------------------
+ 0436           ; //  FUNCTION NAME:    Calculate_C
+ 0436           ; //
+ 0436           ; //  DESCRIPTION:
+ 0436           ; //
+ 0436           ; //    Calculates capacitance
+ 0436           ; //
+ 0436           ; //           C=10^12/(2*PI*freq*X)
+ 0436           ; //
+ 0436           ; //  ARGUMENTS:
+ 0436           ; //            wX
+ 0436           ; //            dwFreq
+ 0436           ; //
+ 0436           ; //  RETURNS:
+ 0436           ; //     Capacitance value in x10 pf .
+ 0436           ; //
+ 0436           ; //-----------------------------------------------------------------------------
+ 0436           ; WORD Calculate_C (WORD wX, DWORD dwFreq)
+ 0436           ; {
+ 0436                   .dbline 240
+ 0436           ; 
+ 0436           ;       if (wX==0)
+ 0436 3DFB00            cmp [X-5],0
+ 0439 B011              jnz L29
+ 043B 3DFC00            cmp [X-4],0
+ 043E B00C              jnz L29
+ 0440           X5:
+ 0440                   .dbline 241
+ 0440           ;               return 0;
+ 0440 62D000            mov REG[0xd0],>__r0
+ 0443 550000            mov [__r1],0
+ 0446 550000            mov [__r0],0
+ 0449 80E2              xjmp L28
+ 044B           L29:
+ 044B                   .dbline 243
+ 044B           ; 
+ 044B           ;       dwFreq /= 1000;         //Hz to Khz
+ 044B 5000              mov A,0
+ 044D 08                push A
+ 044E 08                push A
+ 044F 5003              mov A,3
+ 0451 08                push A
+ 0452 50E8              mov A,-24
+ 0454 08                push A
+ 0455 52F7              mov A,[X-9]
+ 0457 08                push A
+ 0458 52F8              mov A,[X-8]
+ 045A 08                push A
+ 045B 52F9              mov A,[X-7]
+ 045D 08                push A
+ 045E 52FA              mov A,[X-6]
+ 0460 08                push A
+ 0461 62D000            mov REG[0xd0],>__r0
+ 0464 7C0000            xcall __divmodu_32X32_32
+ 0467 18                pop A
+ 0468 54FA              mov [X-6],A
+ 046A 18                pop A
+ 046B 54F9              mov [X-7],A
+ 046D 18                pop A
+ 046E 54F8              mov [X-8],A
+ 0470 18                pop A
+ 0471 54F7              mov [X-9],A
+ 0473 38FC              add SP,-4
+ 0475                   .dbline 244
+ 0475           ;       return ((DWORD)10000/63) *      ((DWORD)10000/dwFreq) * ((DWORD)10000/(wX*10));
+ 0475 52F7              mov A,[X-9]
+ 0477 08                push A
+ 0478 52F8              mov A,[X-8]
+ 047A 08                push A
+ 047B 52F9              mov A,[X-7]
+ 047D 08                push A
+ 047E 52FA              mov A,[X-6]
+ 0480 08                push A
+ 0481 5000              mov A,0
+ 0483 08                push A
+ 0484 08                push A
+ 0485 5027              mov A,39
+ 0487 08                push A
+ 0488 5010              mov A,16
+ 048A 08                push A
+ 048B 7C0000            xcall __divmodu_32X32_32
+ 048E 18                pop A
+ 048F 5300              mov [__r3],A
+ 0491 18                pop A
+ 0492 5300              mov [__r2],A
+ 0494 18                pop A
+ 0495 5300              mov [__r1],A
+ 0497 18                pop A
+ 0498 38FC              add SP,-4
+ 049A 08                push A
+ 049B 5100              mov A,[__r1]
+ 049D 08                push A
+ 049E 5100              mov A,[__r2]
+ 04A0 08                push A
+ 04A1 5100              mov A,[__r3]
+ 04A3 08                push A
+ 04A4 5000              mov A,0
+ 04A6 08                push A
+ 04A7 08                push A
+ 04A8 08                push A
+ 04A9 509E              mov A,-98
+ 04AB 08                push A
+ 04AC 7C0000            xcall __mul_32X32_32
+ 04AF 38FC              add SP,-4
+ 04B1 18                pop A
+ 04B2 5300              mov [__r3],A
+ 04B4 18                pop A
+ 04B5 5300              mov [__r2],A
+ 04B7 18                pop A
+ 04B8 5300              mov [__r1],A
+ 04BA 18                pop A
+ 04BB 5300              mov [__r0],A
+ 04BD 52FB              mov A,[X-5]
+ 04BF 08                push A
+ 04C0 52FC              mov A,[X-4]
+ 04C2 08                push A
+ 04C3 5000              mov A,0
+ 04C5 08                push A
+ 04C6 500A              mov A,10
+ 04C8 08                push A
+ 04C9 7C0000            xcall __mul16
+ 04CC 38FC              add SP,-4
+ 04CE 5100              mov A,[__rX]
+ 04D0 5300              mov [__r5],A
+ 04D2 5100              mov A,[__rY]
+ 04D4 5300              mov [__r4],A
+ 04D6 5100              mov A,[__r5]
+ 04D8 5300              mov [__r7],A
+ 04DA 5100              mov A,[__r4]
+ 04DC 5300              mov [__r6],A
+ 04DE 5000              mov A,0
+ 04E0 08                push A
+ 04E1 08                push A
+ 04E2 5100              mov A,[__r6]
+ 04E4 08                push A
+ 04E5 5100              mov A,[__r7]
+ 04E7 08                push A
+ 04E8 5000              mov A,0
+ 04EA 08                push A
+ 04EB 08                push A
+ 04EC 5027              mov A,39
+ 04EE 08                push A
+ 04EF 5010              mov A,16
+ 04F1 08                push A
+ 04F2 7C0000            xcall __divmodu_32X32_32
+ 04F5 18                pop A
+ 04F6 5300              mov [__r7],A
+ 04F8 18                pop A
+ 04F9 5300              mov [__r6],A
+ 04FB 18                pop A
+ 04FC 5300              mov [__r5],A
+ 04FE 18                pop A
+ 04FF 38FC              add SP,-4
+ 0501 08                push A
+ 0502 5100              mov A,[__r5]
+ 0504 08                push A
+ 0505 5100              mov A,[__r6]
+ 0507 08                push A
+ 0508 5100              mov A,[__r7]
+ 050A 08                push A
+ 050B 5100              mov A,[__r0]
+ 050D 08                push A
+ 050E 5100              mov A,[__r1]
+ 0510 08                push A
+ 0511 5100              mov A,[__r2]
+ 0513 08                push A
+ 0514 5100              mov A,[__r3]
+ 0516 08                push A
+ 0517 7C0000            xcall __mul_32X32_32
+ 051A 38FC              add SP,-4
+ 051C 18                pop A
+ 051D 5300              mov [__r3],A
+ 051F 18                pop A
+ 0520 5300              mov [__r2],A
+ 0522 18                pop A
+ 0523 18                pop A
+ 0524 5100              mov A,[__r3]
+ 0526 5300              mov [__r1],A
+ 0528 5100              mov A,[__r2]
+ 052A 5300              mov [__r0],A
+ 052C                   .dbline -2
+ 052C           L28:
+ 052C 20                pop X
+ 052D                   .dbline 0 ; func end
+ 052D 7F                ret
+ 052E                   .dbsym l dwFreq -9 l
+ 052E                   .dbsym l wX -5 i
+ 052E                   .dbend
+ 052E                   .dbfunc s Calc_Sqrt _Calc_Sqrt fi
+ 052E           ;             ii -> X+8
+ 052E           ;          dwRem -> X+4
+ 052E           ;         dwRoot -> X+0
+ 052E           ;            dwN -> X-7
+ 052E           _Calc_Sqrt:
+ 052E                   .dbline -1
+ 052E 10                push X
+ 052F 4F                mov X,SP
+ 0530 3809              add SP,9
+ 0532                   .dbline 262
+ 0532           ; }
+ 0532           ; 
+ 0532           ; //-----------------------------------------------------------------------------
+ 0532           ; //  FUNCTION NAME:    Calc_Sqrt
+ 0532           ; //
+ 0532           ; //  DESCRIPTION:
+ 0532           ; //
+ 0532           ; //    Calculates square root fo integer number
+ 0532           ; //
+ 0532           ; //  ARGUMENTS:
+ 0532           ; //     dwN            Value to calculate
+ 0532           ; //
+ 0532           ; //  RETURNS:
+ 0532           ; //     Square root
+ 0532           ; //
+ 0532           ; //-----------------------------------------------------------------------------
+ 0532           ; static WORD Calc_Sqrt (DWORD dwN)
+ 0532           ; {
+ 0532                   .dbline 263
+ 0532           ;       DWORD dwRem = 0;
+ 0532 560400            mov [X+4],0
+ 0535 560500            mov [X+5],0
+ 0538 560600            mov [X+6],0
+ 053B 560700            mov [X+7],0
+ 053E                   .dbline 264
+ 053E           ;       DWORD dwRoot = 0;
+ 053E 560000            mov [X+0],0
+ 0541 560100            mov [X+1],0
+ 0544 560200            mov [X+2],0
+ 0547 560300            mov [X+3],0
+ 054A                   .dbline 267
+ 054A           ;       BYTE ii;
+ 054A           ; 
+ 054A           ;       for (ii=0;ii<16;ii++)
+ 054A 560800            mov [X+8],0
+ 054D 80E0              xjmp L35
+ 054F           L32:
+ 054F                   .dbline 268
+ 054F           ;       {
+ 054F                   .dbline 269
+ 054F           ;               dwRoot <<= 1;
+ 054F 6603              asl [X+3]
+ 0551 6C02              rlc [X+2]
+ 0553 6C01              rlc [X+1]
+ 0555 6C00              rlc [X+0]
+ 0557                   .dbline 270
+ 0557           ;               dwRem = ((dwRem<<2)+(dwN>>30));
+ 0557 62D000            mov REG[0xd0],>__r0
+ 055A 52F9              mov A,[X-7]
+ 055C 5300              mov [__r0],A
+ 055E 52FA              mov A,[X-6]
+ 0560 5300              mov [__r1],A
+ 0562 52FB              mov A,[X-5]
+ 0564 5300              mov [__r2],A
+ 0566 52FC              mov A,[X-4]
+ 0568 5300              mov [__r3],A
+ 056A 501E              mov A,30
+ 056C           X6:
+ 056C 70FB              and F,-5
+ 056E 62D000            mov REG[0xd0],>__r0
+ 0571 6E00              rrc [__r0]
+ 0573 6E00              rrc [__r1]
+ 0575 6E00              rrc [__r2]
+ 0577 6E00              rrc [__r3]
+ 0579 78                dec A
+ 057A BFF1              jnz X6
+ 057C 5204              mov A,[X+4]
+ 057E 5300              mov [__r4],A
+ 0580 5205              mov A,[X+5]
+ 0582 5300              mov [__r5],A
+ 0584 5206              mov A,[X+6]
+ 0586 5300              mov [__r6],A
+ 0588 5207              mov A,[X+7]
+ 058A 5300              mov [__r7],A
+ 058C 5002              mov A,2
+ 058E           X7:
+ 058E 62D000            mov REG[0xd0],>__r0
+ 0591 6500              asl [__r7]
+ 0593 6B00              rlc [__r6]
+ 0595 6B00              rlc [__r5]
+ 0597 6B00              rlc [__r4]
+ 0599 78                dec A
+ 059A BFF3              jnz X7
+ 059C 5100              mov A,[__r7]
+ 059E 0200              add A,[__r3]
+ 05A0 5407              mov [X+7],A
+ 05A2 5100              mov A,[__r6]
+ 05A4 0A00              adc A,[__r2]
+ 05A6 5406              mov [X+6],A
+ 05A8 5100              mov A,[__r5]
+ 05AA 0A00              adc A,[__r1]
+ 05AC 5405              mov [X+5],A
+ 05AE 5100              mov A,[__r4]
+ 05B0 0A00              adc A,[__r0]
+ 05B2 5404              mov [X+4],A
+ 05B4                   .dbline 271
+ 05B4           ;               dwN <<= 2;
+ 05B4 52F9              mov A,[X-7]
+ 05B6 5300              mov [__r0],A
+ 05B8 52FA              mov A,[X-6]
+ 05BA 5300              mov [__r1],A
+ 05BC 52FB              mov A,[X-5]
+ 05BE 5300              mov [__r2],A
+ 05C0 52FC              mov A,[X-4]
+ 05C2 5300              mov [__r3],A
+ 05C4 5002              mov A,2
+ 05C6           X8:
+ 05C6 62D000            mov REG[0xd0],>__r0
+ 05C9 6500              asl [__r3]
+ 05CB 6B00              rlc [__r2]
+ 05CD 6B00              rlc [__r1]
+ 05CF 6B00              rlc [__r0]
+ 05D1 78                dec A
+ 05D2 BFF3              jnz X8
+ 05D4 5100              mov A,[__r0]
+ 05D6 54F9              mov [X-7],A
+ 05D8 5100              mov A,[__r1]
+ 05DA 54FA              mov [X-6],A
+ 05DC 5100              mov A,[__r2]
+ 05DE 54FB              mov [X-5],A
+ 05E0 5100              mov A,[__r3]
+ 05E2 54FC              mov [X-4],A
+ 05E4                   .dbline 272
+ 05E4           ;               dwRoot++;
+ 05E4 070301            add [X+3],1
+ 05E7 0F0200            adc [X+2],0
+ 05EA 0F0100            adc [X+1],0
+ 05ED 0F0000            adc [X+0],0
+ 05F0                   .dbline 273
+ 05F0           ;               if (dwRoot<=dwRem)
+ 05F0 5207              mov A,[X+7]
+ 05F2 1303              sub A,[X+3]
+ 05F4 5206              mov A,[X+6]
+ 05F6 1B02              sbb A,[X+2]
+ 05F8 5205              mov A,[X+5]
+ 05FA 1B01              sbb A,[X+1]
+ 05FC 5204              mov A,[X+4]
+ 05FE 1B00              sbb A,[X+0]
+ 0600 C01F              jc L36
+ 0602           X9:
+ 0602                   .dbline 274
+ 0602           ;               {
+ 0602                   .dbline 275
+ 0602           ;                       dwRem -= dwRoot;
+ 0602 5203              mov A,[X+3]
+ 0604 1507              sub [X+7],A
+ 0606 5202              mov A,[X+2]
+ 0608 1D06              sbb [X+6],A
+ 060A 5201              mov A,[X+1]
+ 060C 1D05              sbb [X+5],A
+ 060E 5200              mov A,[X+0]
+ 0610 1D04              sbb [X+4],A
+ 0612                   .dbline 276
+ 0612           ;                       dwRoot++;
+ 0612 070301            add [X+3],1
+ 0615 0F0200            adc [X+2],0
+ 0618 0F0100            adc [X+1],0
+ 061B 0F0000            adc [X+0],0
+ 061E                   .dbline 277
+ 061E           ;               }
+ 061E 800D              xjmp L37
+ 0620           L36:
+ 0620                   .dbline 279
+ 0620           ;               else
+ 0620           ;               {
+ 0620                   .dbline 280
+ 0620           ;                       dwRoot--;
+ 0620 170301            sub [X+3],1
+ 0623 1F0200            sbb [X+2],0
+ 0626 1F0100            sbb [X+1],0
+ 0629 1F0000            sbb [X+0],0
+ 062C                   .dbline 281
+ 062C           ;               }
+ 062C           L37:
+ 062C                   .dbline 282
+ 062C           ;       }
+ 062C           L33:
+ 062C                   .dbline 267
+ 062C 7708              inc [X+8]
+ 062E           L35:
+ 062E                   .dbline 267
+ 062E 3D0810            cmp [X+8],16
+ 0631 CF1D              jc L32
+ 0633           X10:
+ 0633                   .dbline 283
+ 0633           ;       return (WORD)(dwRoot>>1);
+ 0633 62D000            mov REG[0xd0],>__r0
+ 0636 5200              mov A,[X+0]
+ 0638 5300              mov [__r0],A
+ 063A 5201              mov A,[X+1]
+ 063C 5300              mov [__r1],A
+ 063E 5202              mov A,[X+2]
+ 0640 5300              mov [__r2],A
+ 0642 5203              mov A,[X+3]
+ 0644 5300              mov [__r3],A
+ 0646 70FB              and F,-5
+ 0648 6E00              rrc [__r0]
+ 064A 6E00              rrc [__r1]
+ 064C 6E00              rrc [__r2]
+ 064E 6E00              rrc [__r3]
+ 0650 5100              mov A,[__r3]
+ 0652 5300              mov [__r1],A
+ 0654 5100              mov A,[__r2]
+ 0656 5300              mov [__r0],A
+ 0658                   .dbline -2
+ 0658           L31:
+ 0658 38F7              add SP,-9
+ 065A 20                pop X
+ 065B                   .dbline 0 ; func end
+ 065B 7F                ret
+ 065C                   .dbsym l ii 8 c
+ 065C                   .dbsym l dwRem 4 l
+ 065C                   .dbsym l dwRoot 0 l
+ 065C                   .dbsym l dwN -7 l
+ 065C                   .dbend

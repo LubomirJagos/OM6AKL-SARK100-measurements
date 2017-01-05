@@ -1,0 +1,159 @@
+ 0000                   cpu LMM
+                        .module sleep_timer.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./sleep_timer.c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile ./sleep_timer.c
+ 0000           _gTickCount:
+ 0000 01                .byte 1
+ 0001                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\sleep_timer.c
+ 0001                   .dbsym s gTickCount _gTickCount c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\sleep_timer.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\sleep_timer.c
+ 0000                   .dbfunc e SleepTimerINT _SleepTimerINT fV
+ 0000           _SleepTimerINT::
+ 0000                   .dbline -1
+ 0000 71C0              or F,-64
+ 0002 08                push A
+ 0003 5DD0              mov A,REG[0xd0]
+ 0005 08                push A
+ 0006                   .dbline 68
+ 0006           ; //*****************************************************************************/
+ 0006           ; //  This file is a part of the "SARK100 SWR Analyzer firmware"
+ 0006           ; //
+ 0006           ; //  Copyright © 2010 Melchor Varela - EA4FRB.  All rights reserved.
+ 0006           ; //  Melchor Varela, Madrid, Spain.
+ 0006           ; //  melchor.varela@gmail.com
+ 0006           ; //
+ 0006           ; //  "SARK100 SWR Analyzer firmware" is free software: you can redistribute it
+ 0006           ; //  and/or modify it under the terms of the GNU General Public License as
+ 0006           ; //  published by the Free Software Foundation, either version 3 of the License,
+ 0006           ; //  or (at your option) any later version.
+ 0006           ; //
+ 0006           ; //  "SARK100 SWR Analyzer firmware" is distributed in the hope that it will be
+ 0006           ; //  useful,  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 0006           ; //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ 0006           ; //  GNU General Public License for more details.
+ 0006           ; //
+ 0006           ; //  You should have received a copy of the GNU General Public License
+ 0006           ; //  along with "SARK100 SWR Analyzer firmware".  If not,
+ 0006           ; //  see <http://www.gnu.org/licenses/>.
+ 0006           ; //*****************************************************************************/
+ 0006           ; //*****************************************************************************/
+ 0006           ; //
+ 0006           ; //    PROJECT:        SARK100 SWR Analyzer
+ 0006           ; //    FILE NAME:      SLEEP_TIMER.C
+ 0006           ; //    AUTHOR:         Melchor Varela
+ 0006           ; //
+ 0006           ; //    DESCRIPTION
+ 0006           ; //
+ 0006           ; //    Sleep timer interrupt
+ 0006           ; //
+ 0006           ; //    HISTORY
+ 0006           ; //
+ 0006           ; //    NAME    DATE            REMARKS
+ 0006           ; //
+ 0006           ; //    MVM             DEC 2009        Creation
+ 0006           ; //
+ 0006           ; //*****************************************************************************/
+ 0006           ; #include "m8c.h"
+ 0006           ; #include "glb_data.h"
+ 0006           ; 
+ 0006           ; //-----------------------------------------------------------------------------
+ 0006           ; //  Public data
+ 0006           ; //-----------------------------------------------------------------------------
+ 0006           ; 
+ 0006           ; //-----------------------------------------------------------------------------
+ 0006           ; //  Private static data
+ 0006           ; //-----------------------------------------------------------------------------
+ 0006           ; static volatile BYTE gTickCount = 1;  // Prescaler to generate one second
+ 0006           ; 
+ 0006           ; //-----------------------------------------------------------------------------
+ 0006           ; //  FUNCTION NAME: SleepTimerINT
+ 0006           ; //
+ 0006           ; //  DESCRIPTION:
+ 0006           ; //
+ 0006           ; //    Sleep timer interrupt sevice routine. Period 8Hz.
+ 0006           ; //
+ 0006           ; //  ARGUMENTS:
+ 0006           ; //    none.
+ 0006           ; //
+ 0006           ; //  RETURNS:
+ 0006           ; //    none.
+ 0006           ; //
+ 0006           ; //-----------------------------------------------------------------------------
+ 0006           ; #pragma interrupt_handler     SleepTimerINT
+ 0006           ; 
+ 0006           ; void SleepTimerINT ( void )
+ 0006           ; {
+ 0006                   .dbline 69
+ 0006           ;       M8C_ClearWDTAndSleep;
+ 0006 62E338            mov REG[0xe3],56
+ 0009                   .dbline 71
+ 0009           ; 
+ 0009           ;       if (g_bMeasureCounter)
+ 0009 62D000            mov REG[0xd0],>_g_bMeasureCounter
+ 000C 3C0000            cmp [_g_bMeasureCounter],0
+ 000F A003              jz L14
+ 0011                   .dbline 72
+ 0011           ;               g_bMeasureCounter--;
+ 0011 7A00              dec [_g_bMeasureCounter]
+ 0013           L14:
+ 0013                   .dbline 73
+ 0013           ;       if (g_bDebounceCounter)
+ 0013 62D000            mov REG[0xd0],>_g_bDebounceCounter
+ 0016 3C0000            cmp [_g_bDebounceCounter],0
+ 0019 A003              jz L16
+ 001B                   .dbline 74
+ 001B           ;               g_bDebounceCounter--;
+ 001B 7A00              dec [_g_bDebounceCounter]
+ 001D           L16:
+ 001D                   .dbline 76
+ 001D           ; 
+ 001D           ;       if( --gTickCount )
+ 001D 62D000            mov REG[0xd0],>_gTickCount
+ 0020 5100              mov A,[_gTickCount]
+ 0022 1101              sub A,1
+ 0024 5300              mov [_gTickCount],A
+ 0026 62D000            mov REG[0xd0],>__r0
+ 0029 3900              cmp A,0
+ 002B A003              jz L18
+ 002D                   .dbline 77
+ 002D           ;       return;
+ 002D 801B              xjmp L13
+ 002F           L18:
+ 002F                   .dbline 78
+ 002F           ;       gTickCount = 8;
+ 002F 62D000            mov REG[0xd0],>_gTickCount
+ 0032 550008            mov [_gTickCount],8
+ 0035                   .dbline 81
+ 0035           ;       
+ 0035           ;                                                                               // One second
+ 0035           ;       if (g_bSpeedKeyCounter)
+ 0035 62D000            mov REG[0xd0],>_g_bSpeedKeyCounter
+ 0038 3C0000            cmp [_g_bSpeedKeyCounter],0
+ 003B A003              jz L20
+ 003D                   .dbline 82
+ 003D           ;               g_bSpeedKeyCounter--;
+ 003D 7A00              dec [_g_bSpeedKeyCounter]
+ 003F           L20:
+ 003F                   .dbline 84
+ 003F           ; 
+ 003F           ;       if (g_bIddleCounter)
+ 003F 62D000            mov REG[0xd0],>_g_bIddleCounter
+ 0042 3C0000            cmp [_g_bIddleCounter],0
+ 0045 A003              jz L22
+ 0047                   .dbline 85
+ 0047           ;               g_bIddleCounter--;
+ 0047 7A00              dec [_g_bIddleCounter]
+ 0049           L22:
+ 0049                   .dbline -2
+ 0049           L13:
+ 0049 18                pop A
+ 004A 60D0              mov REG[208],A
+ 004C 18                pop A
+ 004D                   .dbline 0 ; func end
+ 004D 7E                reti
+ 004E                   .dbend

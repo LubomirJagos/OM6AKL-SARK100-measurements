@@ -1,0 +1,332 @@
+ 0000                   cpu LMM
+                        .module glb_data.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./glb_data.c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile ./glb_data.c
+ 0000           _g_bIddleCounter::
+ 0000 00                .byte 0
+ 0001                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0001                   .dbsym e g_bIddleCounter _g_bIddleCounter c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _g_bMeasureCounter::
+ 0000 00                .byte 0
+ 0001                   .dbsym e g_bMeasureCounter _g_bMeasureCounter c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _g_bDebounceCounter::
+ 0000 00                .byte 0
+ 0001                   .dbsym e g_bDebounceCounter _g_bDebounceCounter c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _g_bSpeedKeyCounter::
+ 0000 00                .byte 0
+ 0001                   .dbsym e g_bSpeedKeyCounter _g_bSpeedKeyCounter c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _g_bScanning::
+ 0000 00                .byte 0
+ 0001                   .dbsym e g_bScanning _g_bScanning c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+                        .area lit(rom, con, rel)
+ 0000           _g_xBandLimits::
+ 0000 000A              .word 10
+ 0002 0012              .word 18
+ 0004 0014              .word 20
+ 0006 0014              .word 20
+ 0008 0025              .word 37
+ 000A 0032              .word 50
+ 000C 0032              .word 50
+ 000E 0047              .word 71
+ 0010 0050              .word 80
+ 0012 0050              .word 80
+ 0014 0065              .word 101
+ 0016 006E              .word 110
+ 0018 006E              .word 110
+ 001A 0078              .word 120
+ 001C 0082              .word 130
+ 001E 0082              .word 130
+ 0020 008D              .word 141
+ 0022 00AA              .word 170
+ 0024 00AA              .word 170
+ 0026 00B5              .word 181
+ 0028 00BE              .word 190
+ 002A 00BE              .word 190
+ 002C 00D2              .word 210
+ 002E 00E6              .word 230
+ 0030 00E6              .word 230
+ 0032 00F9              .word 249
+ 0034 0104              .word 260
+ 0036 0104              .word 260
+ 0038 010E              .word 270
+ 003A 0118              .word 280
+ 003C 0118              .word 280
+ 003E 0122              .word 290
+ 0040 0136              .word 310
+ 0042 0136              .word 310
+ 0044 0163              .word 355
+ 0046 0190              .word 400
+ 0048 0190              .word 400
+ 004A 01BD              .word 445
+ 004C 01EA              .word 490
+ 004E 01EA              .word 490
+ 0050 01FE              .word 510
+ 0052 0212              .word 530
+ 0054                   .dbstruct 0 6 .7
+ 0054                   .dbfield 0 low i
+ 0054                   .dbfield 2 middle i
+ 0054                   .dbfield 4 high i
+ 0054                   .dbend
+ 0054                   .dbsym e g_xBandLimits _g_xBandLimits A[84:14]kS[.7]
+ 0054           _g_xGainDds::
+ 0054 80                .byte 128
+ 0055 70                .byte 112
+ 0056 70                .byte 112
+ 0057 70                .byte 112
+ 0058 80                .byte 128
+ 0059 60                .byte 96
+ 005A 90                .byte 144
+ 005B 50                .byte 80
+ 005C 70                .byte 112
+ 005D 60                .byte 96
+ 005E 80                .byte 128
+ 005F 50                .byte 80
+ 0060 90                .byte 144
+ 0061 40                .byte 64
+ 0062 70                .byte 112
+ 0063 50                .byte 80
+ 0064 80                .byte 128
+ 0065 40                .byte 64
+ 0066 70                .byte 112
+ 0067 40                .byte 64
+ 0068 70                .byte 112
+ 0069 30                .byte 48
+ 006A 70                .byte 112
+ 006B 20                .byte 32
+ 006C 70                .byte 112
+ 006D 10                .byte 16
+ 006E 70                .byte 112
+ 006F 00                .byte 0
+ 0070 60                .byte 96
+ 0071 00                .byte 0
+ 0072 50                .byte 80
+ 0073 00                .byte 0
+ 0074 30                .byte 48
+ 0075 00                .byte 0
+ 0076                   .dbstruct 0 2 .8
+ 0076                   .dbfield 0 bGain1 c
+ 0076                   .dbfield 1 bGain2 c
+ 0076                   .dbend
+ 0076                   .dbsym e g_xGainDds _g_xGainDds A[34:17]kS[.8]
+ 0076           _g_xDefBandSettings::
+ 0076 02                .byte 2
+ 0077 FF5F              .word -161
+ 0079 0424              .word 1060
+ 007B FEF6              .word -266
+ 007D 0433              .word 1075
+ 007F FFE1              .word -31
+ 0081 0400              .word 1024
+ 0083 02                .byte 2
+ 0084 FF53              .word -173
+ 0086 0429              .word 1065
+ 0088 FF0E              .word -242
+ 008A 042E              .word 1070
+ 008C FFE1              .word -31
+ 008E 0402              .word 1026
+ 0090 02                .byte 2
+ 0091 FF52              .word -174
+ 0093 042A              .word 1066
+ 0095 FF0C              .word -244
+ 0097 042F              .word 1071
+ 0099 000F              .word 15
+ 009B 03FD              .word 1021
+ 009D 03                .byte 3
+ 009E FF62              .word -158
+ 00A0 0428              .word 1064
+ 00A2 FF1B              .word -229
+ 00A4 042E              .word 1070
+ 00A6 007D              .word 125
+ 00A8 03ED              .word 1005
+ 00AA 03                .byte 3
+ 00AB FF3A              .word -198
+ 00AD 0431              .word 1073
+ 00AF FF0F              .word -241
+ 00B1 0431              .word 1073
+ 00B3 00DF              .word 223
+ 00B5 03E1              .word 993
+ 00B7 03                .byte 3
+ 00B8 FF51              .word -175
+ 00BA 042D              .word 1069
+ 00BC FF2F              .word -209
+ 00BE 042A              .word 1066
+ 00C0 00F4              .word 244
+ 00C2 03DF              .word 991
+ 00C4 04                .byte 4
+ 00C5 FF6D              .word -147
+ 00C7 0428              .word 1064
+ 00C9 FF57              .word -169
+ 00CB 0423              .word 1059
+ 00CD 01D2              .word 466
+ 00CF 03BC              .word 956
+ 00D1 04                .byte 4
+ 00D2 FF5D              .word -163
+ 00D4 042D              .word 1069
+ 00D6 FF52              .word -174
+ 00D8 0424              .word 1060
+ 00DA 029A              .word 666
+ 00DC 03A3              .word 931
+ 00DE 05                .byte 5
+ 00DF FF50              .word -176
+ 00E1 0430              .word 1072
+ 00E3 FF64              .word -156
+ 00E5 0420              .word 1056
+ 00E7 03F2              .word 1010
+ 00E9 0375              .word 885
+ 00EB 06                .byte 6
+ 00EC FF7B              .word -133
+ 00EE 0426              .word 1062
+ 00F0 FF69              .word -151
+ 00F2 0420              .word 1056
+ 00F4 0469              .word 1129
+ 00F6 035A              .word 858
+ 00F8 06                .byte 6
+ 00F9 FF60              .word -160
+ 00FB 042D              .word 1069
+ 00FD FF8B              .word -117
+ 00FF 0418              .word 1048
+ 0101 0528              .word 1320
+ 0103 0343              .word 835
+ 0105 07                .byte 7
+ 0106 FF83              .word -125
+ 0108 0425              .word 1061
+ 010A FFB6              .word -74
+ 010C 0411              .word 1041
+ 010E 0791              .word 1937
+ 0110 02ED              .word 749
+ 0112 09                .byte 9
+ 0113 FFC4              .word -60
+ 0115 0411              .word 1041
+ 0117 0012              .word 18
+ 0119 03FE              .word 1022
+ 011B 0B52              .word 2898
+ 011D 0253              .word 595
+ 011F 0A                .byte 10
+ 0120 FFF5              .word -11
+ 0122 03FF              .word 1023
+ 0124 0047              .word 71
+ 0126 03F2              .word 1010
+ 0128 0E89              .word 3721
+ 012A 01D4              .word 468
+ 012C                   .dbstruct 0 4 .10
+ 012C                   .dbfield 0 iSlope I
+ 012C                   .dbfield 2 iOffset I
+ 012C                   .dbend
+ 012C                   .dbstruct 0 12 .11
+ 012C                   .dbfield 0 xVr S[.10]
+ 012C                   .dbfield 4 xVz S[.10]
+ 012C                   .dbfield 8 xVa S[.10]
+ 012C                   .dbend
+ 012C                   .dbstruct 0 13 .12
+ 012C                   .dbfield 0 bGain c
+ 012C                   .dbfield 1 xBridgeCorrect S[.11]
+ 012C                   .dbend
+ 012C                   .dbsym e g_xDefBandSettings _g_xDefBandSettings A[182:14]kS[.12]
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _gwC::
+ 0000 0000              .byte 0,0
+ 0002                   .dbsym e gwC _gwC i
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _gwL::
+ 0000 0000              .byte 0,0
+ 0002                   .dbsym e gwL _gwL i
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _gwR::
+ 0000 0000              .byte 0,0
+ 0002                   .dbsym e gwR _gwR i
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _gwX::
+ 0000 0000              .byte 0,0
+ 0002                   .dbsym e gwX _gwX i
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _gwZ::
+ 0000 0000              .byte 0,0
+ 0002                   .dbsym e gwZ _gwZ i
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _gwSwr::
+ 0000 0000              .byte 0,0
+ 0002                   .dbsym e gwSwr _gwSwr i
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _g_dwSaveFreqBand::
+ 0000 00000000000000000000      .word 0,0,0,0,0
+ 000A 00000000000000000000      .word 0,0,0,0,0
+ 0014 00000000000000000000      .word 0,0,0,0,0
+ 001E 00000000000000000000      .word 0,0,0,0,0
+ 0028 00000000000000000000      .word 0,0,0,0,0
+ 0032 000000000000      .byte 0,0,0,0,0,0
+ 0038                   .dbsym e g_dwSaveFreqBand _g_dwSaveFreqBand A[56:14]l
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _g_xConf::
+ 0000 0000              .byte 0,0
+ 0002                   .dbstruct 0 2 .9
+ 0002                   .dbfield 0 bStep c
+ 0002                   .dbfield 1 bUserIddle c
+ 0002                   .dbend
+ 0002                   .dbsym e g_xConf _g_xConf S[.9]
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _g_xBridgeMeasure::
+ 0000 00000000000000000000      .word 0,0,0,0,0
+ 000A 000000000000      .byte 0,0,0,0,0,0
+ 0010                   .dbstruct 0 16 .1
+ 0010                   .dbfield 0 Vf l
+ 0010                   .dbfield 4 Vr l
+ 0010                   .dbfield 8 Va l
+ 0010                   .dbfield 12 Vz l
+ 0010                   .dbend
+ 0010                   .dbsym e g_xBridgeMeasure _g_xBridgeMeasure S[.1]
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _g_xBridgeCorrect::
+ 0000 00000000000000000000      .word 0,0,0,0,0
+ 000A 0000              .byte 0,0
+ 000C                   .dbsym e g_xBridgeCorrect _g_xBridgeCorrect S[.11]
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _g_xBandCorrFactor::
+ 0000 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000  .word 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+ 003C 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000  .word 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+ 0078 00000000000000000000      .word 0,0,0,0,0
+ 0082 00000000000000000000      .word 0,0,0,0,0
+ 008C 00000000000000000000      .word 0,0,0,0,0
+ 0096 00000000000000000000      .word 0,0,0,0,0
+ 00A0 0000000000000000  .byte 0,0,0,0,0,0,0,0
+ 00A8                   .dbsym e g_xBandCorrFactor _g_xBandCorrFactor A[168:14]S[.11]
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _g_bGainDDS::
+ 0000 00000000000000000000      .word 0,0,0,0,0
+ 000A 00000000          .byte 0,0,0,0
+ 000E                   .dbsym e g_bGainDDS _g_bGainDDS A[14:14]c
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+ 0000           _g_bIsCalibrated::
+ 0000 00                .byte 0
+ 0001                   .dbsym e g_bIsCalibrated _g_bIsCalibrated c

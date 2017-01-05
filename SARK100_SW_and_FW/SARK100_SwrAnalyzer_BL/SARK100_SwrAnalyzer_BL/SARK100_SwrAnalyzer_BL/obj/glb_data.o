@@ -1,0 +1,239 @@
+XH
+H 19 areas 16 global symbols
+M glb_data.c
+A text size 0 flags 0
+dbfile ./glb_data.c
+A data size 1 flags 20
+dbfile ./glb_data.c
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e g_bIddleCounter 0 c
+S _g_bIddleCounter Def0000
+A data size 0 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+A data size 1 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e g_bMeasureCounter 0 c
+S _g_bMeasureCounter Def0000
+A data size 0 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+A data size 1 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e g_bDebounceCounter 0 c
+S _g_bDebounceCounter Def0000
+A data size 0 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+A data size 1 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e g_bSpeedKeyCounter 0 c
+S _g_bSpeedKeyCounter Def0000
+A data size 0 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+A data size 1 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e g_bScanning 0 c
+S _g_bScanning Def0000
+A data size 0 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbstruct 6 .7
+dbfield 0 low i
+dbfield 2 middle i
+dbfield 4 high i
+dbend
+dbstruct 2 .8
+dbfield 0 bGain1 c
+dbfield 1 bGain2 c
+dbend
+dbstruct 4 .10
+dbfield 0 iSlope I
+dbfield 2 iOffset I
+dbend
+dbstruct 12 .11
+dbfield 0 xVr S[.10]
+dbfield 4 xVz S[.10]
+dbfield 8 xVa S[.10]
+dbend
+dbstruct 13 .12
+dbfield 0 bGain c
+dbfield 1 xBridgeCorrect S[.11]
+dbend
+A lit size 12C flags 0
+dbsym e g_xBandLimits 0 A[84:14]kS[.7]
+dbsym e g_xGainDds 54 A[34:17]kS[.8]
+dbsym e g_xDefBandSettings 76 A[182:14]kS[.12]
+S _g_xGainDds Def0054
+S _g_xDefBandSettings Def0076
+S _g_xBandLimits Def0000
+A data size 2 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e gwC 0 i
+S _gwC Def0000
+A data size 2 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e gwL 0 i
+S _gwL Def0000
+A data size 2 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e gwR 0 i
+S _gwR Def0000
+A data size 2 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e gwX 0 i
+S _gwX Def0000
+A data size 2 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e gwZ 0 i
+S _gwZ Def0000
+A data size 2 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e gwSwr 0 i
+S _gwSwr Def0000
+A data size 38 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e g_dwSaveFreqBand 0 A[56:14]l
+S _g_dwSaveFreqBand Def0000
+A data size 2 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbstruct 2 .9
+dbfield 0 bStep c
+dbfield 1 bUserIddle c
+dbend
+dbsym e g_xConf 0 S[.9]
+S _g_xConf Def0000
+A data size 10 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbstruct 16 .1
+dbfield 0 Vf l
+dbfield 4 Vr l
+dbfield 8 Va l
+dbfield 12 Vz l
+dbend
+dbsym e g_xBridgeMeasure 0 S[.1]
+S _g_xBridgeMeasure Def0000
+A data size C flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e g_xBridgeCorrect 0 S[.11]
+S _g_xBridgeCorrect Def0000
+A data size A8 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e g_xBandCorrFactor 0 A[168:14]S[.11]
+S _g_xBandCorrFactor Def0000
+A data size E flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e g_bGainDDS 0 A[14:14]c
+S _g_bGainDDS Def0000
+A data size 1 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\glb_data.c
+dbsym e g_bIsCalibrated 0 c
+S _g_bIsCalibrated Def0000
+T 00 00 00
+R 00 00 00 01
+T 00 00 00
+R 00 00 00 03
+T 00 00 00
+R 00 00 00 05
+T 00 00 00
+R 00 00 00 07
+T 00 00 00
+R 00 00 00 09
+T 00 00 00 0A 00 12 00 14 00 14 00 25 00 32 00 32
+R 00 00 00 0B
+T 00 0E 00 47 00 50 00 50 00 65 00 6E 00 6E 00 78
+R 00 00 00 0B
+T 00 1C 00 82 00 82 00 8D 00 AA 00 AA 00 B5 00 BE
+R 00 00 00 0B
+T 00 2A 00 BE 00 D2 00 E6 00 E6 00 F9 01 04 01 04
+R 00 00 00 0B
+T 00 38 01 0E 01 18 01 18 01 22 01 36 01 36 01 63
+R 00 00 00 0B
+T 00 46 01 90 01 90 01 BD 01 EA 01 EA 01 FE 02 12
+R 00 00 00 0B
+T 00 54 80 70 70 70 80 60 90 50 70 60 80 50 90 40
+R 00 00 00 0B
+T 00 62 70 50 80 40 70 40 70 30 70 20 70 10 70 00
+R 00 00 00 0B
+T 00 70 60 00 50 00 30 00 02 FF 5F 04 24 FE F6
+R 00 00 00 0B
+T 00 7D 04 33 FF E1 04 00 02 FF 53 04 29 FF 0E
+R 00 00 00 0B
+T 00 8A 04 2E FF E1 04 02 02 FF 52 04 2A FF 0C
+R 00 00 00 0B
+T 00 97 04 2F 00 0F 03 FD 03 FF 62 04 28 FF 1B
+R 00 00 00 0B
+T 00 A4 04 2E 00 7D 03 ED 03 FF 3A 04 31 FF 0F
+R 00 00 00 0B
+T 00 B1 04 31 00 DF 03 E1 03 FF 51 04 2D FF 2F
+R 00 00 00 0B
+T 00 BE 04 2A 00 F4 03 DF 04 FF 6D 04 28 FF 57
+R 00 00 00 0B
+T 00 CB 04 23 01 D2 03 BC 04 FF 5D 04 2D FF 52
+R 00 00 00 0B
+T 00 D8 04 24 02 9A 03 A3 05 FF 50 04 30 FF 64
+R 00 00 00 0B
+T 00 E5 04 20 03 F2 03 75 06 FF 7B 04 26 FF 69
+R 00 00 00 0B
+T 00 F2 04 20 04 69 03 5A 06 FF 60 04 2D FF 8B
+R 00 00 00 0B
+T 00 FF 04 18 05 28 03 43 07 FF 83 04 25 FF B6
+R 00 00 00 0B
+T 01 0C 04 11 07 91 02 ED 09 FF C4 04 11 00 12
+R 00 00 00 0B
+T 01 19 03 FE 0B 52 02 53 0A FF F5 03 FF 00 47
+R 00 00 00 0B
+T 01 26 03 F2 0E 89 01 D4
+R 00 00 00 0B
+T 00 00 00 00
+R 00 00 00 0C
+T 00 00 00 00
+R 00 00 00 0D
+T 00 00 00 00
+R 00 00 00 0E
+T 00 00 00 00
+R 00 00 00 0F
+T 00 00 00 00
+R 00 00 00 10
+T 00 00 00 00
+R 00 00 00 11
+T 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 12
+T 00 0E 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 12
+T 00 1C 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 12
+T 00 2A 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 12
+T 00 00 00 00
+R 00 00 00 13
+T 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 14
+T 00 0E 00 00
+R 00 00 00 14
+T 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 15
+T 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 0E 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 1C 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 2A 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 38 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 46 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 54 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 62 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 70 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 7E 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 8C 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 9A 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 16
+T 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+R 00 00 00 17
+T 00 00 00
+R 00 00 00 18

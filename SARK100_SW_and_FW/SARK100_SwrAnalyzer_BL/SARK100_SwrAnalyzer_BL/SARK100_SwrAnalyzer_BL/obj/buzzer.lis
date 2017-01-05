@@ -1,0 +1,239 @@
+ 0000                   cpu LMM
+                        .module buzzer.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./buzzer.c
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\buzzer.c
+ 0000                   .dbfunc e BUZZ_Beep _BUZZ_Beep fV
+ 0000           _BUZZ_Beep::
+ 0000                   .dbline -1
+ 0000                   .dbline 60
+ 0000           ; //*****************************************************************************/
+ 0000           ; //  This file is a part of the "SARK100 SWR Analyzer firmware"
+ 0000           ; //
+ 0000           ; //  Copyright © 2010 Melchor Varela - EA4FRB.  All rights reserved.
+ 0000           ; //  Melchor Varela, Madrid, Spain.
+ 0000           ; //  melchor.varela@gmail.com
+ 0000           ; //
+ 0000           ; //  "SARK100 SWR Analyzer firmware" is free software: you can redistribute it
+ 0000           ; //  and/or modify it under the terms of the GNU General Public License as
+ 0000           ; //  published by the Free Software Foundation, either version 3 of the License,
+ 0000           ; //  or (at your option) any later version.
+ 0000           ; //
+ 0000           ; //  "SARK100 SWR Analyzer firmware" is distributed in the hope that it will be
+ 0000           ; //  useful,  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 0000           ; //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ 0000           ; //  GNU General Public License for more details.
+ 0000           ; //
+ 0000           ; //  You should have received a copy of the GNU General Public License
+ 0000           ; //  along with "SARK100 SWR Analyzer firmware".  If not,
+ 0000           ; //  see <http://www.gnu.org/licenses/>.
+ 0000           ; //*****************************************************************************/
+ 0000           ; //*****************************************************************************/
+ 0000           ; //
+ 0000           ; //    PROJECT:        SARK100 SWR Analyzer
+ 0000           ; //    FILE NAME:      BUZZER.C
+ 0000           ; //    AUTHOR:         EA4FRB - Melchor Varela
+ 0000           ; //
+ 0000           ; //    DESCRIPTION
+ 0000           ; //
+ 0000           ; //    Buzzer management
+ 0000           ; //
+ 0000           ; //    HISTORY
+ 0000           ; //
+ 0000           ; //    NAME    DATE            REMARKS
+ 0000           ; //
+ 0000           ; //    MVM             DEC 2009        Creation
+ 0000           ; //
+ 0000           ; //*****************************************************************************/
+ 0000           ; #include <stdlib.h>
+ 0000           ; #include <m8c.h>
+ 0000           ; #include "PSoCAPI.h"
+ 0000           ; 
+ 0000           ; #include "util.h"
+ 0000           ; 
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; //  FUNCTION NAME:    BUZZ_Beep
+ 0000           ; //
+ 0000           ; //  DESCRIPTION:
+ 0000           ; //
+ 0000           ; //    Sounds buzzer, standard beep
+ 0000           ; //
+ 0000           ; //  ARGUMENTS:
+ 0000           ; //     none.
+ 0000           ; //
+ 0000           ; //  RETURNS:
+ 0000           ; //     none.
+ 0000           ; //
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; void BUZZ_Beep ( void )
+ 0000           ; {
+ 0000                   .dbline 62
+ 0000           ;                                                                               // Set period: clock 32Khz --> 4Khz
+ 0000           ;       PWM8_BUZZ_WritePeriod(8);
+ 0000 10                push X
+ 0001 5008              mov A,8
+ 0003 7C0000            xcall _PWM8_BUZZ_WritePeriod
+ 0006 20                pop X
+ 0007                   .dbline 64
+ 0007           ;                                                                               // Set pulse width to generate a 50% duty cycle
+ 0007           ;       PWM8_BUZZ_WritePulseWidth(4);
+ 0007 10                push X
+ 0008 5004              mov A,4
+ 000A 7C0000            xcall _PWM8_BUZZ_WritePulseWidth
+ 000D                   .dbline 66
+ 000D           ;                                                                               // Enensure interrupt is disabled
+ 000D           ;       PWM8_BUZZ_DisableInt();
+ 000D 7C0000            xcall _PWM8_BUZZ_DisableInt
+ 0010                   .dbline 67
+ 0010           ;       PWM8_BUZZ_Start();
+ 0010 7C0000            xcall _PWM8_BUZZ_Start
+ 0013 20                pop X
+ 0014                   .dbline 68
+ 0014           ;       Delay_Ms(200);
+ 0014 5000              mov A,0
+ 0016 08                push A
+ 0017 50C8              mov A,-56
+ 0019 08                push A
+ 001A 7C0000            xcall _Delay_Ms
+ 001D 38FE              add SP,-2
+ 001F                   .dbline 69
+ 001F           ;       PWM8_BUZZ_Stop();
+ 001F 10                push X
+ 0020 7C0000            xcall _PWM8_BUZZ_Stop
+ 0023 20                pop X
+ 0024                   .dbline 71
+ 0024           ; 
+ 0024           ;       Delay_Ms(200);
+ 0024 5000              mov A,0
+ 0026 08                push A
+ 0027 50C8              mov A,-56
+ 0029 08                push A
+ 002A 7C0000            xcall _Delay_Ms
+ 002D 38FE              add SP,-2
+ 002F                   .dbline -2
+ 002F           L1:
+ 002F                   .dbline 0 ; func end
+ 002F 7F                ret
+ 0030                   .dbend
+ 0030                   .dbfunc e BUZZ_BeepError _BUZZ_BeepError fV
+ 0030           _BUZZ_BeepError::
+ 0030                   .dbline -1
+ 0030                   .dbline 89
+ 0030           ; }
+ 0030           ; 
+ 0030           ; //-----------------------------------------------------------------------------
+ 0030           ; //  FUNCTION NAME:    BUZZ_BeepError
+ 0030           ; //
+ 0030           ; //  DESCRIPTION:
+ 0030           ; //
+ 0030           ; //    Sounds buzzer, error beep
+ 0030           ; //
+ 0030           ; //  ARGUMENTS:
+ 0030           ; //     none.
+ 0030           ; //
+ 0030           ; //  RETURNS:
+ 0030           ; //     none.
+ 0030           ; //
+ 0030           ; //-----------------------------------------------------------------------------
+ 0030           ; void BUZZ_BeepError ( void )
+ 0030           ; {
+ 0030                   .dbline 91
+ 0030           ;                                                                               // Set period: clock 32Khz  --> 2Khz
+ 0030           ;       PWM8_BUZZ_WritePeriod(16);
+ 0030 10                push X
+ 0031 5010              mov A,16
+ 0033 7C0000            xcall _PWM8_BUZZ_WritePeriod
+ 0036 20                pop X
+ 0037                   .dbline 93
+ 0037           ;                                                                               // Set pulse width to generate a 50% duty cycle
+ 0037           ;       PWM8_BUZZ_WritePulseWidth(8);
+ 0037 10                push X
+ 0038 5008              mov A,8
+ 003A 7C0000            xcall _PWM8_BUZZ_WritePulseWidth
+ 003D                   .dbline 95
+ 003D           ;                                                                               // Ensure interrupt is disabled
+ 003D           ;       PWM8_BUZZ_DisableInt();
+ 003D 7C0000            xcall _PWM8_BUZZ_DisableInt
+ 0040                   .dbline 96
+ 0040           ;       PWM8_BUZZ_Start();
+ 0040 7C0000            xcall _PWM8_BUZZ_Start
+ 0043 20                pop X
+ 0044                   .dbline 97
+ 0044           ;       Delay_Ms(200);
+ 0044 5000              mov A,0
+ 0046 08                push A
+ 0047 50C8              mov A,-56
+ 0049 08                push A
+ 004A 7C0000            xcall _Delay_Ms
+ 004D 38FE              add SP,-2
+ 004F                   .dbline 98
+ 004F           ;       PWM8_BUZZ_Stop();
+ 004F 10                push X
+ 0050 7C0000            xcall _PWM8_BUZZ_Stop
+ 0053 20                pop X
+ 0054                   .dbline -2
+ 0054           L2:
+ 0054                   .dbline 0 ; func end
+ 0054 7F                ret
+ 0055                   .dbend
+ 0055                   .dbfunc e BUZZ_KeyClick _BUZZ_KeyClick fV
+ 0055           _BUZZ_KeyClick::
+ 0055                   .dbline -1
+ 0055                   .dbline 116
+ 0055           ; }
+ 0055           ; 
+ 0055           ; //-----------------------------------------------------------------------------
+ 0055           ; //  FUNCTION NAME:    BUZZ_KeyClick
+ 0055           ; //
+ 0055           ; //  DESCRIPTION:
+ 0055           ; //
+ 0055           ; //    Simulates the key click
+ 0055           ; //
+ 0055           ; //  ARGUMENTS:
+ 0055           ; //     none.
+ 0055           ; //
+ 0055           ; //  RETURNS:
+ 0055           ; //     none.
+ 0055           ; //
+ 0055           ; //-----------------------------------------------------------------------------
+ 0055           ; void BUZZ_KeyClick ( void )
+ 0055           ; {
+ 0055                   .dbline 118
+ 0055           ;                                                                               // Set period: clock 32Khz  --> 4Khz
+ 0055           ;       PWM8_BUZZ_WritePeriod(8);
+ 0055 10                push X
+ 0056 5008              mov A,8
+ 0058 7C0000            xcall _PWM8_BUZZ_WritePeriod
+ 005B 20                pop X
+ 005C                   .dbline 120
+ 005C           ;                                                                               // Set pulse width to generate a 50% duty cycle
+ 005C           ;       PWM8_BUZZ_WritePulseWidth(4);
+ 005C 10                push X
+ 005D 5004              mov A,4
+ 005F 7C0000            xcall _PWM8_BUZZ_WritePulseWidth
+ 0062                   .dbline 122
+ 0062           ;                                                                               // Ensure interrupt is disabled
+ 0062           ;       PWM8_BUZZ_DisableInt();
+ 0062 7C0000            xcall _PWM8_BUZZ_DisableInt
+ 0065                   .dbline 123
+ 0065           ;       PWM8_BUZZ_Start();
+ 0065 7C0000            xcall _PWM8_BUZZ_Start
+ 0068 20                pop X
+ 0069                   .dbline 124
+ 0069           ;       Delay_Ms(5);
+ 0069 5000              mov A,0
+ 006B 08                push A
+ 006C 5005              mov A,5
+ 006E 08                push A
+ 006F 7C0000            xcall _Delay_Ms
+ 0072 38FE              add SP,-2
+ 0074                   .dbline 125
+ 0074           ;       PWM8_BUZZ_Stop();
+ 0074 10                push X
+ 0075 7C0000            xcall _PWM8_BUZZ_Stop
+ 0078 20                pop X
+ 0079                   .dbline -2
+ 0079           L3:
+ 0079                   .dbline 0 ; func end
+ 0079 7F                ret
+ 007A                   .dbend

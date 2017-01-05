@@ -1,0 +1,1941 @@
+ 0000                   cpu LMM
+                        .module pclink.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./pclink.c
+                        .area lit(rom, con, rel)
+ 0000           _gszCmdOn:
+ 0000 6F6E00            .byte 'o,'n,0
+ 0003                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\pclink.c
+ 0003                   .dbsym s gszCmdOn _gszCmdOn A[3:3]kc
+ 0003           _gszCmdOff:
+ 0003 6F666600          .byte 'o,'f,'f,0
+ 0007                   .dbsym s gszCmdOff _gszCmdOff A[4:4]kc
+ 0007           _gszCmdFreq:
+ 0007 6672657100        .byte 'f,'r,'e,'q,0
+ 000C                   .dbsym s gszCmdFreq _gszCmdFreq A[5:5]kc
+ 000C           _gszCmdMeasImp:
+ 000C 696D7000          .byte 'i,'m,'p,0
+ 0010                   .dbsym s gszCmdMeasImp _gszCmdMeasImp A[4:4]kc
+ 0010           _gszCmdMeasRaw:
+ 0010 72617700          .byte 'r,'a,'w,0
+ 0014                   .dbsym s gszCmdMeasRaw _gszCmdMeasRaw A[4:4]kc
+ 0014           _gszCmdScan:
+ 0014 7363616E00        .byte 's,'c,'a,'n,0
+ 0019                   .dbsym s gszCmdScan _gszCmdScan A[5:5]kc
+ 0019           _gszCmdScanRaw:
+ 0019 7363616E7200      .byte 's,'c,'a,'n,'r,0
+ 001F                   .dbsym s gszCmdScanRaw _gszCmdScanRaw A[6:6]kc
+ 001F           _gszWelcome:
+ 001F 0D0A5341524B3130302053575220416E  .byte 13,10,'S,'A,'R,'K,49,48,48,32,'S,'W,'R,32,'A,'n
+ 002F 616C797A6572205631330D0A00        .byte 'a,'l,'y,'z,'e,'r,32,'V,49,51,13,10,0
+ 003C                   .dbsym s gszWelcome _gszWelcome A[29:29]kc
+ 003C           _gszCmdPrompt:
+ 003C 0D0A3E3E00        .byte 13,10,62,62,0
+ 0041                   .dbsym s gszCmdPrompt _gszCmdPrompt A[5:5]kc
+ 0041           _gszWaitLink:
+ 0041 57616974696E67204C696E6B00        .byte 'W,'a,'i,'t,'i,'n,'g,32,'L,'i,'n,'k,0
+ 004E                   .dbsym s gszWaitLink _gszWaitLink A[13:13]kc
+ 004E           _gszOk:
+ 004E 0D0A4F4B0D0A00    .byte 13,10,'O,'K,13,10,0
+ 0055                   .dbsym s gszOk _gszOk A[7:7]kc
+ 0055           _gszSwrOvf:
+ 0055 392E393900        .byte 57,46,57,57,0
+ 005A                   .dbsym s gszSwrOvf _gszSwrOvf A[5:5]kc
+ 005A           _gszOvf:
+ 005A 3939393900        .byte 57,57,57,57,0
+ 005F                   .dbsym s gszOvf _gszOvf A[5:5]kc
+ 005F           _gszStart:
+ 005F 0D0A53746172740D0A00      .byte 13,10,'S,'t,'a,'r,'t,13,10,0
+ 0069                   .dbsym s gszStart _gszStart A[10:10]kc
+ 0069           _gszEnd:
+ 0069 456E640D0A00      .byte 'E,'n,'d,13,10,0
+ 006F                   .dbsym s gszEnd _gszEnd A[6:6]kc
+ 006F           _gszErrFreqNotSet:
+ 006F 0D0A4572726F723A2066726571206E6F  .byte 13,10,'E,'r,'r,'o,'r,58,32,'f,'r,'e,'q,32,'n,'o
+ 007F 74207365740D0A00  .byte 't,32,'s,'e,'t,13,10,0
+ 0087                   .dbsym s gszErrFreqNotSet _gszErrFreqNotSet A[24:24]kc
+ 0087           _gszErrExpectFreq:
+ 0087 0D0A4572726F723A2065787065637465  .byte 13,10,'E,'r,'r,'o,'r,58,32,'e,'x,'p,'e,'c,'t,'e
+ 0097 6420667265712076616C0D0A00        .byte 'd,32,'f,'r,'e,'q,32,'v,'a,'l,13,10,0
+ 00A4                   .dbsym s gszErrExpectFreq _gszErrExpectFreq A[29:29]kc
+ 00A4           _gszErrExpectStep:
+ 00A4 0D0A4572726F723A2065787065637465  .byte 13,10,'E,'r,'r,'o,'r,58,32,'e,'x,'p,'e,'c,'t,'e
+ 00B4 6420737465702076616C0D0A00        .byte 'd,32,'s,'t,'e,'p,32,'v,'a,'l,13,10,0
+ 00C1                   .dbsym s gszErrExpectStep _gszErrExpectStep A[29:29]kc
+ 00C1           _gszErrInvalidFreq:
+ 00C1 0D0A4572726F723A20696E76616C6964  .byte 13,10,'E,'r,'r,'o,'r,58,32,'i,'n,'v,'a,'l,'i,'d
+ 00D1 20667265710D0A00  .byte 32,'f,'r,'e,'q,13,10,0
+ 00D9                   .dbsym s gszErrInvalidFreq _gszErrInvalidFreq A[24:24]kc
+ 00D9           _gszErrCmdNotFound1:
+ 00D9 0D0A436F6D6D616E64203C00  .byte 13,10,'C,'o,'m,'m,'a,'n,'d,32,60,0
+ 00E5                   .dbsym s gszErrCmdNotFound1 _gszErrCmdNotFound1 A[12:12]kc
+ 00E5           _gszErrCmdNotFound2:
+ 00E5 3E206E6F7420666F756E640D0A00      .byte 62,32,'n,'o,'t,32,'f,'o,'u,'n,'d,13,10,0
+ 00F3                   .dbsym s gszErrCmdNotFound2 _gszErrCmdNotFound2 A[14:14]kc
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\pclink.c
+ 0000           _gdwCurrentFreq:
+ 0000 FFFFFFFF          .word 65535,65535
+ 0004                   .dbsym s gdwCurrentFreq _gdwCurrentFreq l
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\pclink.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\pclink.c
+ 0000                   .dbfunc e PcLink _PcLink fV
+ 0000           ;         strPtr -> X+0
+ 0000           _PcLink::
+ 0000                   .dbline -1
+ 0000 10                push X
+ 0001 4F                mov X,SP
+ 0002 3802              add SP,2
+ 0004                   .dbline 108
+ 0004           ; //*****************************************************************************/
+ 0004           ; //  This file is a part of the "SARK100 SWR Analyzer firmware"
+ 0004           ; //
+ 0004           ; //  Copyright © 2010 Melchor Varela - EA4FRB.  All rights reserved.
+ 0004           ; //  Melchor Varela, Madrid, Spain.
+ 0004           ; //  melchor.varela@gmail.com
+ 0004           ; //
+ 0004           ; //  "SARK100 SWR Analyzer firmware" is free software: you can redistribute it
+ 0004           ; //  and/or modify it under the terms of the GNU General Public License as
+ 0004           ; //  published by the Free Software Foundation, either version 3 of the License,
+ 0004           ; //  or (at your option) any later version.
+ 0004           ; //
+ 0004           ; //  "SARK100 SWR Analyzer firmware" is distributed in the hope that it will be
+ 0004           ; //  useful,  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 0004           ; //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ 0004           ; //  GNU General Public License for more details.
+ 0004           ; //
+ 0004           ; //  You should have received a copy of the GNU General Public License
+ 0004           ; //  along with "SARK100 SWR Analyzer firmware".  If not,
+ 0004           ; //  see <http://www.gnu.org/licenses/>.
+ 0004           ; //*****************************************************************************/
+ 0004           ; //*****************************************************************************/
+ 0004           ; //
+ 0004           ; //    PROJECT:        SARK100 SWR Analyzer
+ 0004           ; //    FILE NAME:      PCLINK.C
+ 0004           ; //    AUTHOR:         EA4FRB - Melchor Varela
+ 0004           ; //
+ 0004           ; //    DESCRIPTION
+ 0004           ; //
+ 0004           ; //    PC link routines for update measurements
+ 0004           ; //
+ 0004           ; //    HISTORY
+ 0004           ; //
+ 0004           ; //    NAME    DATE            REMARKS
+ 0004           ; //
+ 0004           ; //    MVM             DEC 2009        Creation
+ 0004           ; //
+ 0004           ; //*****************************************************************************/
+ 0004           ; #include <stdlib.h>
+ 0004           ; #include <string.h>
+ 0004           ; #include <m8c.h>
+ 0004           ; #include "PSoCAPI.h"
+ 0004           ; #include "keypad.h"
+ 0004           ; #include "msg_generic.h"
+ 0004           ; #include "dds.h"
+ 0004           ; #include "glb_data.h"
+ 0004           ; #include "calibrate_reflectometer.h"
+ 0004           ; #include "calcs.h"
+ 0004           ; #include "util.h"
+ 0004           ; 
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; //  Private data:
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; static BYTE const gszCmdOn            [] = "on";
+ 0004           ; static BYTE const gszCmdOff           [] = "off";
+ 0004           ; static BYTE const gszCmdFreq  [] = "freq";
+ 0004           ; static BYTE const gszCmdMeasImp       [] = "imp";
+ 0004           ; static BYTE const gszCmdMeasRaw       [] = "raw";
+ 0004           ; static BYTE const gszCmdScan  [] = "scan";
+ 0004           ; static BYTE const gszCmdScanRaw       [] = "scanr";
+ 0004           ; 
+ 0004           ; static BYTE const gszWelcome  [] = "\r\n" PRODUCT_NAME_STR " SWR Analyzer " VERSION_STR "\r\n";
+ 0004           ; static BYTE const gszCmdPrompt        [] = "\r\n>>";
+ 0004           ; static BYTE const gszWaitLink [] = "Waiting Link";
+ 0004           ; static BYTE const gszOk                       [] = "\r\nOK\r\n";
+ 0004           ; static BYTE const gszSwrOvf           [] = "9.99";
+ 0004           ; static BYTE const gszOvf              [] = "9999";
+ 0004           ; static BYTE const gszStart            [] = "\r\nStart\r\n";
+ 0004           ; static BYTE const gszEnd              [] = "End\r\n";
+ 0004           ; 
+ 0004           ; static BYTE const gszErrFreqNotSet    [] = "\r\nError: freq not set\r\n";
+ 0004           ; static BYTE const gszErrExpectFreq    [] = "\r\nError: expected freq val\r\n";
+ 0004           ; static BYTE const gszErrExpectStep    [] = "\r\nError: expected step val\r\n";
+ 0004           ; static BYTE const gszErrInvalidFreq   [] = "\r\nError: invalid freq\r\n";
+ 0004           ; static BYTE const gszErrCmdNotFound1[] = "\r\nCommand <";
+ 0004           ; static BYTE const gszErrCmdNotFound2[] = "> not found\r\n";
+ 0004           ; 
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; //  Prototypes
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; static void Cmd_Off (void);
+ 0004           ; static void Cmd_On (void);
+ 0004           ; static void Cmd_Freq (void);
+ 0004           ; static void Cmd_Imp (void);
+ 0004           ; static void Cmd_Raw (void);
+ 0004           ; static void Cmd_Scan (BYTE bRaw);
+ 0004           ; 
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; //  Private data
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; static DWORD gdwCurrentFreq = -1;
+ 0004           ; 
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; //  FUNCTION NAME:    PcLink
+ 0004           ; //
+ 0004           ; //  DESCRIPTION:
+ 0004           ; //
+ 0004           ; //    PC link routines for update measurements
+ 0004           ; //
+ 0004           ; //  ARGUMENTS:
+ 0004           ; //     none.
+ 0004           ; //
+ 0004           ; //  RETURNS:
+ 0004           ; //     none.
+ 0004           ; //
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; void PcLink (void)
+ 0004           ; {
+ 0004                   .dbline 111
+ 0004           ;       char * strPtr;                                          // Parameter pointer
+ 0004           ; 
+ 0004           ;       UART_CmdReset();                                        // Initialize receiver/cmd buffer
+ 0004 10                push X
+ 0005 7C0000            xcall _UART_CmdReset
+ 0008 20                pop X
+ 0009                   .dbline 112
+ 0009           ;       UART_IntCntl(UART_ENABLE_RX_INT);       // Enable RX interrupts
+ 0009 10                push X
+ 000A 5001              mov A,1
+ 000C 7C0000            xcall _UART_IntCntl
+ 000F 20                pop X
+ 0010                   .dbline 113
+ 0010           ;       UART_Start(UART_PARITY_NONE);           // Enable UART
+ 0010 10                push X
+ 0011 5000              mov A,0
+ 0013 7C0000            xcall _UART_Start
+ 0016 20                pop X
+ 0017                   .dbline 115
+ 0017           ; 
+ 0017           ;       M8C_EnableGInt ;
+ 0017 7101                      or  F, 01h
+ 0019           
+ 0019                   .dbline 117
+ 0019           ; 
+ 0019           ;     UART_PutChar(12);                                         // Clear the screen
+ 0019 10                push X
+ 001A 500C              mov A,12
+ 001C 7C0000            xcall _UART_PutChar
+ 001F 20                pop X
+ 0020                   .dbline 118
+ 0020           ;       UART_CPutString(gszWelcome);
+ 0020 10                push X
+ 0021 501F              mov A,>_gszWelcome
+ 0023 08                push A
+ 0024 501F              mov A,<_gszWelcome
+ 0026 5C                mov X,A
+ 0027 18                pop A
+ 0028 7C0000            xcall _UART_CPutString
+ 002B 20                pop X
+ 002C                   .dbline 119
+ 002C           ;       UART_CPutString(gszCmdPrompt);
+ 002C 10                push X
+ 002D 503C              mov A,>_gszCmdPrompt
+ 002F 08                push A
+ 0030 503C              mov A,<_gszCmdPrompt
+ 0032 5C                mov X,A
+ 0033 18                pop A
+ 0034 7C0000            xcall _UART_CPutString
+ 0037 20                pop X
+ 0038                   .dbline 121
+ 0038           ; 
+ 0038           ;       LCD_Position(1, 0);
+ 0038 10                push X
+ 0039 5700              mov X,0
+ 003B 5001              mov A,1
+ 003D 7C0000            xcall _LCD_Position
+ 0040 20                pop X
+ 0041                   .dbline 122
+ 0041           ;       LCD_PrCString(gszWaitLink);
+ 0041 10                push X
+ 0042 5041              mov A,>_gszWaitLink
+ 0044 08                push A
+ 0045 5041              mov A,<_gszWaitLink
+ 0047 5C                mov X,A
+ 0048 18                pop A
+ 0049 7C0000            xcall _LCD_PrCString
+ 004C 20                pop X
+ 004D 8198              xjmp L15
+ 004F           L14:
+ 004F                   .dbline 124
+ 004F           ;       while(TRUE)
+ 004F           ;       {
+ 004F                   .dbline 125
+ 004F           ;               if (KEYPAD_Get() == KBD_UP)
+ 004F 7C0000            xcall _KEYPAD_Get
+ 0052 62D000            mov REG[0xd0],>__r0
+ 0055 3905              cmp A,5
+ 0057 B003              jnz L17
+ 0059                   .dbline 126
+ 0059           ;                       break;
+ 0059 818E              xjmp L16
+ 005B           L17:
+ 005B                   .dbline 128
+ 005B           ; 
+ 005B           ;               if(UART_bCmdCheck())                    // Wait for command
+ 005B 10                push X
+ 005C 7C0000            xcall _UART_bCmdCheck
+ 005F 62D000            mov REG[0xd0],>__r0
+ 0062 20                pop X
+ 0063 3900              cmp A,0
+ 0065 A180              jz L19
+ 0067                   .dbline 129
+ 0067           ;               {                                                               // More than delimiter?
+ 0067                   .dbline 130
+ 0067           ;                       if(strPtr = UART_szGetParam())
+ 0067 10                push X
+ 0068 7C0000            xcall _UART_szGetParam
+ 006B 62D000            mov REG[0xd0],>__r0
+ 006E 5300              mov [__r0],A
+ 0070 5A00              mov [__r1],X
+ 0072 20                pop X
+ 0073 5100              mov A,[__r1]
+ 0075 5401              mov [X+1],A
+ 0077 5100              mov A,[__r0]
+ 0079 5400              mov [X+0],A
+ 007B 3C0000            cmp [__r0],0
+ 007E B006              jnz X0
+ 0080 3C0000            cmp [__r1],0
+ 0083 A151              jz L21
+ 0085           X0:
+ 0085                   .dbline 131
+ 0085           ;                       {
+ 0085                   .dbline 132
+ 0085           ;                               LCD_Position(1, 0);
+ 0085 10                push X
+ 0086 5700              mov X,0
+ 0088 5001              mov A,1
+ 008A 7C0000            xcall _LCD_Position
+ 008D 20                pop X
+ 008E                   .dbline 133
+ 008E           ;                               LCD_PrCString(gBlankStr);
+ 008E 10                push X
+ 008F 5000              mov A,>_gBlankStr
+ 0091 08                push A
+ 0092 5000              mov A,<_gBlankStr
+ 0094 5C                mov X,A
+ 0095 18                pop A
+ 0096 7C0000            xcall _LCD_PrCString
+ 0099 20                pop X
+ 009A                   .dbline 134
+ 009A           ;                               LCD_Position(1, 0);
+ 009A 10                push X
+ 009B 5700              mov X,0
+ 009D 5001              mov A,1
+ 009F 7C0000            xcall _LCD_Position
+ 00A2 20                pop X
+ 00A3                   .dbline 135
+ 00A3           ;                               LCD_PrString(strPtr);
+ 00A3 10                push X
+ 00A4 5200              mov A,[X+0]
+ 00A6 08                push A
+ 00A7 5201              mov A,[X+1]
+ 00A9 5C                mov X,A
+ 00AA 18                pop A
+ 00AB 7C0000            xcall _LCD_PrString
+ 00AE 20                pop X
+ 00AF                   .dbline 136
+ 00AF           ;                       if(!cstrcmp((const char*)gszCmdOn,(char*)strPtr))
+ 00AF 5200              mov A,[X+0]
+ 00B1 08                push A
+ 00B2 5201              mov A,[X+1]
+ 00B4 08                push A
+ 00B5 5000              mov A,>_gszCmdOn
+ 00B7 08                push A
+ 00B8 5000              mov A,<_gszCmdOn
+ 00BA 08                push A
+ 00BB 7C0000            xcall _cstrcmpLMM
+ 00BE 38FC              add SP,-4
+ 00C0 62D000            mov REG[0xd0],>__r0
+ 00C3 3C0000            cmp [__r0],0
+ 00C6 B00A              jnz L23
+ 00C8 3C0000            cmp [__r1],0
+ 00CB B005              jnz L23
+ 00CD           X1:
+ 00CD                   .dbline 137
+ 00CD           ;                               {
+ 00CD                   .dbline 138
+ 00CD           ;                                       Cmd_On();
+ 00CD 912D              xcall _Cmd_On
+ 00CF                   .dbline 139
+ 00CF           ;                               }
+ 00CF 8105              xjmp L24
+ 00D1           L23:
+ 00D1                   .dbline 140
+ 00D1           ;                       else if(!cstrcmp((const char*)gszCmdOff,(char*)strPtr))
+ 00D1 5200              mov A,[X+0]
+ 00D3 08                push A
+ 00D4 5201              mov A,[X+1]
+ 00D6 08                push A
+ 00D7 5003              mov A,>_gszCmdOff
+ 00D9 08                push A
+ 00DA 5003              mov A,<_gszCmdOff
+ 00DC 08                push A
+ 00DD 7C0000            xcall _cstrcmpLMM
+ 00E0 38FC              add SP,-4
+ 00E2 62D000            mov REG[0xd0],>__r0
+ 00E5 3C0000            cmp [__r0],0
+ 00E8 B00A              jnz L25
+ 00EA 3C0000            cmp [__r1],0
+ 00ED B005              jnz L25
+ 00EF           X2:
+ 00EF                   .dbline 141
+ 00EF           ;                               {
+ 00EF                   .dbline 142
+ 00EF           ;                                       Cmd_Off();
+ 00EF 9151              xcall _Cmd_Off
+ 00F1                   .dbline 143
+ 00F1           ;                               }
+ 00F1 80E3              xjmp L26
+ 00F3           L25:
+ 00F3                   .dbline 144
+ 00F3           ;                       else if(!cstrcmp((const char*)gszCmdScan,(char*)strPtr))
+ 00F3 5200              mov A,[X+0]
+ 00F5 08                push A
+ 00F6 5201              mov A,[X+1]
+ 00F8 08                push A
+ 00F9 5014              mov A,>_gszCmdScan
+ 00FB 08                push A
+ 00FC 5014              mov A,<_gszCmdScan
+ 00FE 08                push A
+ 00FF 7C0000            xcall _cstrcmpLMM
+ 0102 38FC              add SP,-4
+ 0104 62D000            mov REG[0xd0],>__r0
+ 0107 3C0000            cmp [__r0],0
+ 010A B00F              jnz L27
+ 010C 3C0000            cmp [__r1],0
+ 010F B00A              jnz L27
+ 0111           X3:
+ 0111                   .dbline 145
+ 0111           ;                       {
+ 0111                   .dbline 146
+ 0111           ;                                       Cmd_Scan(FALSE);
+ 0111 5000              mov A,0
+ 0113 08                push A
+ 0114 9475              xcall _Cmd_Scan
+ 0116 38FF              add SP,-1
+ 0118                   .dbline 147
+ 0118           ;                               }
+ 0118 80BC              xjmp L28
+ 011A           L27:
+ 011A                   .dbline 148
+ 011A           ;                       else if(!cstrcmp((const char*)gszCmdScanRaw,(char*)strPtr))
+ 011A 5200              mov A,[X+0]
+ 011C 08                push A
+ 011D 5201              mov A,[X+1]
+ 011F 08                push A
+ 0120 5019              mov A,>_gszCmdScanRaw
+ 0122 08                push A
+ 0123 5019              mov A,<_gszCmdScanRaw
+ 0125 08                push A
+ 0126 7C0000            xcall _cstrcmpLMM
+ 0129 38FC              add SP,-4
+ 012B 62D000            mov REG[0xd0],>__r0
+ 012E 3C0000            cmp [__r0],0
+ 0131 B00F              jnz L29
+ 0133 3C0000            cmp [__r1],0
+ 0136 B00A              jnz L29
+ 0138           X4:
+ 0138                   .dbline 149
+ 0138           ;                       {
+ 0138                   .dbline 150
+ 0138           ;                                       Cmd_Scan(TRUE);
+ 0138 5001              mov A,1
+ 013A 08                push A
+ 013B 944E              xcall _Cmd_Scan
+ 013D 38FF              add SP,-1
+ 013F                   .dbline 151
+ 013F           ;                               }
+ 013F 8095              xjmp L30
+ 0141           L29:
+ 0141                   .dbline 152
+ 0141           ;                       else if(!cstrcmp((const char*)gszCmdFreq,(char*)strPtr))
+ 0141 5200              mov A,[X+0]
+ 0143 08                push A
+ 0144 5201              mov A,[X+1]
+ 0146 08                push A
+ 0147 5007              mov A,>_gszCmdFreq
+ 0149 08                push A
+ 014A 5007              mov A,<_gszCmdFreq
+ 014C 08                push A
+ 014D 7C0000            xcall _cstrcmpLMM
+ 0150 38FC              add SP,-4
+ 0152 62D000            mov REG[0xd0],>__r0
+ 0155 3C0000            cmp [__r0],0
+ 0158 B00A              jnz L31
+ 015A 3C0000            cmp [__r1],0
+ 015D B005              jnz L31
+ 015F           X5:
+ 015F                   .dbline 153
+ 015F           ;                               {
+ 015F                   .dbline 154
+ 015F           ;                                       Cmd_Freq();
+ 015F 90F9              xcall _Cmd_Freq
+ 0161                   .dbline 155
+ 0161           ;                               }
+ 0161 8073              xjmp L32
+ 0163           L31:
+ 0163                   .dbline 156
+ 0163           ;                       else if(!cstrcmp((const char*)gszCmdMeasImp,(char*)strPtr))
+ 0163 5200              mov A,[X+0]
+ 0165 08                push A
+ 0166 5201              mov A,[X+1]
+ 0168 08                push A
+ 0169 500C              mov A,>_gszCmdMeasImp
+ 016B 08                push A
+ 016C 500C              mov A,<_gszCmdMeasImp
+ 016E 08                push A
+ 016F 7C0000            xcall _cstrcmpLMM
+ 0172 38FC              add SP,-4
+ 0174 62D000            mov REG[0xd0],>__r0
+ 0177 3C0000            cmp [__r0],0
+ 017A B00F              jnz L33
+ 017C 3C0000            cmp [__r1],0
+ 017F B00A              jnz L33
+ 0181           X6:
+ 0181                   .dbline 157
+ 0181           ;                               {
+ 0181                   .dbline 158
+ 0181           ;                                       UART_PutCRLF();
+ 0181 10                push X
+ 0182 7C0000            xcall _UART_PutCRLF
+ 0185 20                pop X
+ 0186                   .dbline 159
+ 0186           ;                                       Cmd_Imp();
+ 0186 91AC              xcall _Cmd_Imp
+ 0188                   .dbline 160
+ 0188           ;                               }
+ 0188 804C              xjmp L34
+ 018A           L33:
+ 018A                   .dbline 161
+ 018A           ;                       else if(!cstrcmp((const char*)gszCmdMeasRaw,(char*)strPtr))
+ 018A 5200              mov A,[X+0]
+ 018C 08                push A
+ 018D 5201              mov A,[X+1]
+ 018F 08                push A
+ 0190 5010              mov A,>_gszCmdMeasRaw
+ 0192 08                push A
+ 0193 5010              mov A,<_gszCmdMeasRaw
+ 0195 08                push A
+ 0196 7C0000            xcall _cstrcmpLMM
+ 0199 38FC              add SP,-4
+ 019B 62D000            mov REG[0xd0],>__r0
+ 019E 3C0000            cmp [__r0],0
+ 01A1 B00F              jnz L35
+ 01A3 3C0000            cmp [__r1],0
+ 01A6 B00A              jnz L35
+ 01A8           X7:
+ 01A8                   .dbline 162
+ 01A8           ;                               {
+ 01A8                   .dbline 163
+ 01A8           ;                                       UART_PutCRLF();
+ 01A8 10                push X
+ 01A9 7C0000            xcall _UART_PutCRLF
+ 01AC 20                pop X
+ 01AD                   .dbline 164
+ 01AD           ;                                       Cmd_Raw();
+ 01AD 9302              xcall _Cmd_Raw
+ 01AF                   .dbline 165
+ 01AF           ;                               }
+ 01AF 8025              xjmp L36
+ 01B1           L35:
+ 01B1                   .dbline 167
+ 01B1           ;                               else
+ 01B1           ;                               {
+ 01B1                   .dbline 168
+ 01B1           ;                                       UART_CPutString(gszErrCmdNotFound1);
+ 01B1 10                push X
+ 01B2 50D9              mov A,>_gszErrCmdNotFound1
+ 01B4 08                push A
+ 01B5 50D9              mov A,<_gszErrCmdNotFound1
+ 01B7 5C                mov X,A
+ 01B8 18                pop A
+ 01B9 7C0000            xcall _UART_CPutString
+ 01BC 20                pop X
+ 01BD                   .dbline 169
+ 01BD           ;                                       UART_PutString(strPtr);
+ 01BD 10                push X
+ 01BE 5200              mov A,[X+0]
+ 01C0 08                push A
+ 01C1 5201              mov A,[X+1]
+ 01C3 5C                mov X,A
+ 01C4 18                pop A
+ 01C5 7C0000            xcall _UART_PutString
+ 01C8 20                pop X
+ 01C9                   .dbline 170
+ 01C9           ;                                       UART_CPutString(gszErrCmdNotFound2);
+ 01C9 10                push X
+ 01CA 50E5              mov A,>_gszErrCmdNotFound2
+ 01CC 08                push A
+ 01CD 50E5              mov A,<_gszErrCmdNotFound2
+ 01CF 5C                mov X,A
+ 01D0 18                pop A
+ 01D1 7C0000            xcall _UART_CPutString
+ 01D4 20                pop X
+ 01D5                   .dbline 171
+ 01D5           ;                               }
+ 01D5           L36:
+ 01D5           L34:
+ 01D5           L32:
+ 01D5           L30:
+ 01D5           L28:
+ 01D5           L26:
+ 01D5           L24:
+ 01D5                   .dbline 172
+ 01D5           ;                       }
+ 01D5           L21:
+ 01D5                   .dbline 173
+ 01D5           ;                       UART_CmdReset(); // Reset command buffer
+ 01D5 10                push X
+ 01D6 7C0000            xcall _UART_CmdReset
+ 01D9 20                pop X
+ 01DA                   .dbline 174
+ 01DA           ;                       UART_CPutString(gszCmdPrompt);
+ 01DA 10                push X
+ 01DB 503C              mov A,>_gszCmdPrompt
+ 01DD 08                push A
+ 01DE 503C              mov A,<_gszCmdPrompt
+ 01E0 5C                mov X,A
+ 01E1 18                pop A
+ 01E2 7C0000            xcall _UART_CPutString
+ 01E5 20                pop X
+ 01E6                   .dbline 175
+ 01E6           ;               }
+ 01E6           L19:
+ 01E6                   .dbline 176
+ 01E6           ;       }
+ 01E6           L15:
+ 01E6                   .dbline 123
+ 01E6 8E68              xjmp L14
+ 01E8           L16:
+ 01E8                   .dbline 177
+ 01E8           ;       DDS_Set(0);
+ 01E8 5000              mov A,0
+ 01EA 08                push A
+ 01EB 08                push A
+ 01EC 08                push A
+ 01ED 08                push A
+ 01EE 7C0000            xcall _DDS_Set
+ 01F1 38FC              add SP,-4
+ 01F3                   .dbline 178
+ 01F3           ;       UART_Stop();
+ 01F3 10                push X
+ 01F4 7C0000            xcall _UART_Stop
+ 01F7 20                pop X
+ 01F8                   .dbline -2
+ 01F8           L13:
+ 01F8 38FE              add SP,-2
+ 01FA 20                pop X
+ 01FB                   .dbline 0 ; func end
+ 01FB 7F                ret
+ 01FC                   .dbsym l strPtr 0 pc
+ 01FC                   .dbend
+ 01FC                   .dbfunc s Cmd_On _Cmd_On fV
+ 01FC           _Cmd_On:
+ 01FC                   .dbline -1
+ 01FC                   .dbline 196
+ 01FC           ; }
+ 01FC           ; 
+ 01FC           ; //-----------------------------------------------------------------------------
+ 01FC           ; //  FUNCTION NAME:    Cmd_On
+ 01FC           ; //
+ 01FC           ; //  DESCRIPTION:
+ 01FC           ; //
+ 01FC           ; //    Process on (enable DDS) command
+ 01FC           ; //
+ 01FC           ; //  ARGUMENTS:
+ 01FC           ; //     none.
+ 01FC           ; //
+ 01FC           ; //  RETURNS:
+ 01FC           ; //     none.
+ 01FC           ; //
+ 01FC           ; //-----------------------------------------------------------------------------
+ 01FC           ; static void Cmd_On (void)
+ 01FC           ; {
+ 01FC                   .dbline 197
+ 01FC           ;       if (gdwCurrentFreq==-1)
+ 01FC 62D000            mov REG[0xd0],>_gdwCurrentFreq
+ 01FF 3C00FF            cmp [_gdwCurrentFreq],-1
+ 0202 B01E              jnz L38
+ 0204 3C01FF            cmp [_gdwCurrentFreq+1],-1
+ 0207 B019              jnz L38
+ 0209 3C02FF            cmp [_gdwCurrentFreq+2],-1
+ 020C B014              jnz L38
+ 020E 3C03FF            cmp [_gdwCurrentFreq+3],-1
+ 0211 B00F              jnz L38
+ 0213           X8:
+ 0213                   .dbline 198
+ 0213           ;       {
+ 0213                   .dbline 199
+ 0213           ;               UART_CPutString(gszErrFreqNotSet);
+ 0213 10                push X
+ 0214 506F              mov A,>_gszErrFreqNotSet
+ 0216 08                push A
+ 0217 506F              mov A,<_gszErrFreqNotSet
+ 0219 5C                mov X,A
+ 021A 18                pop A
+ 021B 7C0000            xcall _UART_CPutString
+ 021E 20                pop X
+ 021F                   .dbline 200
+ 021F           ;       }
+ 021F 8021              xjmp L39
+ 0221           L38:
+ 0221                   .dbline 202
+ 0221           ;       else
+ 0221           ;       {
+ 0221                   .dbline 203
+ 0221           ;               DDS_Set(gdwCurrentFreq);
+ 0221 62D000            mov REG[0xd0],>_gdwCurrentFreq
+ 0224 5100              mov A,[_gdwCurrentFreq]
+ 0226 08                push A
+ 0227 5101              mov A,[_gdwCurrentFreq+1]
+ 0229 08                push A
+ 022A 5102              mov A,[_gdwCurrentFreq+2]
+ 022C 08                push A
+ 022D 5103              mov A,[_gdwCurrentFreq+3]
+ 022F 08                push A
+ 0230 7C0000            xcall _DDS_Set
+ 0233 38FC              add SP,-4
+ 0235                   .dbline 204
+ 0235           ;               UART_CPutString(gszOk);
+ 0235 10                push X
+ 0236 504E              mov A,>_gszOk
+ 0238 08                push A
+ 0239 504E              mov A,<_gszOk
+ 023B 5C                mov X,A
+ 023C 18                pop A
+ 023D 7C0000            xcall _UART_CPutString
+ 0240 20                pop X
+ 0241                   .dbline 205
+ 0241           ;       }
+ 0241           L39:
+ 0241                   .dbline -2
+ 0241           L37:
+ 0241                   .dbline 0 ; func end
+ 0241 7F                ret
+ 0242                   .dbend
+ 0242                   .dbfunc s Cmd_Off _Cmd_Off fV
+ 0242           _Cmd_Off:
+ 0242                   .dbline -1
+ 0242                   .dbline 223
+ 0242           ; }
+ 0242           ; 
+ 0242           ; //-----------------------------------------------------------------------------
+ 0242           ; //  FUNCTION NAME:    Cmd_Off
+ 0242           ; //
+ 0242           ; //  DESCRIPTION:
+ 0242           ; //
+ 0242           ; //    Process on command
+ 0242           ; //
+ 0242           ; //  ARGUMENTS:
+ 0242           ; //     none.
+ 0242           ; //
+ 0242           ; //  RETURNS:
+ 0242           ; //     none.
+ 0242           ; //
+ 0242           ; //-----------------------------------------------------------------------------
+ 0242           ; static void Cmd_Off (void)
+ 0242           ; {
+ 0242                   .dbline 224
+ 0242           ;       DDS_Set(0);
+ 0242 5000              mov A,0
+ 0244 08                push A
+ 0245 08                push A
+ 0246 08                push A
+ 0247 08                push A
+ 0248 7C0000            xcall _DDS_Set
+ 024B 38FC              add SP,-4
+ 024D                   .dbline 225
+ 024D           ;       UART_CPutString(gszOk);
+ 024D 10                push X
+ 024E 504E              mov A,>_gszOk
+ 0250 08                push A
+ 0251 504E              mov A,<_gszOk
+ 0253 5C                mov X,A
+ 0254 18                pop A
+ 0255 7C0000            xcall _UART_CPutString
+ 0258 20                pop X
+ 0259                   .dbline -2
+ 0259           L40:
+ 0259                   .dbline 0 ; func end
+ 0259 7F                ret
+ 025A                   .dbend
+ 025A                   .dbfunc s Cmd_Freq _Cmd_Freq fV
+ 025A           ;         strPtr -> X+1
+ 025A           ;          bBand -> X+0
+ 025A           _Cmd_Freq:
+ 025A                   .dbline -1
+ 025A 10                push X
+ 025B 4F                mov X,SP
+ 025C 3803              add SP,3
+ 025E                   .dbline 243
+ 025E           ; }
+ 025E           ; 
+ 025E           ; //-----------------------------------------------------------------------------
+ 025E           ; //  FUNCTION NAME:    Cmd_Freq
+ 025E           ; //
+ 025E           ; //  DESCRIPTION:
+ 025E           ; //
+ 025E           ; //    Process freq (set frequency) command
+ 025E           ; //
+ 025E           ; //  ARGUMENTS:
+ 025E           ; //     none.
+ 025E           ; //
+ 025E           ; //  RETURNS:
+ 025E           ; //     none.
+ 025E           ; //
+ 025E           ; //-----------------------------------------------------------------------------
+ 025E           ; static void Cmd_Freq (void)
+ 025E           ; {
+ 025E           L42:
+ 025E                   .dbline 248
+ 025E           ;       char * strPtr;                                          // Parameter pointer
+ 025E           ;       BYTE bBand;
+ 025E           ; 
+ 025E           ;       do
+ 025E           ;       {
+ 025E                   .dbline 249
+ 025E           ;               strPtr = UART_szGetParam();
+ 025E 10                push X
+ 025F 7C0000            xcall _UART_szGetParam
+ 0262 62D000            mov REG[0xd0],>__r0
+ 0265 5300              mov [__r0],A
+ 0267 5A00              mov [__r1],X
+ 0269 20                pop X
+ 026A 5100              mov A,[__r1]
+ 026C 5402              mov [X+2],A
+ 026E 5100              mov A,[__r0]
+ 0270 5401              mov [X+1],A
+ 0272                   .dbline 250
+ 0272           ;               if (strPtr==NULL)
+ 0272 3D0100            cmp [X+1],0
+ 0275 B014              jnz L45
+ 0277 3D0200            cmp [X+2],0
+ 027A B00F              jnz L45
+ 027C           X9:
+ 027C                   .dbline 251
+ 027C           ;               {
+ 027C                   .dbline 252
+ 027C           ;                       UART_CPutString(gszErrExpectFreq);
+ 027C 10                push X
+ 027D 5087              mov A,>_gszErrExpectFreq
+ 027F 08                push A
+ 0280 5087              mov A,<_gszErrExpectFreq
+ 0282 5C                mov X,A
+ 0283 18                pop A
+ 0284 7C0000            xcall _UART_CPutString
+ 0287 20                pop X
+ 0288                   .dbline 253
+ 0288           ;                       break;
+ 0288 80A7              xjmp L44
+ 028A           L45:
+ 028A                   .dbline 255
+ 028A           ;               }
+ 028A           ;               gdwCurrentFreq = atol(strPtr);
+ 028A 5201              mov A,[X+1]
+ 028C 08                push A
+ 028D 5202              mov A,[X+2]
+ 028F 08                push A
+ 0290 7C0000            xcall _atol
+ 0293 38FE              add SP,-2
+ 0295 62D000            mov REG[0xd0],>__r0
+ 0298 5100              mov A,[__r0]
+ 029A 08                push A
+ 029B 5100              mov A,[__r1]
+ 029D 08                push A
+ 029E 5100              mov A,[__r2]
+ 02A0 08                push A
+ 02A1 5100              mov A,[__r3]
+ 02A3 62D000            mov REG[0xd0],>_gdwCurrentFreq
+ 02A6 5303              mov [_gdwCurrentFreq+3],A
+ 02A8 18                pop A
+ 02A9 5302              mov [_gdwCurrentFreq+2],A
+ 02AB 18                pop A
+ 02AC 5301              mov [_gdwCurrentFreq+1],A
+ 02AE 18                pop A
+ 02AF 5300              mov [_gdwCurrentFreq],A
+ 02B1                   .dbline 256
+ 02B1           ;               bBand = GetBand(gdwCurrentFreq);
+ 02B1 5100              mov A,[_gdwCurrentFreq]
+ 02B3 08                push A
+ 02B4 5101              mov A,[_gdwCurrentFreq+1]
+ 02B6 08                push A
+ 02B7 5102              mov A,[_gdwCurrentFreq+2]
+ 02B9 08                push A
+ 02BA 5103              mov A,[_gdwCurrentFreq+3]
+ 02BC 08                push A
+ 02BD 7C0000            xcall _GetBand
+ 02C0 38FC              add SP,-4
+ 02C2 62D000            mov REG[0xd0],>__r0
+ 02C5 5400              mov [X+0],A
+ 02C7                   .dbline 257
+ 02C7           ;               if (bBand==-1)
+ 02C7 3D00FF            cmp [X+0],-1
+ 02CA B00F              jnz L47
+ 02CC                   .dbline 258
+ 02CC           ;               {
+ 02CC                   .dbline 259
+ 02CC           ;                       UART_CPutString(gszErrInvalidFreq);
+ 02CC 10                push X
+ 02CD 50C1              mov A,>_gszErrInvalidFreq
+ 02CF 08                push A
+ 02D0 50C1              mov A,<_gszErrInvalidFreq
+ 02D2 5C                mov X,A
+ 02D3 18                pop A
+ 02D4 7C0000            xcall _UART_CPutString
+ 02D7 20                pop X
+ 02D8                   .dbline 260
+ 02D8           ;                       break;
+ 02D8 8057              xjmp L44
+ 02DA           L47:
+ 02DA                   .dbline 262
+ 02DA           ;               }
+ 02DA           ;               g_xBridgeCorrect = g_xBandCorrFactor[bBand];
+ 02DA 62D000            mov REG[0xd0],>__r0
+ 02DD 5200              mov A,[X+0]
+ 02DF 5300              mov [__r1],A
+ 02E1 5000              mov A,0
+ 02E3 08                push A
+ 02E4 5100              mov A,[__r1]
+ 02E6 08                push A
+ 02E7 5000              mov A,0
+ 02E9 08                push A
+ 02EA 500C              mov A,12
+ 02EC 08                push A
+ 02ED 7C0000            xcall __mul16
+ 02F0 38FC              add SP,-4
+ 02F2 5100              mov A,[__rX]
+ 02F4 5300              mov [__r1],A
+ 02F6 5100              mov A,[__rY]
+ 02F8 5300              mov [__r0],A
+ 02FA 060000            add [__r1],<_g_xBandCorrFactor
+ 02FD 0E0000            adc [__r0],>_g_xBandCorrFactor
+ 0300 550000            mov [__r3],<_g_xBridgeCorrect
+ 0303 550000            mov [__r2],>_g_xBridgeCorrect
+ 0306 5100              mov A,[__r0]
+ 0308 60D4              mov REG[0xd4],A
+ 030A 5100              mov A,[__r2]
+ 030C 60D5              mov REG[0xd5],A
+ 030E 10                push X
+ 030F 570C              mov X,12
+ 0311           X10:
+ 0311 62D000            mov REG[0xd0],>__r0
+ 0314 3E00              mvi A,[__r1]
+ 0316 3F00              mvi [__r3],A
+ 0318 79                dec X
+ 0319 BFF7              jnz X10
+ 031B 20                pop X
+ 031C                   .dbline 263
+ 031C           ;               Adjust_Dds_Gain(bBand);
+ 031C 5200              mov A,[X+0]
+ 031E 08                push A
+ 031F 7C0000            xcall _Adjust_Dds_Gain
+ 0322 38FF              add SP,-1
+ 0324                   .dbline 264
+ 0324           ;               UART_CPutString(gszOk);
+ 0324 10                push X
+ 0325 504E              mov A,>_gszOk
+ 0327 08                push A
+ 0328 504E              mov A,<_gszOk
+ 032A 5C                mov X,A
+ 032B 18                pop A
+ 032C 7C0000            xcall _UART_CPutString
+ 032F 20                pop X
+ 0330                   .dbline 265
+ 0330           ;       } while (FALSE);
+ 0330           L43:
+ 0330                   .dbline 265
+ 0330           L44:
+ 0330                   .dbline -2
+ 0330           L41:
+ 0330 38FD              add SP,-3
+ 0332 20                pop X
+ 0333                   .dbline 0 ; func end
+ 0333 7F                ret
+ 0334                   .dbsym l strPtr 1 pc
+ 0334                   .dbsym l bBand 0 c
+ 0334                   .dbend
+ 0334                   .dbfunc s Cmd_Imp _Cmd_Imp fV
+ 0334           ;          szMsg -> X+0
+ 0334           _Cmd_Imp:
+ 0334                   .dbline -1
+ 0334 10                push X
+ 0335 4F                mov X,SP
+ 0336 3814              add SP,20
+ 0338                   .dbline 283
+ 0338           ; }
+ 0338           ; 
+ 0338           ; //-----------------------------------------------------------------------------
+ 0338           ; //  FUNCTION NAME:    Cmd_Imp
+ 0338           ; //
+ 0338           ; //  DESCRIPTION:
+ 0338           ; //
+ 0338           ; //    Process imp (impedance) command
+ 0338           ; //
+ 0338           ; //  ARGUMENTS:
+ 0338           ; //     none.
+ 0338           ; //
+ 0338           ; //  RETURNS:
+ 0338           ; //     none.
+ 0338           ; //
+ 0338           ; //-----------------------------------------------------------------------------
+ 0338           ; static void Cmd_Imp (void)
+ 0338           ; {
+ 0338                   .dbline 286
+ 0338           ;       BYTE szMsg[20];
+ 0338           ; 
+ 0338           ;       Do_Measure();
+ 0338 7C0000            xcall _Do_Measure
+ 033B                   .dbline 287
+ 033B           ;       Do_Correct();
+ 033B 7C0000            xcall _Do_Correct
+ 033E                   .dbline 289
+ 033E           ; 
+ 033E           ;       gwSwr = Calculate_Swr(g_xBridgeMeasure.Vf, g_xBridgeMeasure.Vr);
+ 033E 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0341 5104              mov A,[_g_xBridgeMeasure+4]
+ 0343 08                push A
+ 0344 5105              mov A,[_g_xBridgeMeasure+4+1]
+ 0346 08                push A
+ 0347 5106              mov A,[_g_xBridgeMeasure+4+2]
+ 0349 08                push A
+ 034A 5107              mov A,[_g_xBridgeMeasure+4+3]
+ 034C 08                push A
+ 034D 5100              mov A,[_g_xBridgeMeasure]
+ 034F 08                push A
+ 0350 5101              mov A,[_g_xBridgeMeasure+1]
+ 0352 08                push A
+ 0353 5102              mov A,[_g_xBridgeMeasure+2]
+ 0355 08                push A
+ 0356 5103              mov A,[_g_xBridgeMeasure+3]
+ 0358 08                push A
+ 0359 7C0000            xcall _Calculate_Swr
+ 035C 38F8              add SP,-8
+ 035E 62D000            mov REG[0xd0],>__r0
+ 0361 5100              mov A,[__r1]
+ 0363 08                push A
+ 0364 5100              mov A,[__r0]
+ 0366 62D000            mov REG[0xd0],>_gwSwr
+ 0369 5300              mov [_gwSwr],A
+ 036B 18                pop A
+ 036C 5301              mov [_gwSwr+1],A
+ 036E                   .dbline 290
+ 036E           ;       gwZ = Calculate_Z(g_xBridgeMeasure.Vz, g_xBridgeMeasure.Va);
+ 036E 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0371 5108              mov A,[_g_xBridgeMeasure+8]
+ 0373 08                push A
+ 0374 5109              mov A,[_g_xBridgeMeasure+8+1]
+ 0376 08                push A
+ 0377 510A              mov A,[_g_xBridgeMeasure+8+2]
+ 0379 08                push A
+ 037A 510B              mov A,[_g_xBridgeMeasure+8+3]
+ 037C 08                push A
+ 037D 510C              mov A,[_g_xBridgeMeasure+12]
+ 037F 08                push A
+ 0380 510D              mov A,[_g_xBridgeMeasure+12+1]
+ 0382 08                push A
+ 0383 510E              mov A,[_g_xBridgeMeasure+12+2]
+ 0385 08                push A
+ 0386 510F              mov A,[_g_xBridgeMeasure+12+3]
+ 0388 08                push A
+ 0389 7C0000            xcall _Calculate_Z
+ 038C 38F8              add SP,-8
+ 038E 62D000            mov REG[0xd0],>__r0
+ 0391 5100              mov A,[__r1]
+ 0393 08                push A
+ 0394 5100              mov A,[__r0]
+ 0396 62D000            mov REG[0xd0],>_gwZ
+ 0399 5300              mov [_gwZ],A
+ 039B 18                pop A
+ 039C 5301              mov [_gwZ+1],A
+ 039E                   .dbline 291
+ 039E           ;       gwR = Calculate_R(gwZ, gwSwr);
+ 039E 62D000            mov REG[0xd0],>_gwSwr
+ 03A1 5100              mov A,[_gwSwr]
+ 03A3 08                push A
+ 03A4 5101              mov A,[_gwSwr+1]
+ 03A6 08                push A
+ 03A7 62D000            mov REG[0xd0],>_gwZ
+ 03AA 5100              mov A,[_gwZ]
+ 03AC 08                push A
+ 03AD 5101              mov A,[_gwZ+1]
+ 03AF 08                push A
+ 03B0 7C0000            xcall _Calculate_R
+ 03B3 38FC              add SP,-4
+ 03B5 62D000            mov REG[0xd0],>__r0
+ 03B8 5100              mov A,[__r1]
+ 03BA 08                push A
+ 03BB 5100              mov A,[__r0]
+ 03BD 62D000            mov REG[0xd0],>_gwR
+ 03C0 5300              mov [_gwR],A
+ 03C2 18                pop A
+ 03C3 5301              mov [_gwR+1],A
+ 03C5                   .dbline 292
+ 03C5           ;       gwX = Calculate_X(gwZ, gwR);
+ 03C5 5100              mov A,[_gwR]
+ 03C7 08                push A
+ 03C8 5101              mov A,[_gwR+1]
+ 03CA 08                push A
+ 03CB 62D000            mov REG[0xd0],>_gwZ
+ 03CE 5100              mov A,[_gwZ]
+ 03D0 08                push A
+ 03D1 5101              mov A,[_gwZ+1]
+ 03D3 08                push A
+ 03D4 7C0000            xcall _Calculate_X
+ 03D7 38FC              add SP,-4
+ 03D9 62D000            mov REG[0xd0],>__r0
+ 03DC 5100              mov A,[__r1]
+ 03DE 08                push A
+ 03DF 5100              mov A,[__r0]
+ 03E1 62D000            mov REG[0xd0],>_gwX
+ 03E4 5300              mov [_gwX],A
+ 03E6 18                pop A
+ 03E7 5301              mov [_gwX+1],A
+ 03E9                   .dbline 294
+ 03E9           ; 
+ 03E9           ;       itoa(szMsg, gwSwr, 10);
+ 03E9 5000              mov A,0
+ 03EB 08                push A
+ 03EC 500A              mov A,10
+ 03EE 08                push A
+ 03EF 62D000            mov REG[0xd0],>_gwSwr
+ 03F2 5100              mov A,[_gwSwr]
+ 03F4 08                push A
+ 03F5 5101              mov A,[_gwSwr+1]
+ 03F7 08                push A
+ 03F8 62D000            mov REG[0xd0],>__r0
+ 03FB 5007              mov A,7
+ 03FD 08                push A
+ 03FE 10                push X
+ 03FF 7C0000            xcall _itoa
+ 0402 38FA              add SP,-6
+ 0404                   .dbline 295
+ 0404           ;       UART_PutChar( szMsg[0] );
+ 0404 10                push X
+ 0405 5200              mov A,[X+0]
+ 0407 7C0000            xcall _UART_PutChar
+ 040A 20                pop X
+ 040B                   .dbline 296
+ 040B           ;       UART_PutChar( '.' );
+ 040B 10                push X
+ 040C 502E              mov A,46
+ 040E 7C0000            xcall _UART_PutChar
+ 0411 20                pop X
+ 0412                   .dbline 297
+ 0412           ;       UART_PutChar( szMsg[1] );
+ 0412 10                push X
+ 0413 5201              mov A,[X+1]
+ 0415 7C0000            xcall _UART_PutChar
+ 0418 20                pop X
+ 0419                   .dbline 298
+ 0419           ;       UART_PutChar( szMsg[2] );
+ 0419 10                push X
+ 041A 5202              mov A,[X+2]
+ 041C 7C0000            xcall _UART_PutChar
+ 041F 20                pop X
+ 0420                   .dbline 300
+ 0420           ; 
+ 0420           ;       UART_PutChar(',');
+ 0420 10                push X
+ 0421 502C              mov A,44
+ 0423 7C0000            xcall _UART_PutChar
+ 0426 20                pop X
+ 0427                   .dbline 301
+ 0427           ;       itoa(szMsg, gwR, 10);
+ 0427 5000              mov A,0
+ 0429 08                push A
+ 042A 500A              mov A,10
+ 042C 08                push A
+ 042D 62D000            mov REG[0xd0],>_gwR
+ 0430 5100              mov A,[_gwR]
+ 0432 08                push A
+ 0433 5101              mov A,[_gwR+1]
+ 0435 08                push A
+ 0436 62D000            mov REG[0xd0],>__r0
+ 0439 5007              mov A,7
+ 043B 08                push A
+ 043C 10                push X
+ 043D 7C0000            xcall _itoa
+ 0440 38FA              add SP,-6
+ 0442                   .dbline 302
+ 0442           ;       UART_PutString(szMsg);
+ 0442 62D000            mov REG[0xd0],>__r0
+ 0445 10                push X
+ 0446 5007              mov A,7
+ 0448 08                push A
+ 0449 18                pop A
+ 044A 7C0000            xcall _UART_PutString
+ 044D 20                pop X
+ 044E                   .dbline 304
+ 044E           ; 
+ 044E           ;       UART_PutChar(',');
+ 044E 10                push X
+ 044F 502C              mov A,44
+ 0451 7C0000            xcall _UART_PutChar
+ 0454 20                pop X
+ 0455                   .dbline 305
+ 0455           ;       itoa(szMsg, gwX, 10);
+ 0455 5000              mov A,0
+ 0457 08                push A
+ 0458 500A              mov A,10
+ 045A 08                push A
+ 045B 62D000            mov REG[0xd0],>_gwX
+ 045E 5100              mov A,[_gwX]
+ 0460 08                push A
+ 0461 5101              mov A,[_gwX+1]
+ 0463 08                push A
+ 0464 62D000            mov REG[0xd0],>__r0
+ 0467 5007              mov A,7
+ 0469 08                push A
+ 046A 10                push X
+ 046B 7C0000            xcall _itoa
+ 046E 38FA              add SP,-6
+ 0470                   .dbline 306
+ 0470           ;       UART_PutString(szMsg);
+ 0470 62D000            mov REG[0xd0],>__r0
+ 0473 10                push X
+ 0474 5007              mov A,7
+ 0476 08                push A
+ 0477 18                pop A
+ 0478 7C0000            xcall _UART_PutString
+ 047B 20                pop X
+ 047C                   .dbline 308
+ 047C           ; 
+ 047C           ;       UART_PutChar(',');
+ 047C 10                push X
+ 047D 502C              mov A,44
+ 047F 7C0000            xcall _UART_PutChar
+ 0482 20                pop X
+ 0483                   .dbline 309
+ 0483           ;       itoa(szMsg, gwZ, 10);
+ 0483 5000              mov A,0
+ 0485 08                push A
+ 0486 500A              mov A,10
+ 0488 08                push A
+ 0489 62D000            mov REG[0xd0],>_gwZ
+ 048C 5100              mov A,[_gwZ]
+ 048E 08                push A
+ 048F 5101              mov A,[_gwZ+1]
+ 0491 08                push A
+ 0492 62D000            mov REG[0xd0],>__r0
+ 0495 5007              mov A,7
+ 0497 08                push A
+ 0498 10                push X
+ 0499 7C0000            xcall _itoa
+ 049C 38FA              add SP,-6
+ 049E                   .dbline 310
+ 049E           ;       UART_PutString(szMsg);
+ 049E 62D000            mov REG[0xd0],>__r0
+ 04A1 10                push X
+ 04A2 5007              mov A,7
+ 04A4 08                push A
+ 04A5 18                pop A
+ 04A6 7C0000            xcall _UART_PutString
+ 04A9                   .dbline 312
+ 04A9           ; 
+ 04A9           ;       UART_PutCRLF();
+ 04A9 7C0000            xcall _UART_PutCRLF
+ 04AC 20                pop X
+ 04AD                   .dbline -2
+ 04AD           L49:
+ 04AD 38EC              add SP,-20
+ 04AF 20                pop X
+ 04B0                   .dbline 0 ; func end
+ 04B0 7F                ret
+ 04B1                   .dbsym l szMsg 0 A[20:20]c
+ 04B1                   .dbend
+ 04B1                   .dbfunc s Cmd_Raw _Cmd_Raw fV
+ 04B1           ;          szMsg -> X+0
+ 04B1           _Cmd_Raw:
+ 04B1                   .dbline -1
+ 04B1 10                push X
+ 04B2 4F                mov X,SP
+ 04B3 3814              add SP,20
+ 04B5                   .dbline 330
+ 04B5           ; }
+ 04B5           ; 
+ 04B5           ; //-----------------------------------------------------------------------------
+ 04B5           ; //  FUNCTION NAME:    Cmd_Raw
+ 04B5           ; //
+ 04B5           ; //  DESCRIPTION:
+ 04B5           ; //
+ 04B5           ; //    Process raw (raw measurement data) command
+ 04B5           ; //
+ 04B5           ; //  ARGUMENTS:
+ 04B5           ; //     none.
+ 04B5           ; //
+ 04B5           ; //  RETURNS:
+ 04B5           ; //     none.
+ 04B5           ; //
+ 04B5           ; //-----------------------------------------------------------------------------
+ 04B5           ; static void Cmd_Raw (void)
+ 04B5           ; {
+ 04B5                   .dbline 333
+ 04B5           ;       BYTE szMsg[20];
+ 04B5           ; 
+ 04B5           ;       Do_Measure();
+ 04B5 7C0000            xcall _Do_Measure
+ 04B8                   .dbline 334
+ 04B8           ;       Do_Correct();
+ 04B8 7C0000            xcall _Do_Correct
+ 04BB                   .dbline 336
+ 04BB           ; 
+ 04BB           ;       ltoa(szMsg, g_xBridgeMeasure.Vf, 10);
+ 04BB 5000              mov A,0
+ 04BD 08                push A
+ 04BE 500A              mov A,10
+ 04C0 08                push A
+ 04C1 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 04C4 5100              mov A,[_g_xBridgeMeasure]
+ 04C6 08                push A
+ 04C7 5101              mov A,[_g_xBridgeMeasure+1]
+ 04C9 08                push A
+ 04CA 5102              mov A,[_g_xBridgeMeasure+2]
+ 04CC 08                push A
+ 04CD 5103              mov A,[_g_xBridgeMeasure+3]
+ 04CF 08                push A
+ 04D0 62D000            mov REG[0xd0],>__r0
+ 04D3 5007              mov A,7
+ 04D5 08                push A
+ 04D6 10                push X
+ 04D7 7C0000            xcall _ltoa
+ 04DA 38F8              add SP,-8
+ 04DC                   .dbline 337
+ 04DC           ;       UART_PutString(szMsg);
+ 04DC 62D000            mov REG[0xd0],>__r0
+ 04DF 10                push X
+ 04E0 5007              mov A,7
+ 04E2 08                push A
+ 04E3 18                pop A
+ 04E4 7C0000            xcall _UART_PutString
+ 04E7 20                pop X
+ 04E8                   .dbline 339
+ 04E8           ; 
+ 04E8           ;       UART_PutChar(',');
+ 04E8 10                push X
+ 04E9 502C              mov A,44
+ 04EB 7C0000            xcall _UART_PutChar
+ 04EE 20                pop X
+ 04EF                   .dbline 340
+ 04EF           ;       ltoa(szMsg, g_xBridgeMeasure.Vr, 10);
+ 04EF 5000              mov A,0
+ 04F1 08                push A
+ 04F2 500A              mov A,10
+ 04F4 08                push A
+ 04F5 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 04F8 5104              mov A,[_g_xBridgeMeasure+4]
+ 04FA 08                push A
+ 04FB 5105              mov A,[_g_xBridgeMeasure+4+1]
+ 04FD 08                push A
+ 04FE 5106              mov A,[_g_xBridgeMeasure+4+2]
+ 0500 08                push A
+ 0501 5107              mov A,[_g_xBridgeMeasure+4+3]
+ 0503 08                push A
+ 0504 62D000            mov REG[0xd0],>__r0
+ 0507 5007              mov A,7
+ 0509 08                push A
+ 050A 10                push X
+ 050B 7C0000            xcall _ltoa
+ 050E 38F8              add SP,-8
+ 0510                   .dbline 341
+ 0510           ;       UART_PutString(szMsg);
+ 0510 62D000            mov REG[0xd0],>__r0
+ 0513 10                push X
+ 0514 5007              mov A,7
+ 0516 08                push A
+ 0517 18                pop A
+ 0518 7C0000            xcall _UART_PutString
+ 051B 20                pop X
+ 051C                   .dbline 343
+ 051C           ; 
+ 051C           ;       UART_PutChar(',');
+ 051C 10                push X
+ 051D 502C              mov A,44
+ 051F 7C0000            xcall _UART_PutChar
+ 0522 20                pop X
+ 0523                   .dbline 344
+ 0523           ;       ltoa(szMsg, g_xBridgeMeasure.Vz, 10);
+ 0523 5000              mov A,0
+ 0525 08                push A
+ 0526 500A              mov A,10
+ 0528 08                push A
+ 0529 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 052C 510C              mov A,[_g_xBridgeMeasure+12]
+ 052E 08                push A
+ 052F 510D              mov A,[_g_xBridgeMeasure+12+1]
+ 0531 08                push A
+ 0532 510E              mov A,[_g_xBridgeMeasure+12+2]
+ 0534 08                push A
+ 0535 510F              mov A,[_g_xBridgeMeasure+12+3]
+ 0537 08                push A
+ 0538 62D000            mov REG[0xd0],>__r0
+ 053B 5007              mov A,7
+ 053D 08                push A
+ 053E 10                push X
+ 053F 7C0000            xcall _ltoa
+ 0542 38F8              add SP,-8
+ 0544                   .dbline 345
+ 0544           ;       UART_PutString(szMsg);
+ 0544 62D000            mov REG[0xd0],>__r0
+ 0547 10                push X
+ 0548 5007              mov A,7
+ 054A 08                push A
+ 054B 18                pop A
+ 054C 7C0000            xcall _UART_PutString
+ 054F 20                pop X
+ 0550                   .dbline 347
+ 0550           ; 
+ 0550           ;       UART_PutChar(',');
+ 0550 10                push X
+ 0551 502C              mov A,44
+ 0553 7C0000            xcall _UART_PutChar
+ 0556 20                pop X
+ 0557                   .dbline 348
+ 0557           ;       ltoa(szMsg, g_xBridgeMeasure.Va, 10);
+ 0557 5000              mov A,0
+ 0559 08                push A
+ 055A 500A              mov A,10
+ 055C 08                push A
+ 055D 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0560 5108              mov A,[_g_xBridgeMeasure+8]
+ 0562 08                push A
+ 0563 5109              mov A,[_g_xBridgeMeasure+8+1]
+ 0565 08                push A
+ 0566 510A              mov A,[_g_xBridgeMeasure+8+2]
+ 0568 08                push A
+ 0569 510B              mov A,[_g_xBridgeMeasure+8+3]
+ 056B 08                push A
+ 056C 62D000            mov REG[0xd0],>__r0
+ 056F 5007              mov A,7
+ 0571 08                push A
+ 0572 10                push X
+ 0573 7C0000            xcall _ltoa
+ 0576 38F8              add SP,-8
+ 0578                   .dbline 349
+ 0578           ;       UART_PutString(szMsg);
+ 0578 62D000            mov REG[0xd0],>__r0
+ 057B 10                push X
+ 057C 5007              mov A,7
+ 057E 08                push A
+ 057F 18                pop A
+ 0580 7C0000            xcall _UART_PutString
+ 0583                   .dbline 351
+ 0583           ; 
+ 0583           ;       UART_PutCRLF();
+ 0583 7C0000            xcall _UART_PutCRLF
+ 0586 20                pop X
+ 0587                   .dbline -2
+ 0587           L55:
+ 0587 38EC              add SP,-20
+ 0589 20                pop X
+ 058A                   .dbline 0 ; func end
+ 058A 7F                ret
+ 058B                   .dbsym l szMsg 0 A[20:20]c
+ 058B                   .dbend
+ 058B                   .dbfunc s Cmd_Scan _Cmd_Scan fV
+ 058B           ;    dwLimitFreq -> X+16
+ 058B           ;         strPtr -> X+14
+ 058B           ;     dwStepFreq -> X+10
+ 058B           ;      dwEndFreq -> X+6
+ 058B           ;      bBandSave -> X+5
+ 058B           ;          bBand -> X+4
+ 058B           ;         dwFreq -> X+0
+ 058B           ;           bRaw -> X-4
+ 058B           _Cmd_Scan:
+ 058B                   .dbline -1
+ 058B 10                push X
+ 058C 4F                mov X,SP
+ 058D 3814              add SP,20
+ 058F                   .dbline 369
+ 058F           ; }
+ 058F           ; 
+ 058F           ; //-----------------------------------------------------------------------------
+ 058F           ; //  FUNCTION NAME:    Cmd_Scan
+ 058F           ; //
+ 058F           ; //  DESCRIPTION:
+ 058F           ; //
+ 058F           ; //    Process scan command
+ 058F           ; //
+ 058F           ; //  ARGUMENTS:
+ 058F           ; //     none.
+ 058F           ; //
+ 058F           ; //  RETURNS:
+ 058F           ; //     none.
+ 058F           ; //
+ 058F           ; //-----------------------------------------------------------------------------
+ 058F           ; static void Cmd_Scan (BYTE bRaw)
+ 058F           ; {
+ 058F                   .dbline 378
+ 058F           ;       DWORD dwFreq;
+ 058F           ;       DWORD dwEndFreq;
+ 058F           ;       DWORD dwLimitFreq;
+ 058F           ;       DWORD dwStepFreq;
+ 058F           ;       BYTE bBand;
+ 058F           ;       BYTE bBandSave;
+ 058F           ;       char * strPtr;                                          // Parameter pointer
+ 058F           ; 
+ 058F           ;       g_bScanning = FALSE;
+ 058F 62D000            mov REG[0xd0],>_g_bScanning
+ 0592 550000            mov [_g_bScanning],0
+ 0595           L60:
+ 0595                   .dbline 380
+ 0595           ;       do
+ 0595           ;       {
+ 0595                   .dbline 382
+ 0595           ;                                                                               // Get start frequency
+ 0595           ;               strPtr = UART_szGetParam();
+ 0595 10                push X
+ 0596 7C0000            xcall _UART_szGetParam
+ 0599 62D000            mov REG[0xd0],>__r0
+ 059C 5300              mov [__r0],A
+ 059E 5A00              mov [__r1],X
+ 05A0 20                pop X
+ 05A1 5100              mov A,[__r1]
+ 05A3 540F              mov [X+15],A
+ 05A5 5100              mov A,[__r0]
+ 05A7 540E              mov [X+14],A
+ 05A9                   .dbline 383
+ 05A9           ;               if (strPtr==NULL)
+ 05A9 3D0E00            cmp [X+14],0
+ 05AC B014              jnz L63
+ 05AE 3D0F00            cmp [X+15],0
+ 05B1 B00F              jnz L63
+ 05B3           X11:
+ 05B3                   .dbline 384
+ 05B3           ;               {
+ 05B3                   .dbline 385
+ 05B3           ;                       UART_CPutString(gszErrExpectFreq);
+ 05B3 10                push X
+ 05B4 5087              mov A,>_gszErrExpectFreq
+ 05B6 08                push A
+ 05B7 5087              mov A,<_gszErrExpectFreq
+ 05B9 5C                mov X,A
+ 05BA 18                pop A
+ 05BB 7C0000            xcall _UART_CPutString
+ 05BE 20                pop X
+ 05BF                   .dbline 386
+ 05BF           ;                       break;
+ 05BF 81F7              xjmp L62
+ 05C1           L63:
+ 05C1                   .dbline 388
+ 05C1           ;               }
+ 05C1           ;               dwFreq = atol(strPtr);
+ 05C1 520E              mov A,[X+14]
+ 05C3 08                push A
+ 05C4 520F              mov A,[X+15]
+ 05C6 08                push A
+ 05C7 7C0000            xcall _atol
+ 05CA 62D000            mov REG[0xd0],>__r0
+ 05CD 5100              mov A,[__r0]
+ 05CF 5400              mov [X+0],A
+ 05D1 5100              mov A,[__r1]
+ 05D3 5401              mov [X+1],A
+ 05D5 5100              mov A,[__r2]
+ 05D7 5402              mov [X+2],A
+ 05D9 5100              mov A,[__r3]
+ 05DB 5403              mov [X+3],A
+ 05DD                   .dbline 389
+ 05DD           ;               bBand = GetBand(dwFreq);
+ 05DD 5200              mov A,[X+0]
+ 05DF 08                push A
+ 05E0 5201              mov A,[X+1]
+ 05E2 08                push A
+ 05E3 5202              mov A,[X+2]
+ 05E5 08                push A
+ 05E6 5203              mov A,[X+3]
+ 05E8 08                push A
+ 05E9 7C0000            xcall _GetBand
+ 05EC 38FA              add SP,-6
+ 05EE 62D000            mov REG[0xd0],>__r0
+ 05F1 5404              mov [X+4],A
+ 05F3                   .dbline 390
+ 05F3           ;               if (bBand==-1)
+ 05F3 3D04FF            cmp [X+4],-1
+ 05F6 B00F              jnz L65
+ 05F8                   .dbline 391
+ 05F8           ;               {
+ 05F8                   .dbline 392
+ 05F8           ;                       UART_CPutString(gszErrInvalidFreq);
+ 05F8 10                push X
+ 05F9 50C1              mov A,>_gszErrInvalidFreq
+ 05FB 08                push A
+ 05FC 50C1              mov A,<_gszErrInvalidFreq
+ 05FE 5C                mov X,A
+ 05FF 18                pop A
+ 0600 7C0000            xcall _UART_CPutString
+ 0603 20                pop X
+ 0604                   .dbline 393
+ 0604           ;                       break;
+ 0604 81B2              xjmp L62
+ 0606           L65:
+ 0606                   .dbline 396
+ 0606           ;               }
+ 0606           ;                                                                               // Get end frequency
+ 0606           ;               strPtr = UART_szGetParam();
+ 0606 10                push X
+ 0607 7C0000            xcall _UART_szGetParam
+ 060A 62D000            mov REG[0xd0],>__r0
+ 060D 5300              mov [__r0],A
+ 060F 5A00              mov [__r1],X
+ 0611 20                pop X
+ 0612 5100              mov A,[__r1]
+ 0614 540F              mov [X+15],A
+ 0616 5100              mov A,[__r0]
+ 0618 540E              mov [X+14],A
+ 061A                   .dbline 397
+ 061A           ;               if (strPtr==NULL)
+ 061A 3D0E00            cmp [X+14],0
+ 061D B014              jnz L67
+ 061F 3D0F00            cmp [X+15],0
+ 0622 B00F              jnz L67
+ 0624           X12:
+ 0624                   .dbline 398
+ 0624           ;               {
+ 0624                   .dbline 399
+ 0624           ;                       UART_CPutString(gszErrExpectFreq);
+ 0624 10                push X
+ 0625 5087              mov A,>_gszErrExpectFreq
+ 0627 08                push A
+ 0628 5087              mov A,<_gszErrExpectFreq
+ 062A 5C                mov X,A
+ 062B 18                pop A
+ 062C 7C0000            xcall _UART_CPutString
+ 062F 20                pop X
+ 0630                   .dbline 400
+ 0630           ;                       break;
+ 0630 8186              xjmp L62
+ 0632           L67:
+ 0632                   .dbline 402
+ 0632           ;               }
+ 0632           ;               dwEndFreq = atol(strPtr);
+ 0632 520E              mov A,[X+14]
+ 0634 08                push A
+ 0635 520F              mov A,[X+15]
+ 0637 08                push A
+ 0638 7C0000            xcall _atol
+ 063B 62D000            mov REG[0xd0],>__r0
+ 063E 5100              mov A,[__r0]
+ 0640 5406              mov [X+6],A
+ 0642 5100              mov A,[__r1]
+ 0644 5407              mov [X+7],A
+ 0646 5100              mov A,[__r2]
+ 0648 5408              mov [X+8],A
+ 064A 5100              mov A,[__r3]
+ 064C 5409              mov [X+9],A
+ 064E                   .dbline 403
+ 064E           ;               bBand = GetBand(dwEndFreq);
+ 064E 5206              mov A,[X+6]
+ 0650 08                push A
+ 0651 5207              mov A,[X+7]
+ 0653 08                push A
+ 0654 5208              mov A,[X+8]
+ 0656 08                push A
+ 0657 5209              mov A,[X+9]
+ 0659 08                push A
+ 065A 7C0000            xcall _GetBand
+ 065D 38FA              add SP,-6
+ 065F 62D000            mov REG[0xd0],>__r0
+ 0662 5404              mov [X+4],A
+ 0664                   .dbline 404
+ 0664           ;               if (bBand==-1)
+ 0664 3D04FF            cmp [X+4],-1
+ 0667 B00F              jnz L69
+ 0669                   .dbline 405
+ 0669           ;               {
+ 0669                   .dbline 406
+ 0669           ;                       UART_CPutString(gszErrInvalidFreq);
+ 0669 10                push X
+ 066A 50C1              mov A,>_gszErrInvalidFreq
+ 066C 08                push A
+ 066D 50C1              mov A,<_gszErrInvalidFreq
+ 066F 5C                mov X,A
+ 0670 18                pop A
+ 0671 7C0000            xcall _UART_CPutString
+ 0674 20                pop X
+ 0675                   .dbline 407
+ 0675           ;                       break;
+ 0675 8141              xjmp L62
+ 0677           L69:
+ 0677                   .dbline 411
+ 0677           ;               }
+ 0677           ; 
+ 0677           ;                                                                               // Get step value
+ 0677           ;               strPtr = UART_szGetParam();
+ 0677 10                push X
+ 0678 7C0000            xcall _UART_szGetParam
+ 067B 62D000            mov REG[0xd0],>__r0
+ 067E 5300              mov [__r0],A
+ 0680 5A00              mov [__r1],X
+ 0682 20                pop X
+ 0683 5100              mov A,[__r1]
+ 0685 540F              mov [X+15],A
+ 0687 5100              mov A,[__r0]
+ 0689 540E              mov [X+14],A
+ 068B                   .dbline 412
+ 068B           ;               if (strPtr==NULL)
+ 068B 3D0E00            cmp [X+14],0
+ 068E B014              jnz L71
+ 0690 3D0F00            cmp [X+15],0
+ 0693 B00F              jnz L71
+ 0695           X13:
+ 0695                   .dbline 413
+ 0695           ;               {
+ 0695                   .dbline 414
+ 0695           ;                       UART_CPutString(gszErrExpectStep);
+ 0695 10                push X
+ 0696 50A4              mov A,>_gszErrExpectStep
+ 0698 08                push A
+ 0699 50A4              mov A,<_gszErrExpectStep
+ 069B 5C                mov X,A
+ 069C 18                pop A
+ 069D 7C0000            xcall _UART_CPutString
+ 06A0 20                pop X
+ 06A1                   .dbline 415
+ 06A1           ;                       break;
+ 06A1 8115              xjmp L62
+ 06A3           L71:
+ 06A3                   .dbline 417
+ 06A3           ;               }
+ 06A3           ;               dwStepFreq = atol(strPtr);
+ 06A3 520E              mov A,[X+14]
+ 06A5 08                push A
+ 06A6 520F              mov A,[X+15]
+ 06A8 08                push A
+ 06A9 7C0000            xcall _atol
+ 06AC 38FE              add SP,-2
+ 06AE 62D000            mov REG[0xd0],>__r0
+ 06B1 5100              mov A,[__r0]
+ 06B3 540A              mov [X+10],A
+ 06B5 5100              mov A,[__r1]
+ 06B7 540B              mov [X+11],A
+ 06B9 5100              mov A,[__r2]
+ 06BB 540C              mov [X+12],A
+ 06BD 5100              mov A,[__r3]
+ 06BF 540D              mov [X+13],A
+ 06C1                   .dbline 419
+ 06C1           ; 
+ 06C1           ;               UART_CPutString(gszStart);
+ 06C1 10                push X
+ 06C2 505F              mov A,>_gszStart
+ 06C4 08                push A
+ 06C5 505F              mov A,<_gszStart
+ 06C7 5C                mov X,A
+ 06C8 18                pop A
+ 06C9 7C0000            xcall _UART_CPutString
+ 06CC 20                pop X
+ 06CD                   .dbline 421
+ 06CD           ; 
+ 06CD           ;               for (bBandSave=-1; dwFreq < dwEndFreq;)
+ 06CD 5605FF            mov [X+5],-1
+ 06D0 80A6              xjmp L76
+ 06D2           L73:
+ 06D2                   .dbline 422
+ 06D2           ;               {
+ 06D2                   .dbline 423
+ 06D2           ;                       DDS_Set(dwFreq);
+ 06D2 5200              mov A,[X+0]
+ 06D4 08                push A
+ 06D5 5201              mov A,[X+1]
+ 06D7 08                push A
+ 06D8 5202              mov A,[X+2]
+ 06DA 08                push A
+ 06DB 5203              mov A,[X+3]
+ 06DD 08                push A
+ 06DE 7C0000            xcall _DDS_Set
+ 06E1 38FC              add SP,-4
+ 06E3                   .dbline 424
+ 06E3           ;                       Delay_Ms(10);
+ 06E3 5000              mov A,0
+ 06E5 08                push A
+ 06E6 500A              mov A,10
+ 06E8 08                push A
+ 06E9 7C0000            xcall _Delay_Ms
+ 06EC                   .dbline 426
+ 06EC           ; 
+ 06EC           ;                       bBand = GetBand(dwFreq);
+ 06EC 5200              mov A,[X+0]
+ 06EE 08                push A
+ 06EF 5201              mov A,[X+1]
+ 06F1 08                push A
+ 06F2 5202              mov A,[X+2]
+ 06F4 08                push A
+ 06F5 5203              mov A,[X+3]
+ 06F7 08                push A
+ 06F8 7C0000            xcall _GetBand
+ 06FB 38FA              add SP,-6
+ 06FD 62D000            mov REG[0xd0],>__r0
+ 0700 5404              mov [X+4],A
+ 0702                   .dbline 427
+ 0702           ;                       if (bBand!=bBandSave)
+ 0702 5204              mov A,[X+4]
+ 0704 3B05              cmp A,[X+5]
+ 0706 A055              jz L77
+ 0708                   .dbline 428
+ 0708           ;                       {
+ 0708                   .dbline 429
+ 0708           ;                               bBandSave=bBand;
+ 0708 5204              mov A,[X+4]
+ 070A 5405              mov [X+5],A
+ 070C                   .dbline 430
+ 070C           ;                               g_xBridgeCorrect = g_xBandCorrFactor[bBand];
+ 070C 5204              mov A,[X+4]
+ 070E 5300              mov [__r1],A
+ 0710 5000              mov A,0
+ 0712 08                push A
+ 0713 5100              mov A,[__r1]
+ 0715 08                push A
+ 0716 5000              mov A,0
+ 0718 08                push A
+ 0719 500C              mov A,12
+ 071B 08                push A
+ 071C 7C0000            xcall __mul16
+ 071F 38FC              add SP,-4
+ 0721 5100              mov A,[__rX]
+ 0723 5300              mov [__r1],A
+ 0725 5100              mov A,[__rY]
+ 0727 5300              mov [__r0],A
+ 0729 060000            add [__r1],<_g_xBandCorrFactor
+ 072C 0E0000            adc [__r0],>_g_xBandCorrFactor
+ 072F 550000            mov [__r3],<_g_xBridgeCorrect
+ 0732 550000            mov [__r2],>_g_xBridgeCorrect
+ 0735 5100              mov A,[__r0]
+ 0737 60D4              mov REG[0xd4],A
+ 0739 5100              mov A,[__r2]
+ 073B 60D5              mov REG[0xd5],A
+ 073D 10                push X
+ 073E 570C              mov X,12
+ 0740           X14:
+ 0740 62D000            mov REG[0xd0],>__r0
+ 0743 3E00              mvi A,[__r1]
+ 0745 3F00              mvi [__r3],A
+ 0747 79                dec X
+ 0748 BFF7              jnz X14
+ 074A 20                pop X
+ 074B                   .dbline 431
+ 074B           ;                               Adjust_Dds_Gain(bBand);
+ 074B 5204              mov A,[X+4]
+ 074D 08                push A
+ 074E 7C0000            xcall _Adjust_Dds_Gain
+ 0751                   .dbline 432
+ 0751           ;                               Delay_Ms(50);
+ 0751 5000              mov A,0
+ 0753 08                push A
+ 0754 5032              mov A,50
+ 0756 08                push A
+ 0757 7C0000            xcall _Delay_Ms
+ 075A 38FD              add SP,-3
+ 075C                   .dbline 433
+ 075C           ;                       }
+ 075C           L77:
+ 075C                   .dbline 434
+ 075C           ;                       if (bRaw)
+ 075C 3DFC00            cmp [X-4],0
+ 075F A005              jz L79
+ 0761                   .dbline 435
+ 0761           ;                               Cmd_Raw();
+ 0761 9D4E              xcall _Cmd_Raw
+ 0763 8003              xjmp L80
+ 0765           L79:
+ 0765                   .dbline 437
+ 0765           ;                       else
+ 0765           ;                               Cmd_Imp();
+ 0765 9BCD              xcall _Cmd_Imp
+ 0767           L80:
+ 0767                   .dbline 438
+ 0767           ;                       dwFreq += dwStepFreq;
+ 0767 520D              mov A,[X+13]
+ 0769 0503              add [X+3],A
+ 076B 520C              mov A,[X+12]
+ 076D 0D02              adc [X+2],A
+ 076F 520B              mov A,[X+11]
+ 0771 0D01              adc [X+1],A
+ 0773 520A              mov A,[X+10]
+ 0775 0D00              adc [X+0],A
+ 0777                   .dbline 439
+ 0777           ;               }
+ 0777           L74:
+ 0777                   .dbline 421
+ 0777           L76:
+ 0777                   .dbline 421
+ 0777 5203              mov A,[X+3]
+ 0779 1309              sub A,[X+9]
+ 077B 5202              mov A,[X+2]
+ 077D 1B08              sbb A,[X+8]
+ 077F 5201              mov A,[X+1]
+ 0781 1B07              sbb A,[X+7]
+ 0783 5200              mov A,[X+0]
+ 0785 1B06              sbb A,[X+6]
+ 0787 CF4A              jc L73
+ 0789           X15:
+ 0789                   .dbline 440
+ 0789           ;               UART_CPutString(gszEnd);
+ 0789 10                push X
+ 078A 5069              mov A,>_gszEnd
+ 078C 08                push A
+ 078D 5069              mov A,<_gszEnd
+ 078F 5C                mov X,A
+ 0790 18                pop A
+ 0791 7C0000            xcall _UART_CPutString
+ 0794 20                pop X
+ 0795                   .dbline 441
+ 0795           ;               if (gdwCurrentFreq==-1)
+ 0795 62D000            mov REG[0xd0],>_gdwCurrentFreq
+ 0798 3C00FF            cmp [_gdwCurrentFreq],-1
+ 079B B01B              jnz L81
+ 079D 3C01FF            cmp [_gdwCurrentFreq+1],-1
+ 07A0 B016              jnz L81
+ 07A2 3C02FF            cmp [_gdwCurrentFreq+2],-1
+ 07A5 B011              jnz L81
+ 07A7 3C03FF            cmp [_gdwCurrentFreq+3],-1
+ 07AA B00C              jnz L81
+ 07AC           X16:
+ 07AC                   .dbline 442
+ 07AC           ;               {
+ 07AC                   .dbline 443
+ 07AC           ;                       DDS_Set(0);
+ 07AC 5000              mov A,0
+ 07AE 08                push A
+ 07AF 08                push A
+ 07B0 08                push A
+ 07B1 08                push A
+ 07B2 7C0000            xcall _DDS_Set
+ 07B5 38FC              add SP,-4
+ 07B7                   .dbline 444
+ 07B7           ;               }
+ 07B7           L81:
+ 07B7                   .dbline 445
+ 07B7           ;       } while (FALSE);
+ 07B7           L61:
+ 07B7                   .dbline 445
+ 07B7           L62:
+ 07B7                   .dbline 447
+ 07B7           ; 
+ 07B7           ;       g_bScanning = FALSE;
+ 07B7 62D000            mov REG[0xd0],>_g_bScanning
+ 07BA 550000            mov [_g_bScanning],0
+ 07BD                   .dbline -2
+ 07BD           L59:
+ 07BD 38EC              add SP,-20
+ 07BF 20                pop X
+ 07C0                   .dbline 0 ; func end
+ 07C0 7F                ret
+ 07C1                   .dbsym l dwLimitFreq 16 l
+ 07C1                   .dbsym l strPtr 14 pc
+ 07C1                   .dbsym l dwStepFreq 10 l
+ 07C1                   .dbsym l dwEndFreq 6 l
+ 07C1                   .dbsym l bBandSave 5 c
+ 07C1                   .dbsym l bBand 4 c
+ 07C1                   .dbsym l dwFreq 0 l
+ 07C1                   .dbsym l bRaw -4 c
+ 07C1                   .dbend

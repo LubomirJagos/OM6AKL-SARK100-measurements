@@ -1,0 +1,21 @@
+flash 5FB2 SRAM    B:
+ 00 236 bytes
+flash 5FB6 SRAM   F7:
+ <size at next line>   1
+  [size:] 1 bytes
+flash 5FBA SRAM  100:
+ 00 224 bytes
+flash 5FBE SRAM  200:
+ 00 112 bytes
+flash 5FC2 SRAM  270:
+ <size at next line>   3 C2  3 C7  3 CB  3 CF  3 D3  3 D7  3 DB  3 DF  3 E3  3 E7  3 EB  3 EF  3 F2  3 F5
+  [size:] 28 bytes
+flash 5FE1 SRAM  28C:
+ 00 30 bytes
+flash 5FE5 SRAM  2B7:
+ <size at next line>   3 44  3 4C  3 56  3 66  3 70  3 7E  3 82  3 86  3 8A  3 8E  3 92  3 97  3 9D  3 A2  3 A8  3 AF  3 B3  3 B8  3 BD FF FF FF FF
+  [size:] 42 bytes
+flash 6012 SRAM  2E1:
+ 00 14 bytes
+flash 6016 SRAM  2F0:
+ 00 7 bytes

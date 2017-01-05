@@ -1,0 +1,2822 @@
+ 0000                   cpu LMM
+                        .module calibrate_reflectometer.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./calibrate_reflectometer.c
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\calibrate_reflectometer.c
+ 0000                   .dbfunc e Calibrate_Reflectometer _Calibrate_Reflectometer fV
+ 0000           ;             ii -> X+3
+ 0000           ;       bGainIdx -> X+3
+ 0000           ;          wZero -> X+1
+ 0000           ;          bBand -> X+0
+ 0000           _Calibrate_Reflectometer::
+ 0000                   .dbline -1
+ 0000 10                push X
+ 0001 4F                mov X,SP
+ 0002 3804              add SP,4
+ 0004                   .dbline 106
+ 0004           ; //*****************************************************************************/
+ 0004           ; //  This file is a part of the "SARK100 SWR Analyzer firmware"
+ 0004           ; //
+ 0004           ; //  Copyright © 2010 Melchor Varela - EA4FRB.  All rights reserved.
+ 0004           ; //  Melchor Varela, Madrid, Spain.
+ 0004           ; //  melchor.varela@gmail.com
+ 0004           ; //
+ 0004           ; //  "SARK100 SWR Analyzer firmware" is free software: you can redistribute it
+ 0004           ; //  and/or modify it under the terms of the GNU General Public License as
+ 0004           ; //  published by the Free Software Foundation, either version 3 of the License,
+ 0004           ; //  or (at your option) any later version.
+ 0004           ; //
+ 0004           ; //  "SARK100 SWR Analyzer firmware" is distributed in the hope that it will be
+ 0004           ; //  useful,  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 0004           ; //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ 0004           ; //  GNU General Public License for more details.
+ 0004           ; //
+ 0004           ; //  You should have received a copy of the GNU General Public License
+ 0004           ; //  along with "SARK100 SWR Analyzer firmware".  If not,
+ 0004           ; //  see <http://www.gnu.org/licenses/>.
+ 0004           ; //*****************************************************************************/
+ 0004           ; //*****************************************************************************/
+ 0004           ; //
+ 0004           ; //    PROJECT:        SARK100 SWR Analyzer
+ 0004           ; //    FILE NAME:      CALIBRATE_REFRECTOMETER.C
+ 0004           ; //    AUTHOR:         EA4FRB - Melchor Varela
+ 0004           ; //
+ 0004           ; //    DESCRIPTION
+ 0004           ; //
+ 0004           ; //    Calibration routines
+ 0004           ; //
+ 0004           ; //    HISTORY
+ 0004           ; //
+ 0004           ; //    NAME    DATE            REMARKS
+ 0004           ; //
+ 0004           ; //    MVM             DEC 2009        Creation
+ 0004           ; //
+ 0004           ; //*****************************************************************************/
+ 0004           ; 
+ 0004           ; #include <m8c.h>                                      // Part specific constants and macros
+ 0004           ; #include "PSoCAPI.h"
+ 0004           ; #include "Lcd.h"
+ 0004           ; 
+ 0004           ; #include "dds.h"
+ 0004           ; #include "util.h"
+ 0004           ; #include "glb_data.h"
+ 0004           ; #include "keypad.h"
+ 0004           ; #include "msg_generic.h"
+ 0004           ; #include "buzzer.h"
+ 0004           ; #include "storage.h"
+ 0004           ; #include "display.h"
+ 0004           ; #include "calibrate_reflectometer.h"
+ 0004           ; #include "calcs.h"
+ 0004           ; 
+ 0004           ; //#define DEBUG       1                                               // Uncomment to debug calibration results on USB
+ 0004           ; 
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; //  Typedefs
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; typedef struct                                                        // Two-point calibration vector
+ 0004           ; {
+ 0004           ;       WORD wX0;
+ 0004           ;       WORD wX1;
+ 0004           ;       WORD wY0;
+ 0004           ;       WORD wY1;
+ 0004           ; } CALIB_VECTOR;
+ 0004           ; 
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; //  Defines
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; #define SLOPE_CORRECT         10000
+ 0004           ; #define VF_REFERENCE_LEVEL    (4010)          // Full scale value
+ 0004           ; #define SWR_274_LOAD          548                     // Expected SWR at 274-ohm load
+ 0004           ; #define SWR_150_LOAD          300                     // Expected SWR at 150-ohm load
+ 0004           ; #define WAIT_TIME_MEASURE     500                     // Estabilizing time for measurement (ms)
+ 0004           ; 
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; //  Prototypes
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; static void Calc_Correct (CORRECT_DATA *pxCorr, CALIB_VECTOR *pxVect);
+ 0004           ; static WORD Correct_Measure(CORRECT_DATA *pxCorr, WORD wX);
+ 0004           ; static BOOL WaitLoadUser (const char *pszText);
+ 0004           ; 
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; //  Private data
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; static CALIB_VECTOR xCalVz[BAND_MAX];
+ 0004           ; static CALIB_VECTOR xCalVr[BAND_MAX];
+ 0004           ; static CALIB_VECTOR xCalVa[BAND_MAX];
+ 0004           ; 
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; //  FUNCTION NAME:    Calibrate_Reflectometer()
+ 0004           ; //
+ 0004           ; //  DESCRIPTION:
+ 0004           ; //
+ 0004           ; //    Calibration routine
+ 0004           ; //
+ 0004           ; //  ARGUMENTS:
+ 0004           ; //     none.
+ 0004           ; //
+ 0004           ; //  RETURNS:
+ 0004           ; //     none.
+ 0004           ; //
+ 0004           ; //-----------------------------------------------------------------------------
+ 0004           ; void Calibrate_Reflectometer (void)
+ 0004           ; {
+ 0004           L15:
+ 0004                   .dbline 111
+ 0004           ;       BYTE bBand;
+ 0004           ;       WORD wZero;
+ 0004           ; 
+ 0004           ;       do
+ 0004           ;       {
+ 0004                   .dbline 112
+ 0004           ;               DISP_Clear();
+ 0004 7C0000            xcall _DISP_Clear
+ 0007                   .dbline 114
+ 0007           ; 
+ 0007           ;               DDS_Set(0);
+ 0007 5000              mov A,0
+ 0009 08                push A
+ 000A 08                push A
+ 000B 08                push A
+ 000C 08                push A
+ 000D 7C0000            xcall _DDS_Set
+ 0010 38FC              add SP,-4
+ 0012                   .dbline 115
+ 0012           ;               Delay_Ms(WAIT_TIME_MEASURE);
+ 0012 5001              mov A,1
+ 0014 08                push A
+ 0015 50F4              mov A,-12
+ 0017 08                push A
+ 0018 7C0000            xcall _Delay_Ms
+ 001B                   .dbline 118
+ 001B           ;                                                                               // No signal, no load
+ 001B           ;                                                                               // Get offset readings
+ 001B           ;               if (!WaitLoadUser(gOpenLoadStr))
+ 001B 5000              mov A,>_gOpenLoadStr
+ 001D 08                push A
+ 001E 5000              mov A,<_gOpenLoadStr
+ 0020 08                push A
+ 0021 7C0EFC            xcall _WaitLoadUser
+ 0024 38FC              add SP,-4
+ 0026 62D000            mov REG[0xd0],>__r0
+ 0029 3900              cmp A,0
+ 002B B004              jnz L18
+ 002D                   .dbline 119
+ 002D           ;                       break;
+ 002D 7D0AA1            xjmp L17
+ 0030           L18:
+ 0030                   .dbline 121
+ 0030           ; 
+ 0030           ;               DDS_Set(10000000);
+ 0030 5000              mov A,0
+ 0032 08                push A
+ 0033 5098              mov A,-104
+ 0035 08                push A
+ 0036 5096              mov A,-106
+ 0038 08                push A
+ 0039 5080              mov A,-128
+ 003B 08                push A
+ 003C 7C0000            xcall _DDS_Set
+ 003F                   .dbline 122
+ 003F           ;               Delay_Ms(WAIT_TIME_MEASURE);
+ 003F 5001              mov A,1
+ 0041 08                push A
+ 0042 50F4              mov A,-12
+ 0044 08                push A
+ 0045 7C0000            xcall _Delay_Ms
+ 0048 38FA              add SP,-6
+ 004A                   .dbline 125
+ 004A           ; 
+ 004A           ;                                                                               // Measures zero level
+ 004A           ;               PGA_ADC_GAIN_CR1 &= ~1;                 // Set input to RefLO
+ 004A 4172FE            and REG[0x72],-2
+ 004D                   .dbline 126
+ 004D           ;               ADCINC12_GetSamples(1);
+ 004D 10                push X
+ 004E 5001              mov A,1
+ 0050 7C0000            xcall _ADCINC12_GetSamples
+ 0053 20                pop X
+ 0054           L20:
+ 0054                   .dbline 128
+ 0054           ;                                                                               // Wait for data to be ready.
+ 0054           ;               while(ADCINC12_fIsDataAvailable() == 0);
+ 0054           L21:
+ 0054                   .dbline 128
+ 0054 10                push X
+ 0055 7C0000            xcall _ADCINC12_fIsDataAvailable
+ 0058 62D000            mov REG[0xd0],>__r0
+ 005B 20                pop X
+ 005C 3900              cmp A,0
+ 005E AFF5              jz L20
+ 0060                   .dbline 129
+ 0060           ;               wZero = (ADCINC12_iGetData()+2048);
+ 0060 10                push X
+ 0061 7C0000            xcall _ADCINC12_iGetData
+ 0064 62D000            mov REG[0xd0],>__r0
+ 0067 5300              mov [__r1],A
+ 0069 5A00              mov [__r0],X
+ 006B 20                pop X
+ 006C 060000            add [__r1],0
+ 006F 0E0008            adc [__r0],8
+ 0072 5100              mov A,[__r1]
+ 0074 5402              mov [X+2],A
+ 0076 5100              mov A,[__r0]
+ 0078 5401              mov [X+1],A
+ 007A                   .dbline 130
+ 007A           ;               ADCINC12_ClearFlag();
+ 007A 10                push X
+ 007B 7C0000            xcall _ADCINC12_ClearFlag
+ 007E 20                pop X
+ 007F                   .dbline 132
+ 007F           ; 
+ 007F           ;               PGA_ADC_GAIN_CR1 |= 1;                  // Set input to PortInp
+ 007F 437201            or REG[0x72],1
+ 0082                   .dbline 136
+ 0082           ; 
+ 0082           ;                                                                               //
+ 0082           ;                                                                               // Adjust Vf
+ 0082           ;               for (bBand=0; bBand<BAND_MAX;bBand++)
+ 0082 560000            mov [X+0],0
+ 0085 8153              xjmp L26
+ 0087           L23:
+ 0087                   .dbline 137
+ 0087           ;               {
+ 0087                   .dbline 140
+ 0087           ;                       BYTE bGainIdx;
+ 0087           ; 
+ 0087           ;                       DDS_Set(g_xBandLimits[bBand].middle * BAND_FREQ_MULT);
+ 0087 62D000            mov REG[0xd0],>__r0
+ 008A 5200              mov A,[X+0]
+ 008C 5300              mov [__r1],A
+ 008E 5000              mov A,0
+ 0090 08                push A
+ 0091 5100              mov A,[__r1]
+ 0093 08                push A
+ 0094 5000              mov A,0
+ 0096 08                push A
+ 0097 5006              mov A,6
+ 0099 08                push A
+ 009A 7C0000            xcall __mul16
+ 009D 38FC              add SP,-4
+ 009F 5100              mov A,[__rX]
+ 00A1 5300              mov [__r1],A
+ 00A3 5100              mov A,[__rY]
+ 00A5 5300              mov [__r0],A
+ 00A7 060002            add [__r1],<_g_xBandLimits+2
+ 00AA 0E0002            adc [__r0],>_g_xBandLimits+2
+ 00AD 5100              mov A,[__r0]
+ 00AF 10                push X
+ 00B0 08                push A
+ 00B1 5800              mov X,[__r1]
+ 00B3 28                romx
+ 00B4 5300              mov [__r0],A
+ 00B6 18                pop A
+ 00B7 75                inc X
+ 00B8 0900              adc A,0
+ 00BA 28                romx
+ 00BB 20                pop X
+ 00BC 5300              mov [__r3],A
+ 00BE 5100              mov A,[__r0]
+ 00C0 5300              mov [__r2],A
+ 00C2 5000              mov A,0
+ 00C4 08                push A
+ 00C5 08                push A
+ 00C6 5100              mov A,[__r2]
+ 00C8 08                push A
+ 00C9 5100              mov A,[__r3]
+ 00CB 08                push A
+ 00CC 5000              mov A,0
+ 00CE 08                push A
+ 00CF 5001              mov A,1
+ 00D1 08                push A
+ 00D2 5086              mov A,-122
+ 00D4 08                push A
+ 00D5 50A0              mov A,-96
+ 00D7 08                push A
+ 00D8 7C0000            xcall __mul_32X32_32
+ 00DB 38FC              add SP,-4
+ 00DD 18                pop A
+ 00DE 5300              mov [__r3],A
+ 00E0 18                pop A
+ 00E1 5300              mov [__r2],A
+ 00E3 18                pop A
+ 00E4 5300              mov [__r1],A
+ 00E6 18                pop A
+ 00E7 08                push A
+ 00E8 5100              mov A,[__r1]
+ 00EA 08                push A
+ 00EB 5100              mov A,[__r2]
+ 00ED 08                push A
+ 00EE 5100              mov A,[__r3]
+ 00F0 08                push A
+ 00F1 7C0000            xcall _DDS_Set
+ 00F4                   .dbline 141
+ 00F4           ;                       Delay_Ms(WAIT_TIME_MEASURE);
+ 00F4 5001              mov A,1
+ 00F6 08                push A
+ 00F7 50F4              mov A,-12
+ 00F9 08                push A
+ 00FA 7C0000            xcall _Delay_Ms
+ 00FD 38FA              add SP,-6
+ 00FF                   .dbline 142
+ 00FF           ;                       for (bGainIdx=0;bGainIdx<GAIN_SETTINGS_MAX;bGainIdx++)
+ 00FF 560300            mov [X+3],0
+ 0102 80B2              xjmp L31
+ 0104           L28:
+ 0104                   .dbline 143
+ 0104           ;                       {
+ 0104                   .dbline 144
+ 0104           ;                               PGA_DDS_1_SetGain(g_xGainDds[bGainIdx].bGain1);
+ 0104 62D000            mov REG[0xd0],>__r0
+ 0107 5203              mov A,[X+3]
+ 0109 5300              mov [__r1],A
+ 010B 550000            mov [__r0],0
+ 010E 6500              asl [__r1]
+ 0110 6B00              rlc [__r0]
+ 0112 060000            add [__r1],<_g_xGainDds
+ 0115 0E0000            adc [__r0],>_g_xGainDds
+ 0118 5100              mov A,[__r0]
+ 011A 10                push X
+ 011B 5800              mov X,[__r1]
+ 011D 28                romx
+ 011E 20                pop X
+ 011F 10                push X
+ 0120 7C0000            xcall _PGA_DDS_1_SetGain
+ 0123 20                pop X
+ 0124                   .dbline 145
+ 0124           ;                               PGA_DDS_2_SetGain(g_xGainDds[bGainIdx].bGain2);
+ 0124 62D000            mov REG[0xd0],>__r0
+ 0127 5203              mov A,[X+3]
+ 0129 5300              mov [__r1],A
+ 012B 550000            mov [__r0],0
+ 012E 6500              asl [__r1]
+ 0130 6B00              rlc [__r0]
+ 0132 060001            add [__r1],<_g_xGainDds+1
+ 0135 0E0001            adc [__r0],>_g_xGainDds+1
+ 0138 5100              mov A,[__r0]
+ 013A 10                push X
+ 013B 5800              mov X,[__r1]
+ 013D 28                romx
+ 013E 20                pop X
+ 013F 10                push X
+ 0140 7C0000            xcall _PGA_DDS_2_SetGain
+ 0143 20                pop X
+ 0144                   .dbline 146
+ 0144           ;                               Delay_Ms(100);
+ 0144 5000              mov A,0
+ 0146 08                push A
+ 0147 5064              mov A,100
+ 0149 08                push A
+ 014A 7C0000            xcall _Delay_Ms
+ 014D 38FE              add SP,-2
+ 014F                   .dbline 147
+ 014F           ;                               Do_Measure();
+ 014F 7C0000            xcall _Do_Measure
+ 0152                   .dbline 148
+ 0152           ;                               if (g_xBridgeMeasure.Vf >= (VF_REFERENCE_LEVEL-wZero))
+ 0152 62D000            mov REG[0xd0],>__r0
+ 0155 50AA              mov A,-86
+ 0157 1302              sub A,[X+2]
+ 0159 5300              mov [__r1],A
+ 015B 500F              mov A,15
+ 015D 1B01              sbb A,[X+1]
+ 015F 5300              mov [__r0],A
+ 0161 5100              mov A,[__r1]
+ 0163 5300              mov [__r3],A
+ 0165 5100              mov A,[__r0]
+ 0167 5300              mov [__r2],A
+ 0169 550000            mov [__r1],0
+ 016C 550000            mov [__r0],0
+ 016F 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0172 5103              mov A,[_g_xBridgeMeasure+3]
+ 0174 62D000            mov REG[0xd0],>__r0
+ 0177 1200              sub A,[__r3]
+ 0179 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 017C 5102              mov A,[_g_xBridgeMeasure+2]
+ 017E 62D000            mov REG[0xd0],>__r0
+ 0181 1A00              sbb A,[__r2]
+ 0183 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0186 5101              mov A,[_g_xBridgeMeasure+1]
+ 0188 62D000            mov REG[0xd0],>__r0
+ 018B 1A00              sbb A,[__r1]
+ 018D 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0190 5100              mov A,[_g_xBridgeMeasure]
+ 0192 62D000            mov REG[0xd0],>__r0
+ 0195 1A00              sbb A,[__r0]
+ 0197 C01B              jc L33
+ 0199           X0:
+ 0199                   .dbline 149
+ 0199           ;                               {
+ 0199                   .dbline 150
+ 0199           ;                                       g_bGainDDS[bBand] = bGainIdx;
+ 0199 62D000            mov REG[0xd0],>__r0
+ 019C 5200              mov A,[X+0]
+ 019E 5300              mov [__r1],A
+ 01A0 550000            mov [__r0],0
+ 01A3 060000            add [__r1],<_g_bGainDDS
+ 01A6 0E0000            adc [__r0],>_g_bGainDDS
+ 01A9 5100              mov A,[__r0]
+ 01AB 60D5              mov REG[0xd5],A
+ 01AD 5203              mov A,[X+3]
+ 01AF 3F00              mvi [__r1],A
+ 01B1                   .dbline 151
+ 01B1           ;                                       break;
+ 01B1 8008              xjmp L30
+ 01B3           L33:
+ 01B3                   .dbline 153
+ 01B3           ;                               }
+ 01B3           ;                       }
+ 01B3           L29:
+ 01B3                   .dbline 142
+ 01B3 7703              inc [X+3]
+ 01B5           L31:
+ 01B5                   .dbline 142
+ 01B5 3D0311            cmp [X+3],17
+ 01B8 CF4B              jc L28
+ 01BA           X1:
+ 01BA           L30:
+ 01BA                   .dbline 154
+ 01BA           ;                       if (bGainIdx==GAIN_SETTINGS_MAX)
+ 01BA 3D0311            cmp [X+3],17
+ 01BD B019              jnz L35
+ 01BF                   .dbline 155
+ 01BF           ;                       {
+ 01BF                   .dbline 156
+ 01BF           ;                               g_bGainDDS[bBand] = GAIN_SETTINGS_MAX-1;
+ 01BF 62D000            mov REG[0xd0],>__r0
+ 01C2 5200              mov A,[X+0]
+ 01C4 5300              mov [__r1],A
+ 01C6 550000            mov [__r0],0
+ 01C9 060000            add [__r1],<_g_bGainDDS
+ 01CC 0E0000            adc [__r0],>_g_bGainDDS
+ 01CF 5100              mov A,[__r0]
+ 01D1 60D5              mov REG[0xd5],A
+ 01D3 5010              mov A,16
+ 01D5 3F00              mvi [__r1],A
+ 01D7                   .dbline 157
+ 01D7           ;                       }
+ 01D7           L35:
+ 01D7                   .dbline 158
+ 01D7           ;               }
+ 01D7           L24:
+ 01D7                   .dbline 136
+ 01D7 7700              inc [X+0]
+ 01D9           L26:
+ 01D9                   .dbline 136
+ 01D9 3D000E            cmp [X+0],14
+ 01DC CEAA              jc L23
+ 01DE           X2:
+ 01DE                   .dbline 161
+ 01DE           ;                                                                               //
+ 01DE           ;                                                                               // 50ohm load
+ 01DE           ;               if (!WaitLoadUser(g50OhmLoadStr))
+ 01DE 5000              mov A,>_g50OhmLoadStr
+ 01E0 08                push A
+ 01E1 5000              mov A,<_g50OhmLoadStr
+ 01E3 08                push A
+ 01E4 7C0EFC            xcall _WaitLoadUser
+ 01E7 38FE              add SP,-2
+ 01E9 62D000            mov REG[0xd0],>__r0
+ 01EC 3900              cmp A,0
+ 01EE B004              jnz L37
+ 01F0                   .dbline 162
+ 01F0           ;                       break;
+ 01F0 7D0AA1            xjmp L17
+ 01F3           L37:
+ 01F3                   .dbline 165
+ 01F3           ;                                                                               // At each band frequency, ...
+ 01F3           ;                                                                       // Determine correction factor for Vz and Va to be 1/2 Vf (using 50-ohm load)
+ 01F3           ;               for (bBand=0; bBand<BAND_MAX;bBand++)
+ 01F3 560000            mov [X+0],0
+ 01F6 823E              xjmp L42
+ 01F8           L39:
+ 01F8                   .dbline 166
+ 01F8           ;               {
+ 01F8                   .dbline 167
+ 01F8           ;                       Adjust_Dds_Gain(bBand);
+ 01F8 5200              mov A,[X+0]
+ 01FA 08                push A
+ 01FB 7C0BE9            xcall _Adjust_Dds_Gain
+ 01FE 38FF              add SP,-1
+ 0200                   .dbline 168
+ 0200           ;                       DDS_Set(g_xBandLimits[bBand].middle * BAND_FREQ_MULT);
+ 0200 62D000            mov REG[0xd0],>__r0
+ 0203 5200              mov A,[X+0]
+ 0205 5300              mov [__r1],A
+ 0207 5000              mov A,0
+ 0209 08                push A
+ 020A 5100              mov A,[__r1]
+ 020C 08                push A
+ 020D 5000              mov A,0
+ 020F 08                push A
+ 0210 5006              mov A,6
+ 0212 08                push A
+ 0213 7C0000            xcall __mul16
+ 0216 38FC              add SP,-4
+ 0218 5100              mov A,[__rX]
+ 021A 5300              mov [__r1],A
+ 021C 5100              mov A,[__rY]
+ 021E 5300              mov [__r0],A
+ 0220 060002            add [__r1],<_g_xBandLimits+2
+ 0223 0E0002            adc [__r0],>_g_xBandLimits+2
+ 0226 5100              mov A,[__r0]
+ 0228 10                push X
+ 0229 08                push A
+ 022A 5800              mov X,[__r1]
+ 022C 28                romx
+ 022D 5300              mov [__r0],A
+ 022F 18                pop A
+ 0230 75                inc X
+ 0231 0900              adc A,0
+ 0233 28                romx
+ 0234 20                pop X
+ 0235 5300              mov [__r3],A
+ 0237 5100              mov A,[__r0]
+ 0239 5300              mov [__r2],A
+ 023B 5000              mov A,0
+ 023D 08                push A
+ 023E 08                push A
+ 023F 5100              mov A,[__r2]
+ 0241 08                push A
+ 0242 5100              mov A,[__r3]
+ 0244 08                push A
+ 0245 5000              mov A,0
+ 0247 08                push A
+ 0248 5001              mov A,1
+ 024A 08                push A
+ 024B 5086              mov A,-122
+ 024D 08                push A
+ 024E 50A0              mov A,-96
+ 0250 08                push A
+ 0251 7C0000            xcall __mul_32X32_32
+ 0254 38FC              add SP,-4
+ 0256 18                pop A
+ 0257 5300              mov [__r3],A
+ 0259 18                pop A
+ 025A 5300              mov [__r2],A
+ 025C 18                pop A
+ 025D 5300              mov [__r1],A
+ 025F 18                pop A
+ 0260 08                push A
+ 0261 5100              mov A,[__r1]
+ 0263 08                push A
+ 0264 5100              mov A,[__r2]
+ 0266 08                push A
+ 0267 5100              mov A,[__r3]
+ 0269 08                push A
+ 026A 7C0000            xcall _DDS_Set
+ 026D                   .dbline 169
+ 026D           ;                       Delay_Ms(WAIT_TIME_MEASURE);
+ 026D 5001              mov A,1
+ 026F 08                push A
+ 0270 50F4              mov A,-12
+ 0272 08                push A
+ 0273 7C0000            xcall _Delay_Ms
+ 0276 38FA              add SP,-6
+ 0278                   .dbline 170
+ 0278           ;                       Do_Measure();
+ 0278 7C0000            xcall _Do_Measure
+ 027B                   .dbline 172
+ 027B           ; 
+ 027B           ;                       xCalVz[bBand].wX0 = g_xBridgeMeasure.Vz;
+ 027B 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 027E 510F              mov A,[_g_xBridgeMeasure+12+3]
+ 0280 62D000            mov REG[0xd0],>__r0
+ 0283 5300              mov [__r1],A
+ 0285 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0288 510E              mov A,[_g_xBridgeMeasure+12+2]
+ 028A 62D000            mov REG[0xd0],>__r0
+ 028D 5300              mov [__r0],A
+ 028F 5200              mov A,[X+0]
+ 0291 5300              mov [__r3],A
+ 0293 550000            mov [__r2],0
+ 0296 6500              asl [__r3]
+ 0298 6B00              rlc [__r2]
+ 029A 6500              asl [__r3]
+ 029C 6B00              rlc [__r2]
+ 029E 6500              asl [__r3]
+ 02A0 6B00              rlc [__r2]
+ 02A2 060000            add [__r3],<_xCalVz
+ 02A5 0E0000            adc [__r2],>_xCalVz
+ 02A8 5100              mov A,[__r2]
+ 02AA 60D5              mov REG[0xd5],A
+ 02AC 5100              mov A,[__r0]
+ 02AE 3F00              mvi [__r3],A
+ 02B0 5100              mov A,[__r1]
+ 02B2 3F00              mvi [__r3],A
+ 02B4                   .dbline 173
+ 02B4           ;                       xCalVz[bBand].wY0 = (DWORD)((DWORD)g_xBridgeMeasure.Vf*CORRECTION_FACTOR)/(DWORD)(2*g_xBridgeMeasure.Vz);
+ 02B4 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 02B7 510C              mov A,[_g_xBridgeMeasure+12]
+ 02B9 08                push A
+ 02BA 510D              mov A,[_g_xBridgeMeasure+12+1]
+ 02BC 08                push A
+ 02BD 510E              mov A,[_g_xBridgeMeasure+12+2]
+ 02BF 08                push A
+ 02C0 510F              mov A,[_g_xBridgeMeasure+12+3]
+ 02C2 62D000            mov REG[0xd0],>__r0
+ 02C5 5300              mov [__r3],A
+ 02C7 18                pop A
+ 02C8 5300              mov [__r2],A
+ 02CA 18                pop A
+ 02CB 5300              mov [__r1],A
+ 02CD 18                pop A
+ 02CE 5300              mov [__r0],A
+ 02D0 6500              asl [__r3]
+ 02D2 6B00              rlc [__r2]
+ 02D4 6B00              rlc [__r1]
+ 02D6 6B00              rlc [__r0]
+ 02D8 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 02DB 5100              mov A,[_g_xBridgeMeasure]
+ 02DD 08                push A
+ 02DE 5101              mov A,[_g_xBridgeMeasure+1]
+ 02E0 08                push A
+ 02E1 5102              mov A,[_g_xBridgeMeasure+2]
+ 02E3 08                push A
+ 02E4 5103              mov A,[_g_xBridgeMeasure+3]
+ 02E6 08                push A
+ 02E7 5000              mov A,0
+ 02E9 08                push A
+ 02EA 08                push A
+ 02EB 5003              mov A,3
+ 02ED 08                push A
+ 02EE 50E8              mov A,-24
+ 02F0 08                push A
+ 02F1 62D000            mov REG[0xd0],>__r0
+ 02F4 7C0000            xcall __mul_32X32_32
+ 02F7 38FC              add SP,-4
+ 02F9 18                pop A
+ 02FA 5300              mov [__r7],A
+ 02FC 18                pop A
+ 02FD 5300              mov [__r6],A
+ 02FF 18                pop A
+ 0300 5300              mov [__r5],A
+ 0302 18                pop A
+ 0303 5300              mov [__r4],A
+ 0305 5100              mov A,[__r0]
+ 0307 08                push A
+ 0308 5100              mov A,[__r1]
+ 030A 08                push A
+ 030B 5100              mov A,[__r2]
+ 030D 08                push A
+ 030E 5100              mov A,[__r3]
+ 0310 08                push A
+ 0311 5100              mov A,[__r4]
+ 0313 08                push A
+ 0314 5100              mov A,[__r5]
+ 0316 08                push A
+ 0317 5100              mov A,[__r6]
+ 0319 08                push A
+ 031A 5100              mov A,[__r7]
+ 031C 08                push A
+ 031D 7C0000            xcall __divmodu_32X32_32
+ 0320 18                pop A
+ 0321 5300              mov [__r3],A
+ 0323 18                pop A
+ 0324 5300              mov [__r2],A
+ 0326 18                pop A
+ 0327 18                pop A
+ 0328 38FC              add SP,-4
+ 032A 5100              mov A,[__r3]
+ 032C 5300              mov [__r1],A
+ 032E 5100              mov A,[__r2]
+ 0330 5300              mov [__r0],A
+ 0332 5200              mov A,[X+0]
+ 0334 5300              mov [__r3],A
+ 0336 550000            mov [__r2],0
+ 0339 6500              asl [__r3]
+ 033B 6B00              rlc [__r2]
+ 033D 6500              asl [__r3]
+ 033F 6B00              rlc [__r2]
+ 0341 6500              asl [__r3]
+ 0343 6B00              rlc [__r2]
+ 0345 060004            add [__r3],<_xCalVz+4
+ 0348 0E0004            adc [__r2],>_xCalVz+4
+ 034B 5100              mov A,[__r2]
+ 034D 60D5              mov REG[0xd5],A
+ 034F 5100              mov A,[__r0]
+ 0351 3F00              mvi [__r3],A
+ 0353 5100              mov A,[__r1]
+ 0355 3F00              mvi [__r3],A
+ 0357                   .dbline 174
+ 0357           ;                       xCalVa[bBand].wX0 = g_xBridgeMeasure.Va;
+ 0357 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 035A 510B              mov A,[_g_xBridgeMeasure+8+3]
+ 035C 62D000            mov REG[0xd0],>__r0
+ 035F 5300              mov [__r1],A
+ 0361 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0364 510A              mov A,[_g_xBridgeMeasure+8+2]
+ 0366 62D000            mov REG[0xd0],>__r0
+ 0369 5300              mov [__r0],A
+ 036B 5200              mov A,[X+0]
+ 036D 5300              mov [__r3],A
+ 036F 550000            mov [__r2],0
+ 0372 6500              asl [__r3]
+ 0374 6B00              rlc [__r2]
+ 0376 6500              asl [__r3]
+ 0378 6B00              rlc [__r2]
+ 037A 6500              asl [__r3]
+ 037C 6B00              rlc [__r2]
+ 037E 060000            add [__r3],<_xCalVa
+ 0381 0E0000            adc [__r2],>_xCalVa
+ 0384 5100              mov A,[__r2]
+ 0386 60D5              mov REG[0xd5],A
+ 0388 5100              mov A,[__r0]
+ 038A 3F00              mvi [__r3],A
+ 038C 5100              mov A,[__r1]
+ 038E 3F00              mvi [__r3],A
+ 0390                   .dbline 175
+ 0390           ;                       xCalVa[bBand].wY0 = (DWORD)((DWORD)g_xBridgeMeasure.Vf*CORRECTION_FACTOR)/(DWORD)(2*g_xBridgeMeasure.Va);
+ 0390 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0393 5108              mov A,[_g_xBridgeMeasure+8]
+ 0395 08                push A
+ 0396 5109              mov A,[_g_xBridgeMeasure+8+1]
+ 0398 08                push A
+ 0399 510A              mov A,[_g_xBridgeMeasure+8+2]
+ 039B 08                push A
+ 039C 510B              mov A,[_g_xBridgeMeasure+8+3]
+ 039E 62D000            mov REG[0xd0],>__r0
+ 03A1 5300              mov [__r3],A
+ 03A3 18                pop A
+ 03A4 5300              mov [__r2],A
+ 03A6 18                pop A
+ 03A7 5300              mov [__r1],A
+ 03A9 18                pop A
+ 03AA 5300              mov [__r0],A
+ 03AC 6500              asl [__r3]
+ 03AE 6B00              rlc [__r2]
+ 03B0 6B00              rlc [__r1]
+ 03B2 6B00              rlc [__r0]
+ 03B4 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 03B7 5100              mov A,[_g_xBridgeMeasure]
+ 03B9 08                push A
+ 03BA 5101              mov A,[_g_xBridgeMeasure+1]
+ 03BC 08                push A
+ 03BD 5102              mov A,[_g_xBridgeMeasure+2]
+ 03BF 08                push A
+ 03C0 5103              mov A,[_g_xBridgeMeasure+3]
+ 03C2 08                push A
+ 03C3 5000              mov A,0
+ 03C5 08                push A
+ 03C6 08                push A
+ 03C7 5003              mov A,3
+ 03C9 08                push A
+ 03CA 50E8              mov A,-24
+ 03CC 08                push A
+ 03CD 62D000            mov REG[0xd0],>__r0
+ 03D0 7C0000            xcall __mul_32X32_32
+ 03D3 38FC              add SP,-4
+ 03D5 18                pop A
+ 03D6 5300              mov [__r7],A
+ 03D8 18                pop A
+ 03D9 5300              mov [__r6],A
+ 03DB 18                pop A
+ 03DC 5300              mov [__r5],A
+ 03DE 18                pop A
+ 03DF 5300              mov [__r4],A
+ 03E1 5100              mov A,[__r0]
+ 03E3 08                push A
+ 03E4 5100              mov A,[__r1]
+ 03E6 08                push A
+ 03E7 5100              mov A,[__r2]
+ 03E9 08                push A
+ 03EA 5100              mov A,[__r3]
+ 03EC 08                push A
+ 03ED 5100              mov A,[__r4]
+ 03EF 08                push A
+ 03F0 5100              mov A,[__r5]
+ 03F2 08                push A
+ 03F3 5100              mov A,[__r6]
+ 03F5 08                push A
+ 03F6 5100              mov A,[__r7]
+ 03F8 08                push A
+ 03F9 7C0000            xcall __divmodu_32X32_32
+ 03FC 18                pop A
+ 03FD 5300              mov [__r3],A
+ 03FF 18                pop A
+ 0400 5300              mov [__r2],A
+ 0402 18                pop A
+ 0403 18                pop A
+ 0404 38FC              add SP,-4
+ 0406 5100              mov A,[__r3]
+ 0408 5300              mov [__r1],A
+ 040A 5100              mov A,[__r2]
+ 040C 5300              mov [__r0],A
+ 040E 5200              mov A,[X+0]
+ 0410 5300              mov [__r3],A
+ 0412 550000            mov [__r2],0
+ 0415 6500              asl [__r3]
+ 0417 6B00              rlc [__r2]
+ 0419 6500              asl [__r3]
+ 041B 6B00              rlc [__r2]
+ 041D 6500              asl [__r3]
+ 041F 6B00              rlc [__r2]
+ 0421 060004            add [__r3],<_xCalVa+4
+ 0424 0E0004            adc [__r2],>_xCalVa+4
+ 0427 5100              mov A,[__r2]
+ 0429 60D5              mov REG[0xd5],A
+ 042B 5100              mov A,[__r0]
+ 042D 3F00              mvi [__r3],A
+ 042F 5100              mov A,[__r1]
+ 0431 3F00              mvi [__r3],A
+ 0433                   .dbline 176
+ 0433           ;         }
+ 0433           L40:
+ 0433                   .dbline 165
+ 0433 7700              inc [X+0]
+ 0435           L42:
+ 0435                   .dbline 165
+ 0435 3D000E            cmp [X+0],14
+ 0438 CDBF              jc L39
+ 043A           X3:
+ 043A                   .dbline 179
+ 043A           ;                                                                               //
+ 043A           ;                                                                               // 150ohm load
+ 043A           ;               if (!WaitLoadUser(g150OhmLoadStr))
+ 043A 5000              mov A,>_g150OhmLoadStr
+ 043C 08                push A
+ 043D 5000              mov A,<_g150OhmLoadStr
+ 043F 08                push A
+ 0440 7C0EFC            xcall _WaitLoadUser
+ 0443 38FE              add SP,-2
+ 0445 62D000            mov REG[0xd0],>__r0
+ 0448 3900              cmp A,0
+ 044A B003              jnz L50
+ 044C                   .dbline 180
+ 044C           ;                       break;
+ 044C 8654              xjmp L17
+ 044E           L50:
+ 044E                   .dbline 184
+ 044E           ;                                                                               // At each band frequency, ...
+ 044E           ;                                                                       // Determine correction factor for Vz to be 3/4 Vf and Va to be 1/4 Vf (using 150-ohm load)
+ 044E           ;                                                                               // Determine correction factor for Vr --> SWR:300
+ 044E           ;               for (bBand=0; bBand<BAND_MAX;bBand++)
+ 044E 560000            mov [X+0],0
+ 0451 8374              xjmp L55
+ 0453           L52:
+ 0453                   .dbline 185
+ 0453           ;               {
+ 0453                   .dbline 186
+ 0453           ;                       Adjust_Dds_Gain(bBand);
+ 0453 5200              mov A,[X+0]
+ 0455 08                push A
+ 0456 9791              xcall _Adjust_Dds_Gain
+ 0458 38FF              add SP,-1
+ 045A                   .dbline 187
+ 045A           ;                       DDS_Set(g_xBandLimits[bBand].middle * BAND_FREQ_MULT);
+ 045A 62D000            mov REG[0xd0],>__r0
+ 045D 5200              mov A,[X+0]
+ 045F 5300              mov [__r1],A
+ 0461 5000              mov A,0
+ 0463 08                push A
+ 0464 5100              mov A,[__r1]
+ 0466 08                push A
+ 0467 5000              mov A,0
+ 0469 08                push A
+ 046A 5006              mov A,6
+ 046C 08                push A
+ 046D 7C0000            xcall __mul16
+ 0470 38FC              add SP,-4
+ 0472 5100              mov A,[__rX]
+ 0474 5300              mov [__r1],A
+ 0476 5100              mov A,[__rY]
+ 0478 5300              mov [__r0],A
+ 047A 060002            add [__r1],<_g_xBandLimits+2
+ 047D 0E0002            adc [__r0],>_g_xBandLimits+2
+ 0480 5100              mov A,[__r0]
+ 0482 10                push X
+ 0483 08                push A
+ 0484 5800              mov X,[__r1]
+ 0486 28                romx
+ 0487 5300              mov [__r0],A
+ 0489 18                pop A
+ 048A 75                inc X
+ 048B 0900              adc A,0
+ 048D 28                romx
+ 048E 20                pop X
+ 048F 5300              mov [__r3],A
+ 0491 5100              mov A,[__r0]
+ 0493 5300              mov [__r2],A
+ 0495 5000              mov A,0
+ 0497 08                push A
+ 0498 08                push A
+ 0499 5100              mov A,[__r2]
+ 049B 08                push A
+ 049C 5100              mov A,[__r3]
+ 049E 08                push A
+ 049F 5000              mov A,0
+ 04A1 08                push A
+ 04A2 5001              mov A,1
+ 04A4 08                push A
+ 04A5 5086              mov A,-122
+ 04A7 08                push A
+ 04A8 50A0              mov A,-96
+ 04AA 08                push A
+ 04AB 7C0000            xcall __mul_32X32_32
+ 04AE 38FC              add SP,-4
+ 04B0 18                pop A
+ 04B1 5300              mov [__r3],A
+ 04B3 18                pop A
+ 04B4 5300              mov [__r2],A
+ 04B6 18                pop A
+ 04B7 5300              mov [__r1],A
+ 04B9 18                pop A
+ 04BA 08                push A
+ 04BB 5100              mov A,[__r1]
+ 04BD 08                push A
+ 04BE 5100              mov A,[__r2]
+ 04C0 08                push A
+ 04C1 5100              mov A,[__r3]
+ 04C3 08                push A
+ 04C4 7C0000            xcall _DDS_Set
+ 04C7                   .dbline 188
+ 04C7           ;                       Delay_Ms(WAIT_TIME_MEASURE);
+ 04C7 5001              mov A,1
+ 04C9 08                push A
+ 04CA 50F4              mov A,-12
+ 04CC 08                push A
+ 04CD 7C0000            xcall _Delay_Ms
+ 04D0 38FA              add SP,-6
+ 04D2                   .dbline 189
+ 04D2           ;                       Do_Measure();
+ 04D2 7C0000            xcall _Do_Measure
+ 04D5                   .dbline 191
+ 04D5           ; 
+ 04D5           ;                       xCalVz[bBand].wX1 = g_xBridgeMeasure.Vz;
+ 04D5 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 04D8 510F              mov A,[_g_xBridgeMeasure+12+3]
+ 04DA 62D000            mov REG[0xd0],>__r0
+ 04DD 5300              mov [__r1],A
+ 04DF 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 04E2 510E              mov A,[_g_xBridgeMeasure+12+2]
+ 04E4 62D000            mov REG[0xd0],>__r0
+ 04E7 5300              mov [__r0],A
+ 04E9 5200              mov A,[X+0]
+ 04EB 5300              mov [__r3],A
+ 04ED 550000            mov [__r2],0
+ 04F0 6500              asl [__r3]
+ 04F2 6B00              rlc [__r2]
+ 04F4 6500              asl [__r3]
+ 04F6 6B00              rlc [__r2]
+ 04F8 6500              asl [__r3]
+ 04FA 6B00              rlc [__r2]
+ 04FC 060002            add [__r3],<_xCalVz+2
+ 04FF 0E0002            adc [__r2],>_xCalVz+2
+ 0502 5100              mov A,[__r2]
+ 0504 60D5              mov REG[0xd5],A
+ 0506 5100              mov A,[__r0]
+ 0508 3F00              mvi [__r3],A
+ 050A 5100              mov A,[__r1]
+ 050C 3F00              mvi [__r3],A
+ 050E                   .dbline 192
+ 050E           ;                       xCalVz[bBand].wY1 = (DWORD)((DWORD)g_xBridgeMeasure.Vf*CORRECTION_FACTOR*3)/(DWORD)(4*g_xBridgeMeasure.Vz);
+ 050E 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0511 510C              mov A,[_g_xBridgeMeasure+12]
+ 0513 08                push A
+ 0514 510D              mov A,[_g_xBridgeMeasure+12+1]
+ 0516 08                push A
+ 0517 510E              mov A,[_g_xBridgeMeasure+12+2]
+ 0519 08                push A
+ 051A 510F              mov A,[_g_xBridgeMeasure+12+3]
+ 051C 62D000            mov REG[0xd0],>__r0
+ 051F 5300              mov [__r3],A
+ 0521 18                pop A
+ 0522 5300              mov [__r2],A
+ 0524 18                pop A
+ 0525 5300              mov [__r1],A
+ 0527 18                pop A
+ 0528 5300              mov [__r0],A
+ 052A 5002              mov A,2
+ 052C           X4:
+ 052C 62D000            mov REG[0xd0],>__r0
+ 052F 6500              asl [__r3]
+ 0531 6B00              rlc [__r2]
+ 0533 6B00              rlc [__r1]
+ 0535 6B00              rlc [__r0]
+ 0537 78                dec A
+ 0538 BFF3              jnz X4
+ 053A 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 053D 5100              mov A,[_g_xBridgeMeasure]
+ 053F 08                push A
+ 0540 5101              mov A,[_g_xBridgeMeasure+1]
+ 0542 08                push A
+ 0543 5102              mov A,[_g_xBridgeMeasure+2]
+ 0545 08                push A
+ 0546 5103              mov A,[_g_xBridgeMeasure+3]
+ 0548 08                push A
+ 0549 5000              mov A,0
+ 054B 08                push A
+ 054C 08                push A
+ 054D 5003              mov A,3
+ 054F 08                push A
+ 0550 50E8              mov A,-24
+ 0552 08                push A
+ 0553 62D000            mov REG[0xd0],>__r0
+ 0556 7C0000            xcall __mul_32X32_32
+ 0559 38FC              add SP,-4
+ 055B 18                pop A
+ 055C 5300              mov [__r7],A
+ 055E 18                pop A
+ 055F 5300              mov [__r6],A
+ 0561 18                pop A
+ 0562 5300              mov [__r5],A
+ 0564 18                pop A
+ 0565 08                push A
+ 0566 5100              mov A,[__r5]
+ 0568 08                push A
+ 0569 5100              mov A,[__r6]
+ 056B 08                push A
+ 056C 5100              mov A,[__r7]
+ 056E 08                push A
+ 056F 5000              mov A,0
+ 0571 08                push A
+ 0572 08                push A
+ 0573 08                push A
+ 0574 5003              mov A,3
+ 0576 08                push A
+ 0577 7C0000            xcall __mul_32X32_32
+ 057A 38FC              add SP,-4
+ 057C 18                pop A
+ 057D 5300              mov [__r7],A
+ 057F 18                pop A
+ 0580 5300              mov [__r6],A
+ 0582 18                pop A
+ 0583 5300              mov [__r5],A
+ 0585 18                pop A
+ 0586 5300              mov [__r4],A
+ 0588 5100              mov A,[__r0]
+ 058A 08                push A
+ 058B 5100              mov A,[__r1]
+ 058D 08                push A
+ 058E 5100              mov A,[__r2]
+ 0590 08                push A
+ 0591 5100              mov A,[__r3]
+ 0593 08                push A
+ 0594 5100              mov A,[__r4]
+ 0596 08                push A
+ 0597 5100              mov A,[__r5]
+ 0599 08                push A
+ 059A 5100              mov A,[__r6]
+ 059C 08                push A
+ 059D 5100              mov A,[__r7]
+ 059F 08                push A
+ 05A0 7C0000            xcall __divmodu_32X32_32
+ 05A3 18                pop A
+ 05A4 5300              mov [__r3],A
+ 05A6 18                pop A
+ 05A7 5300              mov [__r2],A
+ 05A9 18                pop A
+ 05AA 18                pop A
+ 05AB 38FC              add SP,-4
+ 05AD 5100              mov A,[__r3]
+ 05AF 5300              mov [__r1],A
+ 05B1 5100              mov A,[__r2]
+ 05B3 5300              mov [__r0],A
+ 05B5 5200              mov A,[X+0]
+ 05B7 5300              mov [__r3],A
+ 05B9 550000            mov [__r2],0
+ 05BC 6500              asl [__r3]
+ 05BE 6B00              rlc [__r2]
+ 05C0 6500              asl [__r3]
+ 05C2 6B00              rlc [__r2]
+ 05C4 6500              asl [__r3]
+ 05C6 6B00              rlc [__r2]
+ 05C8 060006            add [__r3],<_xCalVz+6
+ 05CB 0E0006            adc [__r2],>_xCalVz+6
+ 05CE 5100              mov A,[__r2]
+ 05D0 60D5              mov REG[0xd5],A
+ 05D2 5100              mov A,[__r0]
+ 05D4 3F00              mvi [__r3],A
+ 05D6 5100              mov A,[__r1]
+ 05D8 3F00              mvi [__r3],A
+ 05DA                   .dbline 193
+ 05DA           ;                       xCalVa[bBand].wX1 = g_xBridgeMeasure.Va;
+ 05DA 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 05DD 510B              mov A,[_g_xBridgeMeasure+8+3]
+ 05DF 62D000            mov REG[0xd0],>__r0
+ 05E2 5300              mov [__r1],A
+ 05E4 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 05E7 510A              mov A,[_g_xBridgeMeasure+8+2]
+ 05E9 62D000            mov REG[0xd0],>__r0
+ 05EC 5300              mov [__r0],A
+ 05EE 5200              mov A,[X+0]
+ 05F0 5300              mov [__r3],A
+ 05F2 550000            mov [__r2],0
+ 05F5 6500              asl [__r3]
+ 05F7 6B00              rlc [__r2]
+ 05F9 6500              asl [__r3]
+ 05FB 6B00              rlc [__r2]
+ 05FD 6500              asl [__r3]
+ 05FF 6B00              rlc [__r2]
+ 0601 060002            add [__r3],<_xCalVa+2
+ 0604 0E0002            adc [__r2],>_xCalVa+2
+ 0607 5100              mov A,[__r2]
+ 0609 60D5              mov REG[0xd5],A
+ 060B 5100              mov A,[__r0]
+ 060D 3F00              mvi [__r3],A
+ 060F 5100              mov A,[__r1]
+ 0611 3F00              mvi [__r3],A
+ 0613                   .dbline 194
+ 0613           ;                       xCalVa[bBand].wY1 = (DWORD)((DWORD)g_xBridgeMeasure.Vf*CORRECTION_FACTOR)/(DWORD)(4*g_xBridgeMeasure.Va);
+ 0613 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0616 5108              mov A,[_g_xBridgeMeasure+8]
+ 0618 08                push A
+ 0619 5109              mov A,[_g_xBridgeMeasure+8+1]
+ 061B 08                push A
+ 061C 510A              mov A,[_g_xBridgeMeasure+8+2]
+ 061E 08                push A
+ 061F 510B              mov A,[_g_xBridgeMeasure+8+3]
+ 0621 62D000            mov REG[0xd0],>__r0
+ 0624 5300              mov [__r3],A
+ 0626 18                pop A
+ 0627 5300              mov [__r2],A
+ 0629 18                pop A
+ 062A 5300              mov [__r1],A
+ 062C 18                pop A
+ 062D 5300              mov [__r0],A
+ 062F 5002              mov A,2
+ 0631           X5:
+ 0631 62D000            mov REG[0xd0],>__r0
+ 0634 6500              asl [__r3]
+ 0636 6B00              rlc [__r2]
+ 0638 6B00              rlc [__r1]
+ 063A 6B00              rlc [__r0]
+ 063C 78                dec A
+ 063D BFF3              jnz X5
+ 063F 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0642 5100              mov A,[_g_xBridgeMeasure]
+ 0644 08                push A
+ 0645 5101              mov A,[_g_xBridgeMeasure+1]
+ 0647 08                push A
+ 0648 5102              mov A,[_g_xBridgeMeasure+2]
+ 064A 08                push A
+ 064B 5103              mov A,[_g_xBridgeMeasure+3]
+ 064D 08                push A
+ 064E 5000              mov A,0
+ 0650 08                push A
+ 0651 08                push A
+ 0652 5003              mov A,3
+ 0654 08                push A
+ 0655 50E8              mov A,-24
+ 0657 08                push A
+ 0658 62D000            mov REG[0xd0],>__r0
+ 065B 7C0000            xcall __mul_32X32_32
+ 065E 38FC              add SP,-4
+ 0660 18                pop A
+ 0661 5300              mov [__r7],A
+ 0663 18                pop A
+ 0664 5300              mov [__r6],A
+ 0666 18                pop A
+ 0667 5300              mov [__r5],A
+ 0669 18                pop A
+ 066A 5300              mov [__r4],A
+ 066C 5100              mov A,[__r0]
+ 066E 08                push A
+ 066F 5100              mov A,[__r1]
+ 0671 08                push A
+ 0672 5100              mov A,[__r2]
+ 0674 08                push A
+ 0675 5100              mov A,[__r3]
+ 0677 08                push A
+ 0678 5100              mov A,[__r4]
+ 067A 08                push A
+ 067B 5100              mov A,[__r5]
+ 067D 08                push A
+ 067E 5100              mov A,[__r6]
+ 0680 08                push A
+ 0681 5100              mov A,[__r7]
+ 0683 08                push A
+ 0684 7C0000            xcall __divmodu_32X32_32
+ 0687 18                pop A
+ 0688 5300              mov [__r3],A
+ 068A 18                pop A
+ 068B 5300              mov [__r2],A
+ 068D 18                pop A
+ 068E 18                pop A
+ 068F 38FC              add SP,-4
+ 0691 5100              mov A,[__r3]
+ 0693 5300              mov [__r1],A
+ 0695 5100              mov A,[__r2]
+ 0697 5300              mov [__r0],A
+ 0699 5200              mov A,[X+0]
+ 069B 5300              mov [__r3],A
+ 069D 550000            mov [__r2],0
+ 06A0 6500              asl [__r3]
+ 06A2 6B00              rlc [__r2]
+ 06A4 6500              asl [__r3]
+ 06A6 6B00              rlc [__r2]
+ 06A8 6500              asl [__r3]
+ 06AA 6B00              rlc [__r2]
+ 06AC 060006            add [__r3],<_xCalVa+6
+ 06AF 0E0006            adc [__r2],>_xCalVa+6
+ 06B2 5100              mov A,[__r2]
+ 06B4 60D5              mov REG[0xd5],A
+ 06B6 5100              mov A,[__r0]
+ 06B8 3F00              mvi [__r3],A
+ 06BA 5100              mov A,[__r1]
+ 06BC 3F00              mvi [__r3],A
+ 06BE                   .dbline 196
+ 06BE           ; 
+ 06BE           ;                       xCalVr[bBand].wX0 = g_xBridgeMeasure.Vr;
+ 06BE 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 06C1 5107              mov A,[_g_xBridgeMeasure+4+3]
+ 06C3 62D000            mov REG[0xd0],>__r0
+ 06C6 5300              mov [__r1],A
+ 06C8 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 06CB 5106              mov A,[_g_xBridgeMeasure+4+2]
+ 06CD 62D000            mov REG[0xd0],>__r0
+ 06D0 5300              mov [__r0],A
+ 06D2 5200              mov A,[X+0]
+ 06D4 5300              mov [__r3],A
+ 06D6 550000            mov [__r2],0
+ 06D9 6500              asl [__r3]
+ 06DB 6B00              rlc [__r2]
+ 06DD 6500              asl [__r3]
+ 06DF 6B00              rlc [__r2]
+ 06E1 6500              asl [__r3]
+ 06E3 6B00              rlc [__r2]
+ 06E5 060000            add [__r3],<_xCalVr
+ 06E8 0E0000            adc [__r2],>_xCalVr
+ 06EB 5100              mov A,[__r2]
+ 06ED 60D5              mov REG[0xd5],A
+ 06EF 5100              mov A,[__r0]
+ 06F1 3F00              mvi [__r3],A
+ 06F3 5100              mov A,[__r1]
+ 06F5 3F00              mvi [__r3],A
+ 06F7                   .dbline 197
+ 06F7           ;                       xCalVr[bBand].wY0 = ((DWORD)(((SWR_150_LOAD-100)*g_xBridgeMeasure.Vf)/(SWR_150_LOAD+100))*CORRECTION_FACTOR)/(DWORD)g_xBridgeMeasure.Vr;
+ 06F7 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 06FA 5100              mov A,[_g_xBridgeMeasure]
+ 06FC 08                push A
+ 06FD 5101              mov A,[_g_xBridgeMeasure+1]
+ 06FF 08                push A
+ 0700 5102              mov A,[_g_xBridgeMeasure+2]
+ 0702 08                push A
+ 0703 5103              mov A,[_g_xBridgeMeasure+3]
+ 0705 08                push A
+ 0706 5000              mov A,0
+ 0708 08                push A
+ 0709 08                push A
+ 070A 08                push A
+ 070B 50C8              mov A,-56
+ 070D 08                push A
+ 070E 62D000            mov REG[0xd0],>__r0
+ 0711 7C0000            xcall __mul_32X32_32
+ 0714 38FC              add SP,-4
+ 0716 18                pop A
+ 0717 5300              mov [__r3],A
+ 0719 18                pop A
+ 071A 5300              mov [__r2],A
+ 071C 18                pop A
+ 071D 5300              mov [__r1],A
+ 071F 18                pop A
+ 0720 5300              mov [__r0],A
+ 0722 5000              mov A,0
+ 0724 08                push A
+ 0725 08                push A
+ 0726 5001              mov A,1
+ 0728 08                push A
+ 0729 5090              mov A,-112
+ 072B 08                push A
+ 072C 5100              mov A,[__r0]
+ 072E 08                push A
+ 072F 5100              mov A,[__r1]
+ 0731 08                push A
+ 0732 5100              mov A,[__r2]
+ 0734 08                push A
+ 0735 5100              mov A,[__r3]
+ 0737 08                push A
+ 0738 7C0000            xcall __divmodu_32X32_32
+ 073B 18                pop A
+ 073C 5300              mov [__r3],A
+ 073E 18                pop A
+ 073F 5300              mov [__r2],A
+ 0741 18                pop A
+ 0742 5300              mov [__r1],A
+ 0744 18                pop A
+ 0745 38FC              add SP,-4
+ 0747 08                push A
+ 0748 5100              mov A,[__r1]
+ 074A 08                push A
+ 074B 5100              mov A,[__r2]
+ 074D 08                push A
+ 074E 5100              mov A,[__r3]
+ 0750 08                push A
+ 0751 5000              mov A,0
+ 0753 08                push A
+ 0754 08                push A
+ 0755 5003              mov A,3
+ 0757 08                push A
+ 0758 50E8              mov A,-24
+ 075A 08                push A
+ 075B 7C0000            xcall __mul_32X32_32
+ 075E 38FC              add SP,-4
+ 0760 18                pop A
+ 0761 5300              mov [__r3],A
+ 0763 18                pop A
+ 0764 5300              mov [__r2],A
+ 0766 18                pop A
+ 0767 5300              mov [__r1],A
+ 0769 18                pop A
+ 076A 5300              mov [__r0],A
+ 076C 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 076F 5104              mov A,[_g_xBridgeMeasure+4]
+ 0771 08                push A
+ 0772 5105              mov A,[_g_xBridgeMeasure+4+1]
+ 0774 08                push A
+ 0775 5106              mov A,[_g_xBridgeMeasure+4+2]
+ 0777 08                push A
+ 0778 5107              mov A,[_g_xBridgeMeasure+4+3]
+ 077A 08                push A
+ 077B 62D000            mov REG[0xd0],>__r0
+ 077E 5100              mov A,[__r0]
+ 0780 08                push A
+ 0781 5100              mov A,[__r1]
+ 0783 08                push A
+ 0784 5100              mov A,[__r2]
+ 0786 08                push A
+ 0787 5100              mov A,[__r3]
+ 0789 08                push A
+ 078A 7C0000            xcall __divmodu_32X32_32
+ 078D 18                pop A
+ 078E 5300              mov [__r3],A
+ 0790 18                pop A
+ 0791 5300              mov [__r2],A
+ 0793 18                pop A
+ 0794 18                pop A
+ 0795 38FC              add SP,-4
+ 0797 5100              mov A,[__r3]
+ 0799 5300              mov [__r1],A
+ 079B 5100              mov A,[__r2]
+ 079D 5300              mov [__r0],A
+ 079F 5200              mov A,[X+0]
+ 07A1 5300              mov [__r3],A
+ 07A3 550000            mov [__r2],0
+ 07A6 6500              asl [__r3]
+ 07A8 6B00              rlc [__r2]
+ 07AA 6500              asl [__r3]
+ 07AC 6B00              rlc [__r2]
+ 07AE 6500              asl [__r3]
+ 07B0 6B00              rlc [__r2]
+ 07B2 060004            add [__r3],<_xCalVr+4
+ 07B5 0E0004            adc [__r2],>_xCalVr+4
+ 07B8 5100              mov A,[__r2]
+ 07BA 60D5              mov REG[0xd5],A
+ 07BC 5100              mov A,[__r0]
+ 07BE 3F00              mvi [__r3],A
+ 07C0 5100              mov A,[__r1]
+ 07C2 3F00              mvi [__r3],A
+ 07C4                   .dbline 198
+ 07C4           ;         }
+ 07C4           L53:
+ 07C4                   .dbline 184
+ 07C4 7700              inc [X+0]
+ 07C6           L55:
+ 07C6                   .dbline 184
+ 07C6 3D000E            cmp [X+0],14
+ 07C9 CC89              jc L52
+ 07CB           X6:
+ 07CB                   .dbline 201
+ 07CB           ; 
+ 07CB           ;                                                                               // 274ohm load
+ 07CB           ;               if (!WaitLoadUser(g274OhmLoadStr))
+ 07CB 5000              mov A,>_g274OhmLoadStr
+ 07CD 08                push A
+ 07CE 5000              mov A,<_g274OhmLoadStr
+ 07D0 08                push A
+ 07D1 9729              xcall _WaitLoadUser
+ 07D3 38FE              add SP,-2
+ 07D5 62D000            mov REG[0xd0],>__r0
+ 07D8 3900              cmp A,0
+ 07DA B003              jnz L68
+ 07DC                   .dbline 202
+ 07DC           ;                       break;
+ 07DC 82C4              xjmp L17
+ 07DE           L68:
+ 07DE                   .dbline 205
+ 07DE           ;                                                                               // At each band frequency, ...
+ 07DE           ;                                                                       // Determine correction factor for Vr to get a SWR of 548 (using 274-ohm load)
+ 07DE           ;               for (bBand=0; bBand<BAND_MAX;bBand++)
+ 07DE 560000            mov [X+0],0
+ 07E1 8277              xjmp L73
+ 07E3           L70:
+ 07E3                   .dbline 206
+ 07E3           ;               {
+ 07E3                   .dbline 209
+ 07E3           ;                       BYTE ii;
+ 07E3           ; 
+ 07E3           ;                       Adjust_Dds_Gain(bBand);
+ 07E3 5200              mov A,[X+0]
+ 07E5 08                push A
+ 07E6 9401              xcall _Adjust_Dds_Gain
+ 07E8 38FF              add SP,-1
+ 07EA                   .dbline 210
+ 07EA           ;                       DDS_Set(g_xBandLimits[bBand].middle * BAND_FREQ_MULT);
+ 07EA 62D000            mov REG[0xd0],>__r0
+ 07ED 5200              mov A,[X+0]
+ 07EF 5300              mov [__r1],A
+ 07F1 5000              mov A,0
+ 07F3 08                push A
+ 07F4 5100              mov A,[__r1]
+ 07F6 08                push A
+ 07F7 5000              mov A,0
+ 07F9 08                push A
+ 07FA 5006              mov A,6
+ 07FC 08                push A
+ 07FD 7C0000            xcall __mul16
+ 0800 38FC              add SP,-4
+ 0802 5100              mov A,[__rX]
+ 0804 5300              mov [__r1],A
+ 0806 5100              mov A,[__rY]
+ 0808 5300              mov [__r0],A
+ 080A 060002            add [__r1],<_g_xBandLimits+2
+ 080D 0E0002            adc [__r0],>_g_xBandLimits+2
+ 0810 5100              mov A,[__r0]
+ 0812 10                push X
+ 0813 08                push A
+ 0814 5800              mov X,[__r1]
+ 0816 28                romx
+ 0817 5300              mov [__r0],A
+ 0819 18                pop A
+ 081A 75                inc X
+ 081B 0900              adc A,0
+ 081D 28                romx
+ 081E 20                pop X
+ 081F 5300              mov [__r3],A
+ 0821 5100              mov A,[__r0]
+ 0823 5300              mov [__r2],A
+ 0825 5000              mov A,0
+ 0827 08                push A
+ 0828 08                push A
+ 0829 5100              mov A,[__r2]
+ 082B 08                push A
+ 082C 5100              mov A,[__r3]
+ 082E 08                push A
+ 082F 5000              mov A,0
+ 0831 08                push A
+ 0832 5001              mov A,1
+ 0834 08                push A
+ 0835 5086              mov A,-122
+ 0837 08                push A
+ 0838 50A0              mov A,-96
+ 083A 08                push A
+ 083B 7C0000            xcall __mul_32X32_32
+ 083E 38FC              add SP,-4
+ 0840 18                pop A
+ 0841 5300              mov [__r3],A
+ 0843 18                pop A
+ 0844 5300              mov [__r2],A
+ 0846 18                pop A
+ 0847 5300              mov [__r1],A
+ 0849 18                pop A
+ 084A 08                push A
+ 084B 5100              mov A,[__r1]
+ 084D 08                push A
+ 084E 5100              mov A,[__r2]
+ 0850 08                push A
+ 0851 5100              mov A,[__r3]
+ 0853 08                push A
+ 0854 7C0000            xcall _DDS_Set
+ 0857                   .dbline 211
+ 0857           ;                       Delay_Ms(WAIT_TIME_MEASURE);
+ 0857 5001              mov A,1
+ 0859 08                push A
+ 085A 50F4              mov A,-12
+ 085C 08                push A
+ 085D 7C0000            xcall _Delay_Ms
+ 0860 38FA              add SP,-6
+ 0862                   .dbline 212
+ 0862           ;                       Do_Measure();
+ 0862 7C0000            xcall _Do_Measure
+ 0865                   .dbline 214
+ 0865           ; 
+ 0865           ;                       xCalVr[bBand].wX1 = g_xBridgeMeasure.Vr;
+ 0865 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0868 5107              mov A,[_g_xBridgeMeasure+4+3]
+ 086A 62D000            mov REG[0xd0],>__r0
+ 086D 5300              mov [__r1],A
+ 086F 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0872 5106              mov A,[_g_xBridgeMeasure+4+2]
+ 0874 62D000            mov REG[0xd0],>__r0
+ 0877 5300              mov [__r0],A
+ 0879 5200              mov A,[X+0]
+ 087B 5300              mov [__r3],A
+ 087D 550000            mov [__r2],0
+ 0880 6500              asl [__r3]
+ 0882 6B00              rlc [__r2]
+ 0884 6500              asl [__r3]
+ 0886 6B00              rlc [__r2]
+ 0888 6500              asl [__r3]
+ 088A 6B00              rlc [__r2]
+ 088C 060002            add [__r3],<_xCalVr+2
+ 088F 0E0002            adc [__r2],>_xCalVr+2
+ 0892 5100              mov A,[__r2]
+ 0894 60D5              mov REG[0xd5],A
+ 0896 5100              mov A,[__r0]
+ 0898 3F00              mvi [__r3],A
+ 089A 5100              mov A,[__r1]
+ 089C 3F00              mvi [__r3],A
+ 089E                   .dbline 215
+ 089E           ;                       xCalVr[bBand].wY1 = ((DWORD)(((SWR_274_LOAD-100)*g_xBridgeMeasure.Vf)/(SWR_274_LOAD+100))*CORRECTION_FACTOR)/(DWORD)g_xBridgeMeasure.Vr;
+ 089E 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 08A1 5100              mov A,[_g_xBridgeMeasure]
+ 08A3 08                push A
+ 08A4 5101              mov A,[_g_xBridgeMeasure+1]
+ 08A6 08                push A
+ 08A7 5102              mov A,[_g_xBridgeMeasure+2]
+ 08A9 08                push A
+ 08AA 5103              mov A,[_g_xBridgeMeasure+3]
+ 08AC 08                push A
+ 08AD 5000              mov A,0
+ 08AF 08                push A
+ 08B0 08                push A
+ 08B1 5001              mov A,1
+ 08B3 08                push A
+ 08B4 50C0              mov A,-64
+ 08B6 08                push A
+ 08B7 62D000            mov REG[0xd0],>__r0
+ 08BA 7C0000            xcall __mul_32X32_32
+ 08BD 38FC              add SP,-4
+ 08BF 18                pop A
+ 08C0 5300              mov [__r3],A
+ 08C2 18                pop A
+ 08C3 5300              mov [__r2],A
+ 08C5 18                pop A
+ 08C6 5300              mov [__r1],A
+ 08C8 18                pop A
+ 08C9 5300              mov [__r0],A
+ 08CB 5000              mov A,0
+ 08CD 08                push A
+ 08CE 08                push A
+ 08CF 5002              mov A,2
+ 08D1 08                push A
+ 08D2 5088              mov A,-120
+ 08D4 08                push A
+ 08D5 5100              mov A,[__r0]
+ 08D7 08                push A
+ 08D8 5100              mov A,[__r1]
+ 08DA 08                push A
+ 08DB 5100              mov A,[__r2]
+ 08DD 08                push A
+ 08DE 5100              mov A,[__r3]
+ 08E0 08                push A
+ 08E1 7C0000            xcall __divmodu_32X32_32
+ 08E4 18                pop A
+ 08E5 5300              mov [__r3],A
+ 08E7 18                pop A
+ 08E8 5300              mov [__r2],A
+ 08EA 18                pop A
+ 08EB 5300              mov [__r1],A
+ 08ED 18                pop A
+ 08EE 38FC              add SP,-4
+ 08F0 08                push A
+ 08F1 5100              mov A,[__r1]
+ 08F3 08                push A
+ 08F4 5100              mov A,[__r2]
+ 08F6 08                push A
+ 08F7 5100              mov A,[__r3]
+ 08F9 08                push A
+ 08FA 5000              mov A,0
+ 08FC 08                push A
+ 08FD 08                push A
+ 08FE 5003              mov A,3
+ 0900 08                push A
+ 0901 50E8              mov A,-24
+ 0903 08                push A
+ 0904 7C0000            xcall __mul_32X32_32
+ 0907 38FC              add SP,-4
+ 0909 18                pop A
+ 090A 5300              mov [__r3],A
+ 090C 18                pop A
+ 090D 5300              mov [__r2],A
+ 090F 18                pop A
+ 0910 5300              mov [__r1],A
+ 0912 18                pop A
+ 0913 5300              mov [__r0],A
+ 0915 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0918 5104              mov A,[_g_xBridgeMeasure+4]
+ 091A 08                push A
+ 091B 5105              mov A,[_g_xBridgeMeasure+4+1]
+ 091D 08                push A
+ 091E 5106              mov A,[_g_xBridgeMeasure+4+2]
+ 0920 08                push A
+ 0921 5107              mov A,[_g_xBridgeMeasure+4+3]
+ 0923 08                push A
+ 0924 62D000            mov REG[0xd0],>__r0
+ 0927 5100              mov A,[__r0]
+ 0929 08                push A
+ 092A 5100              mov A,[__r1]
+ 092C 08                push A
+ 092D 5100              mov A,[__r2]
+ 092F 08                push A
+ 0930 5100              mov A,[__r3]
+ 0932 08                push A
+ 0933 7C0000            xcall __divmodu_32X32_32
+ 0936 18                pop A
+ 0937 5300              mov [__r3],A
+ 0939 18                pop A
+ 093A 5300              mov [__r2],A
+ 093C 18                pop A
+ 093D 18                pop A
+ 093E 38FC              add SP,-4
+ 0940 5100              mov A,[__r3]
+ 0942 5300              mov [__r1],A
+ 0944 5100              mov A,[__r2]
+ 0946 5300              mov [__r0],A
+ 0948 5200              mov A,[X+0]
+ 094A 5300              mov [__r3],A
+ 094C 550000            mov [__r2],0
+ 094F 6500              asl [__r3]
+ 0951 6B00              rlc [__r2]
+ 0953 6500              asl [__r3]
+ 0955 6B00              rlc [__r2]
+ 0957 6500              asl [__r3]
+ 0959 6B00              rlc [__r2]
+ 095B 060006            add [__r3],<_xCalVr+6
+ 095E 0E0006            adc [__r2],>_xCalVr+6
+ 0961 5100              mov A,[__r2]
+ 0963 60D5              mov REG[0xd5],A
+ 0965 5100              mov A,[__r0]
+ 0967 3F00              mvi [__r3],A
+ 0969 5100              mov A,[__r1]
+ 096B 3F00              mvi [__r3],A
+ 096D                   .dbline 218
+ 096D           ; 
+ 096D           ;                                                                               // Convert calibration factor to slope and offset
+ 096D           ;                       Calc_Correct(&g_xBandCorrFactor[bBand].xVz, &xCalVz[bBand]);
+ 096D 5200              mov A,[X+0]
+ 096F 5300              mov [__r1],A
+ 0971 550000            mov [__r0],0
+ 0974 6500              asl [__r1]
+ 0976 6B00              rlc [__r0]
+ 0978 6500              asl [__r1]
+ 097A 6B00              rlc [__r0]
+ 097C 6500              asl [__r1]
+ 097E 6B00              rlc [__r0]
+ 0980 060000            add [__r1],<_xCalVz
+ 0983 0E0000            adc [__r0],>_xCalVz
+ 0986 5100              mov A,[__r0]
+ 0988 08                push A
+ 0989 5100              mov A,[__r1]
+ 098B 08                push A
+ 098C 5200              mov A,[X+0]
+ 098E 5300              mov [__r1],A
+ 0990 5000              mov A,0
+ 0992 08                push A
+ 0993 5100              mov A,[__r1]
+ 0995 08                push A
+ 0996 5000              mov A,0
+ 0998 08                push A
+ 0999 500C              mov A,12
+ 099B 08                push A
+ 099C 7C0000            xcall __mul16
+ 099F 38FC              add SP,-4
+ 09A1 5100              mov A,[__rX]
+ 09A3 5300              mov [__r1],A
+ 09A5 5100              mov A,[__rY]
+ 09A7 5300              mov [__r0],A
+ 09A9 060004            add [__r1],<_g_xBandCorrFactor+4
+ 09AC 0E0004            adc [__r0],>_g_xBandCorrFactor+4
+ 09AF 5100              mov A,[__r0]
+ 09B1 08                push A
+ 09B2 5100              mov A,[__r1]
+ 09B4 08                push A
+ 09B5 936B              xcall _Calc_Correct
+ 09B7 38FC              add SP,-4
+ 09B9                   .dbline 219
+ 09B9           ;                       Calc_Correct(&g_xBandCorrFactor[bBand].xVa, &xCalVa[bBand]);
+ 09B9 62D000            mov REG[0xd0],>__r0
+ 09BC 5200              mov A,[X+0]
+ 09BE 5300              mov [__r1],A
+ 09C0 550000            mov [__r0],0
+ 09C3 6500              asl [__r1]
+ 09C5 6B00              rlc [__r0]
+ 09C7 6500              asl [__r1]
+ 09C9 6B00              rlc [__r0]
+ 09CB 6500              asl [__r1]
+ 09CD 6B00              rlc [__r0]
+ 09CF 060000            add [__r1],<_xCalVa
+ 09D2 0E0000            adc [__r0],>_xCalVa
+ 09D5 5100              mov A,[__r0]
+ 09D7 08                push A
+ 09D8 5100              mov A,[__r1]
+ 09DA 08                push A
+ 09DB 5200              mov A,[X+0]
+ 09DD 5300              mov [__r1],A
+ 09DF 5000              mov A,0
+ 09E1 08                push A
+ 09E2 5100              mov A,[__r1]
+ 09E4 08                push A
+ 09E5 5000              mov A,0
+ 09E7 08                push A
+ 09E8 500C              mov A,12
+ 09EA 08                push A
+ 09EB 7C0000            xcall __mul16
+ 09EE 38FC              add SP,-4
+ 09F0 5100              mov A,[__rX]
+ 09F2 5300              mov [__r1],A
+ 09F4 5100              mov A,[__rY]
+ 09F6 5300              mov [__r0],A
+ 09F8 060008            add [__r1],<_g_xBandCorrFactor+8
+ 09FB 0E0008            adc [__r0],>_g_xBandCorrFactor+8
+ 09FE 5100              mov A,[__r0]
+ 0A00 08                push A
+ 0A01 5100              mov A,[__r1]
+ 0A03 08                push A
+ 0A04 931C              xcall _Calc_Correct
+ 0A06 38FC              add SP,-4
+ 0A08                   .dbline 220
+ 0A08           ;                       Calc_Correct(&g_xBandCorrFactor[bBand].xVr, &xCalVr[bBand]);
+ 0A08 62D000            mov REG[0xd0],>__r0
+ 0A0B 5200              mov A,[X+0]
+ 0A0D 5300              mov [__r1],A
+ 0A0F 550000            mov [__r0],0
+ 0A12 6500              asl [__r1]
+ 0A14 6B00              rlc [__r0]
+ 0A16 6500              asl [__r1]
+ 0A18 6B00              rlc [__r0]
+ 0A1A 6500              asl [__r1]
+ 0A1C 6B00              rlc [__r0]
+ 0A1E 060000            add [__r1],<_xCalVr
+ 0A21 0E0000            adc [__r0],>_xCalVr
+ 0A24 5100              mov A,[__r0]
+ 0A26 08                push A
+ 0A27 5100              mov A,[__r1]
+ 0A29 08                push A
+ 0A2A 5200              mov A,[X+0]
+ 0A2C 5300              mov [__r1],A
+ 0A2E 5000              mov A,0
+ 0A30 08                push A
+ 0A31 5100              mov A,[__r1]
+ 0A33 08                push A
+ 0A34 5000              mov A,0
+ 0A36 08                push A
+ 0A37 500C              mov A,12
+ 0A39 08                push A
+ 0A3A 7C0000            xcall __mul16
+ 0A3D 38FC              add SP,-4
+ 0A3F 5100              mov A,[__rX]
+ 0A41 5300              mov [__r1],A
+ 0A43 5100              mov A,[__rY]
+ 0A45 5300              mov [__r0],A
+ 0A47 060000            add [__r1],<_g_xBandCorrFactor
+ 0A4A 0E0000            adc [__r0],>_g_xBandCorrFactor
+ 0A4D 5100              mov A,[__r0]
+ 0A4F 08                push A
+ 0A50 5100              mov A,[__r1]
+ 0A52 08                push A
+ 0A53 92CD              xcall _Calc_Correct
+ 0A55 38FC              add SP,-4
+ 0A57                   .dbline 221
+ 0A57           ;         }
+ 0A57           L71:
+ 0A57                   .dbline 205
+ 0A57 7700              inc [X+0]
+ 0A59           L73:
+ 0A59                   .dbline 205
+ 0A59 3D000E            cmp [X+0],14
+ 0A5C CD86              jc L70
+ 0A5E           X7:
+ 0A5E                   .dbline 224
+ 0A5E           ; 
+ 0A5E           ;                                                                               // Store data
+ 0A5E           ;               g_bIsCalibrated = TRUE;
+ 0A5E 62D000            mov REG[0xd0],>_g_bIsCalibrated
+ 0A61 550001            mov [_g_bIsCalibrated],1
+ 0A64                   .dbline 225
+ 0A64           ;               STR_SaveCalibration();
+ 0A64 7C0000            xcall _STR_SaveCalibration
+ 0A67                   .dbline 228
+ 0A67           ; 
+ 0A67           ;                                                                               // Finish, alert user
+ 0A67           ;               DISP_Clear();
+ 0A67 7C0000            xcall _DISP_Clear
+ 0A6A                   .dbline 229
+ 0A6A           ;               LCD_Position(0, 0);
+ 0A6A 10                push X
+ 0A6B 5000              mov A,0
+ 0A6D 5C                mov X,A
+ 0A6E 7C0000            xcall _LCD_Position
+ 0A71 20                pop X
+ 0A72                   .dbline 230
+ 0A72           ;               LCD_PrCString(gConfigCalibStr);
+ 0A72 10                push X
+ 0A73 5000              mov A,>_gConfigCalibStr
+ 0A75 08                push A
+ 0A76 5000              mov A,<_gConfigCalibStr
+ 0A78 5C                mov X,A
+ 0A79 18                pop A
+ 0A7A 7C0000            xcall _LCD_PrCString
+ 0A7D 20                pop X
+ 0A7E                   .dbline 231
+ 0A7E           ;               LCD_Position(1, 0);
+ 0A7E 10                push X
+ 0A7F 5700              mov X,0
+ 0A81 5001              mov A,1
+ 0A83 7C0000            xcall _LCD_Position
+ 0A86 20                pop X
+ 0A87                   .dbline 232
+ 0A87           ;               LCD_PrCString(gDoneStr);
+ 0A87 10                push X
+ 0A88 5000              mov A,>_gDoneStr
+ 0A8A 08                push A
+ 0A8B 5000              mov A,<_gDoneStr
+ 0A8D 5C                mov X,A
+ 0A8E 18                pop A
+ 0A8F 7C0000            xcall _LCD_PrCString
+ 0A92 20                pop X
+ 0A93                   .dbline 233
+ 0A93           ;               BUZZ_Beep();
+ 0A93 7C0000            xcall _BUZZ_Beep
+ 0A96                   .dbline 234
+ 0A96           ;               KEYPAD_WaitKey(TIME_WAIT_KEY_S);
+ 0A96 501E              mov A,30
+ 0A98 08                push A
+ 0A99 7C0000            xcall _KEYPAD_WaitKey
+ 0A9C 38FF              add SP,-1
+ 0A9E 62D000            mov REG[0xd0],>__r0
+ 0AA1                   .dbline 235
+ 0AA1           ;       }
+ 0AA1           L16:
+ 0AA1                   .dbline 236
+ 0AA1           ;       while (FALSE);
+ 0AA1           L17:
+ 0AA1                   .dbline -2
+ 0AA1           L14:
+ 0AA1 38FC              add SP,-4
+ 0AA3 20                pop X
+ 0AA4                   .dbline 0 ; func end
+ 0AA4 7F                ret
+ 0AA5                   .dbsym l ii 3 c
+ 0AA5                   .dbsym l bGainIdx 3 c
+ 0AA5                   .dbsym l wZero 1 i
+ 0AA5                   .dbsym l bBand 0 c
+ 0AA5                   .dbend
+ 0AA5                   .dbfunc e Do_Correct _Do_Correct fV
+ 0AA5           _Do_Correct::
+ 0AA5                   .dbline -1
+ 0AA5                   .dbline 309
+ 0AA5           ; 
+ 0AA5           ; #ifdef DEBUG
+ 0AA5           ; {
+ 0AA5           ;       BYTE szMsg[20];
+ 0AA5           ; 
+ 0AA5           ;       UART_CmdReset();                                        // Initialize receiver/cmd buffer
+ 0AA5           ;       UART_IntCntl(UART_ENABLE_RX_INT);       // Enable RX interrupts
+ 0AA5           ;       UART_Start(UART_PARITY_NONE);           // Enable UART
+ 0AA5           ;       M8C_EnableGInt ;
+ 0AA5           ;       UART_PutChar(12);                                       // Clear the screen
+ 0AA5           ; 
+ 0AA5           ;       UART_CPutString("Zero:");
+ 0AA5           ;       itoa(szMsg, wZero, 10);
+ 0AA5           ;       UART_PutString(szMsg);
+ 0AA5           ;       UART_PutCRLF();
+ 0AA5           ;                                                                               // Print correction factors
+ 0AA5           ;       for (bBand=0; bBand<BAND_MAX;bBand++)
+ 0AA5           ;       {
+ 0AA5           ;               UART_CPutString("Band:");
+ 0AA5           ;               itoa(szMsg, bBand, 10);
+ 0AA5           ;               UART_PutString(szMsg);
+ 0AA5           ; 
+ 0AA5           ;               UART_CPutString("\t G=");
+ 0AA5           ;               itoa(szMsg, g_bGainDDS[bBand], 10);
+ 0AA5           ;               UART_PutString(szMsg);
+ 0AA5           ; 
+ 0AA5           ;               UART_CPutString("\t VR.S=");
+ 0AA5           ;               ltoa(szMsg, g_xBandCorrFactor[bBand].xVr.iSlope, 10);
+ 0AA5           ;               UART_PutString(szMsg);
+ 0AA5           ; 
+ 0AA5           ;               UART_CPutString("\t VR.O=");
+ 0AA5           ;               ltoa(szMsg, g_xBandCorrFactor[bBand].xVr.iOffset, 10);
+ 0AA5           ;               UART_PutString(szMsg);
+ 0AA5           ; 
+ 0AA5           ;               UART_CPutString("\t VZ.S=");
+ 0AA5           ;               ltoa(szMsg, g_xBandCorrFactor[bBand].xVz.iSlope, 10);
+ 0AA5           ;               UART_PutString(szMsg);
+ 0AA5           ; 
+ 0AA5           ;               UART_CPutString("\t VZ.O=");
+ 0AA5           ;               ltoa(szMsg, g_xBandCorrFactor[bBand].xVz.iOffset, 10);
+ 0AA5           ;               UART_PutString(szMsg);
+ 0AA5           ; 
+ 0AA5           ;               UART_CPutString("\t VA.S=");
+ 0AA5           ;               ltoa(szMsg, g_xBandCorrFactor[bBand].xVa.iSlope, 10);
+ 0AA5           ;               UART_PutString(szMsg);
+ 0AA5           ; 
+ 0AA5           ;               UART_CPutString("\t VA.O=");
+ 0AA5           ;               ltoa(szMsg, g_xBandCorrFactor[bBand].xVa.iOffset, 10);
+ 0AA5           ;               UART_PutString(szMsg);
+ 0AA5           ; 
+ 0AA5           ;               UART_PutCRLF();
+ 0AA5           ;       }
+ 0AA5           ;       UART_Stop();
+ 0AA5           ; }
+ 0AA5           ; #endif
+ 0AA5           ; }
+ 0AA5           ; 
+ 0AA5           ; //-----------------------------------------------------------------------------
+ 0AA5           ; //  FUNCTION NAME:    Do_Correct()
+ 0AA5           ; //
+ 0AA5           ; //  DESCRIPTION:
+ 0AA5           ; //
+ 0AA5           ; //    Do the complete adjustment of the measurement based on two-point calibration data
+ 0AA5           ; //
+ 0AA5           ; //  ARGUMENTS:
+ 0AA5           ; //    none
+ 0AA5           ; //
+ 0AA5           ; //  RETURNS:
+ 0AA5           ; //     none.
+ 0AA5           ; //
+ 0AA5           ; //-----------------------------------------------------------------------------
+ 0AA5           ; void Do_Correct (void)
+ 0AA5           ; {
+ 0AA5                   .dbline 310
+ 0AA5           ;       g_xBridgeMeasure.Vf *= CORRECTION_FACTOR;
+ 0AA5 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0AA8 5100              mov A,[_g_xBridgeMeasure]
+ 0AAA 08                push A
+ 0AAB 5101              mov A,[_g_xBridgeMeasure+1]
+ 0AAD 08                push A
+ 0AAE 5102              mov A,[_g_xBridgeMeasure+2]
+ 0AB0 08                push A
+ 0AB1 5103              mov A,[_g_xBridgeMeasure+3]
+ 0AB3 08                push A
+ 0AB4 5000              mov A,0
+ 0AB6 08                push A
+ 0AB7 08                push A
+ 0AB8 5003              mov A,3
+ 0ABA 08                push A
+ 0ABB 50E8              mov A,-24
+ 0ABD 08                push A
+ 0ABE 62D000            mov REG[0xd0],>__r0
+ 0AC1 7C0000            xcall __mul_32X32_32
+ 0AC4 38FC              add SP,-4
+ 0AC6 18                pop A
+ 0AC7 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0ACA 5303              mov [_g_xBridgeMeasure+3],A
+ 0ACC 18                pop A
+ 0ACD 5302              mov [_g_xBridgeMeasure+2],A
+ 0ACF 18                pop A
+ 0AD0 5301              mov [_g_xBridgeMeasure+1],A
+ 0AD2 18                pop A
+ 0AD3 5300              mov [_g_xBridgeMeasure],A
+ 0AD5                   .dbline 311
+ 0AD5           ;       g_xBridgeMeasure.Vr *= Correct_Measure(&g_xBridgeCorrect.xVr, g_xBridgeMeasure.Vr);
+ 0AD5 5107              mov A,[_g_xBridgeMeasure+4+3]
+ 0AD7 62D000            mov REG[0xd0],>__r0
+ 0ADA 5300              mov [__r1],A
+ 0ADC 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0ADF 5106              mov A,[_g_xBridgeMeasure+4+2]
+ 0AE1 62D000            mov REG[0xd0],>__r0
+ 0AE4 08                push A
+ 0AE5 5100              mov A,[__r1]
+ 0AE7 08                push A
+ 0AE8 5000              mov A,>_g_xBridgeCorrect
+ 0AEA 08                push A
+ 0AEB 5000              mov A,<_g_xBridgeCorrect
+ 0AED 08                push A
+ 0AEE 915F              xcall _Correct_Measure
+ 0AF0 38FC              add SP,-4
+ 0AF2 62D000            mov REG[0xd0],>__r0
+ 0AF5 5100              mov A,[__r1]
+ 0AF7 5300              mov [__r3],A
+ 0AF9 5100              mov A,[__r0]
+ 0AFB 5300              mov [__r2],A
+ 0AFD 5000              mov A,0
+ 0AFF 08                push A
+ 0B00 08                push A
+ 0B01 5100              mov A,[__r2]
+ 0B03 08                push A
+ 0B04 5100              mov A,[__r3]
+ 0B06 08                push A
+ 0B07 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0B0A 5104              mov A,[_g_xBridgeMeasure+4]
+ 0B0C 08                push A
+ 0B0D 5105              mov A,[_g_xBridgeMeasure+4+1]
+ 0B0F 08                push A
+ 0B10 5106              mov A,[_g_xBridgeMeasure+4+2]
+ 0B12 08                push A
+ 0B13 5107              mov A,[_g_xBridgeMeasure+4+3]
+ 0B15 08                push A
+ 0B16 62D000            mov REG[0xd0],>__r0
+ 0B19 7C0000            xcall __mul_32X32_32
+ 0B1C 38FC              add SP,-4
+ 0B1E 18                pop A
+ 0B1F 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0B22 5307              mov [_g_xBridgeMeasure+4+3],A
+ 0B24 18                pop A
+ 0B25 5306              mov [_g_xBridgeMeasure+4+2],A
+ 0B27 18                pop A
+ 0B28 5305              mov [_g_xBridgeMeasure+4+1],A
+ 0B2A 18                pop A
+ 0B2B 5304              mov [_g_xBridgeMeasure+4],A
+ 0B2D                   .dbline 312
+ 0B2D           ;       if (g_bScanning == FALSE)
+ 0B2D 62D000            mov REG[0xd0],>_g_bScanning
+ 0B30 3C0000            cmp [_g_bScanning],0
+ 0B33 B0B4              jnz L84
+ 0B35                   .dbline 313
+ 0B35           ;       {
+ 0B35                   .dbline 314
+ 0B35           ;               g_xBridgeMeasure.Vz *= Correct_Measure(&g_xBridgeCorrect.xVz, g_xBridgeMeasure.Vz);
+ 0B35 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0B38 510F              mov A,[_g_xBridgeMeasure+12+3]
+ 0B3A 62D000            mov REG[0xd0],>__r0
+ 0B3D 5300              mov [__r1],A
+ 0B3F 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0B42 510E              mov A,[_g_xBridgeMeasure+12+2]
+ 0B44 62D000            mov REG[0xd0],>__r0
+ 0B47 08                push A
+ 0B48 5100              mov A,[__r1]
+ 0B4A 08                push A
+ 0B4B 5004              mov A,>_g_xBridgeCorrect+4
+ 0B4D 08                push A
+ 0B4E 5004              mov A,<_g_xBridgeCorrect+4
+ 0B50 08                push A
+ 0B51 90FC              xcall _Correct_Measure
+ 0B53 38FC              add SP,-4
+ 0B55 62D000            mov REG[0xd0],>__r0
+ 0B58 5100              mov A,[__r1]
+ 0B5A 5300              mov [__r3],A
+ 0B5C 5100              mov A,[__r0]
+ 0B5E 5300              mov [__r2],A
+ 0B60 5000              mov A,0
+ 0B62 08                push A
+ 0B63 08                push A
+ 0B64 5100              mov A,[__r2]
+ 0B66 08                push A
+ 0B67 5100              mov A,[__r3]
+ 0B69 08                push A
+ 0B6A 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0B6D 510C              mov A,[_g_xBridgeMeasure+12]
+ 0B6F 08                push A
+ 0B70 510D              mov A,[_g_xBridgeMeasure+12+1]
+ 0B72 08                push A
+ 0B73 510E              mov A,[_g_xBridgeMeasure+12+2]
+ 0B75 08                push A
+ 0B76 510F              mov A,[_g_xBridgeMeasure+12+3]
+ 0B78 08                push A
+ 0B79 62D000            mov REG[0xd0],>__r0
+ 0B7C 7C0000            xcall __mul_32X32_32
+ 0B7F 38FC              add SP,-4
+ 0B81 18                pop A
+ 0B82 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0B85 530F              mov [_g_xBridgeMeasure+12+3],A
+ 0B87 18                pop A
+ 0B88 530E              mov [_g_xBridgeMeasure+12+2],A
+ 0B8A 18                pop A
+ 0B8B 530D              mov [_g_xBridgeMeasure+12+1],A
+ 0B8D 18                pop A
+ 0B8E 530C              mov [_g_xBridgeMeasure+12],A
+ 0B90                   .dbline 315
+ 0B90           ;               g_xBridgeMeasure.Va *= Correct_Measure(&g_xBridgeCorrect.xVa, g_xBridgeMeasure.Va);
+ 0B90 510B              mov A,[_g_xBridgeMeasure+8+3]
+ 0B92 62D000            mov REG[0xd0],>__r0
+ 0B95 5300              mov [__r1],A
+ 0B97 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0B9A 510A              mov A,[_g_xBridgeMeasure+8+2]
+ 0B9C 62D000            mov REG[0xd0],>__r0
+ 0B9F 08                push A
+ 0BA0 5100              mov A,[__r1]
+ 0BA2 08                push A
+ 0BA3 5008              mov A,>_g_xBridgeCorrect+8
+ 0BA5 08                push A
+ 0BA6 5008              mov A,<_g_xBridgeCorrect+8
+ 0BA8 08                push A
+ 0BA9 90A4              xcall _Correct_Measure
+ 0BAB 38FC              add SP,-4
+ 0BAD 62D000            mov REG[0xd0],>__r0
+ 0BB0 5100              mov A,[__r1]
+ 0BB2 5300              mov [__r3],A
+ 0BB4 5100              mov A,[__r0]
+ 0BB6 5300              mov [__r2],A
+ 0BB8 5000              mov A,0
+ 0BBA 08                push A
+ 0BBB 08                push A
+ 0BBC 5100              mov A,[__r2]
+ 0BBE 08                push A
+ 0BBF 5100              mov A,[__r3]
+ 0BC1 08                push A
+ 0BC2 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0BC5 5108              mov A,[_g_xBridgeMeasure+8]
+ 0BC7 08                push A
+ 0BC8 5109              mov A,[_g_xBridgeMeasure+8+1]
+ 0BCA 08                push A
+ 0BCB 510A              mov A,[_g_xBridgeMeasure+8+2]
+ 0BCD 08                push A
+ 0BCE 510B              mov A,[_g_xBridgeMeasure+8+3]
+ 0BD0 08                push A
+ 0BD1 62D000            mov REG[0xd0],>__r0
+ 0BD4 7C0000            xcall __mul_32X32_32
+ 0BD7 38FC              add SP,-4
+ 0BD9 18                pop A
+ 0BDA 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0BDD 530B              mov [_g_xBridgeMeasure+8+3],A
+ 0BDF 18                pop A
+ 0BE0 530A              mov [_g_xBridgeMeasure+8+2],A
+ 0BE2 18                pop A
+ 0BE3 5309              mov [_g_xBridgeMeasure+8+1],A
+ 0BE5 18                pop A
+ 0BE6 5308              mov [_g_xBridgeMeasure+8],A
+ 0BE8                   .dbline 316
+ 0BE8           ;       }
+ 0BE8           L84:
+ 0BE8                   .dbline -2
+ 0BE8           L81:
+ 0BE8                   .dbline 0 ; func end
+ 0BE8 7F                ret
+ 0BE9                   .dbend
+ 0BE9                   .dbfunc e Adjust_Dds_Gain _Adjust_Dds_Gain fV
+ 0BE9           ;          bBand -> X-4
+ 0BE9           _Adjust_Dds_Gain::
+ 0BE9                   .dbline -1
+ 0BE9 10                push X
+ 0BEA 4F                mov X,SP
+ 0BEB                   .dbline 334
+ 0BEB           ; }
+ 0BEB           ; 
+ 0BEB           ; //-----------------------------------------------------------------------------
+ 0BEB           ; //  FUNCTION NAME:    Adjust_Dds_Gain()
+ 0BEB           ; //
+ 0BEB           ; //  DESCRIPTION:
+ 0BEB           ; //
+ 0BEB           ; //    Adjust PGA's gain for setting right DDS level
+ 0BEB           ; //
+ 0BEB           ; //  ARGUMENTS:
+ 0BEB           ; //    bBand   Integer describing band number
+ 0BEB           ; //
+ 0BEB           ; //  RETURNS:
+ 0BEB           ; //     none.
+ 0BEB           ; //
+ 0BEB           ; //-----------------------------------------------------------------------------
+ 0BEB           ; void Adjust_Dds_Gain (BYTE bBand)
+ 0BEB           ; {
+ 0BEB                   .dbline 335
+ 0BEB           ;       PGA_DDS_1_SetGain(g_xGainDds[g_bGainDDS[bBand]].bGain1);
+ 0BEB 62D000            mov REG[0xd0],>__r0
+ 0BEE 52FC              mov A,[X-4]
+ 0BF0 5300              mov [__r1],A
+ 0BF2 550000            mov [__r0],0
+ 0BF5 060000            add [__r1],<_g_bGainDDS
+ 0BF8 0E0000            adc [__r0],>_g_bGainDDS
+ 0BFB 5100              mov A,[__r0]
+ 0BFD 60D4              mov REG[0xd4],A
+ 0BFF 3E00              mvi A,[__r1]
+ 0C01 5300              mov [__r1],A
+ 0C03 550000            mov [__r0],0
+ 0C06 6500              asl [__r1]
+ 0C08 6B00              rlc [__r0]
+ 0C0A 060000            add [__r1],<_g_xGainDds
+ 0C0D 0E0000            adc [__r0],>_g_xGainDds
+ 0C10 5100              mov A,[__r0]
+ 0C12 10                push X
+ 0C13 5800              mov X,[__r1]
+ 0C15 28                romx
+ 0C16 20                pop X
+ 0C17 10                push X
+ 0C18 7C0000            xcall _PGA_DDS_1_SetGain
+ 0C1B 20                pop X
+ 0C1C                   .dbline 336
+ 0C1C           ;       PGA_DDS_2_SetGain(g_xGainDds[g_bGainDDS[bBand]].bGain2);
+ 0C1C 62D000            mov REG[0xd0],>__r0
+ 0C1F 52FC              mov A,[X-4]
+ 0C21 5300              mov [__r1],A
+ 0C23 550000            mov [__r0],0
+ 0C26 060000            add [__r1],<_g_bGainDDS
+ 0C29 0E0000            adc [__r0],>_g_bGainDDS
+ 0C2C 5100              mov A,[__r0]
+ 0C2E 60D4              mov REG[0xd4],A
+ 0C30 3E00              mvi A,[__r1]
+ 0C32 5300              mov [__r1],A
+ 0C34 550000            mov [__r0],0
+ 0C37 6500              asl [__r1]
+ 0C39 6B00              rlc [__r0]
+ 0C3B 060001            add [__r1],<_g_xGainDds+1
+ 0C3E 0E0001            adc [__r0],>_g_xGainDds+1
+ 0C41 5100              mov A,[__r0]
+ 0C43 10                push X
+ 0C44 5800              mov X,[__r1]
+ 0C46 28                romx
+ 0C47 20                pop X
+ 0C48 10                push X
+ 0C49 7C0000            xcall _PGA_DDS_2_SetGain
+ 0C4C 20                pop X
+ 0C4D                   .dbline -2
+ 0C4D           L92:
+ 0C4D 20                pop X
+ 0C4E                   .dbline 0 ; func end
+ 0C4E 7F                ret
+ 0C4F                   .dbsym l bBand -4 c
+ 0C4F                   .dbend
+ 0C4F                   .dbfunc s Correct_Measure _Correct_Measure fi
+ 0C4F                   .dbstruct 0 4 .10
+ 0C4F                   .dbfield 0 iSlope I
+ 0C4F                   .dbfield 2 iOffset I
+ 0C4F                   .dbend
+ 0C4F           ;             wX -> X-7
+ 0C4F           ;         pxCorr -> X-5
+ 0C4F           _Correct_Measure:
+ 0C4F                   .dbline -1
+ 0C4F 10                push X
+ 0C50 4F                mov X,SP
+ 0C51                   .dbline 355
+ 0C51           ; }
+ 0C51           ; 
+ 0C51           ; //-----------------------------------------------------------------------------
+ 0C51           ; //  FUNCTION NAME:    Correct_Measure()
+ 0C51           ; //
+ 0C51           ; //  DESCRIPTION:
+ 0C51           ; //
+ 0C51           ; //    Corrects measurement: y=mx+b
+ 0C51           ; //
+ 0C51           ; //  ARGUMENTS:
+ 0C51           ; //    pxCorr  Correction data (slope and offset)
+ 0C51           ; //            wX              Data to correct
+ 0C51           ; //
+ 0C51           ; //  RETURNS:
+ 0C51           ; //     none.
+ 0C51           ; //
+ 0C51           ; //-----------------------------------------------------------------------------
+ 0C51           ; static WORD Correct_Measure(CORRECT_DATA *pxCorr, WORD wX)
+ 0C51           ; {
+ 0C51                   .dbline 356
+ 0C51           ;       return (((LONG)pxCorr->iSlope*(LONG)wX)/SLOPE_CORRECT)+pxCorr->iOffset;
+ 0C51 62D000            mov REG[0xd0],>__r0
+ 0C54 52FC              mov A,[X-4]
+ 0C56 5300              mov [__r1],A
+ 0C58 52FB              mov A,[X-5]
+ 0C5A 60D4              mov REG[0xd4],A
+ 0C5C 3E00              mvi A,[__r1]
+ 0C5E 5300              mov [__r0],A
+ 0C60 3E00              mvi A,[__r1]
+ 0C62 5300              mov [__r3],A
+ 0C64 5100              mov A,[__r0]
+ 0C66 5300              mov [__r2],A
+ 0C68 470080            tst [__r2],-128
+ 0C6B A009              jz X8
+ 0C6D 5500FF            mov [__r1],-1
+ 0C70 5500FF            mov [__r0],-1
+ 0C73 800A              jmp X9
+ 0C75           X8:
+ 0C75 62D000            mov REG[0xd0],>__r0
+ 0C78 550000            mov [__r1],0
+ 0C7B 550000            mov [__r0],0
+ 0C7E           X9:
+ 0C7E 62D000            mov REG[0xd0],>__r0
+ 0C81 52FA              mov A,[X-6]
+ 0C83 5300              mov [__r7],A
+ 0C85 52F9              mov A,[X-7]
+ 0C87 5300              mov [__r6],A
+ 0C89 5000              mov A,0
+ 0C8B 08                push A
+ 0C8C 08                push A
+ 0C8D 5100              mov A,[__r6]
+ 0C8F 08                push A
+ 0C90 5100              mov A,[__r7]
+ 0C92 08                push A
+ 0C93 5100              mov A,[__r0]
+ 0C95 08                push A
+ 0C96 5100              mov A,[__r1]
+ 0C98 08                push A
+ 0C99 5100              mov A,[__r2]
+ 0C9B 08                push A
+ 0C9C 5100              mov A,[__r3]
+ 0C9E 08                push A
+ 0C9F 7C0000            xcall __mul_32X32_32
+ 0CA2 38FC              add SP,-4
+ 0CA4 18                pop A
+ 0CA5 5300              mov [__r3],A
+ 0CA7 18                pop A
+ 0CA8 5300              mov [__r2],A
+ 0CAA 18                pop A
+ 0CAB 5300              mov [__r1],A
+ 0CAD 18                pop A
+ 0CAE 5300              mov [__r0],A
+ 0CB0 5000              mov A,0
+ 0CB2 08                push A
+ 0CB3 08                push A
+ 0CB4 5027              mov A,39
+ 0CB6 08                push A
+ 0CB7 5010              mov A,16
+ 0CB9 08                push A
+ 0CBA 5100              mov A,[__r0]
+ 0CBC 08                push A
+ 0CBD 5100              mov A,[__r1]
+ 0CBF 08                push A
+ 0CC0 5100              mov A,[__r2]
+ 0CC2 08                push A
+ 0CC3 5100              mov A,[__r3]
+ 0CC5 08                push A
+ 0CC6 7C0000            xcall __divmod_32X32_32
+ 0CC9 18                pop A
+ 0CCA 5300              mov [__r3],A
+ 0CCC 18                pop A
+ 0CCD 5300              mov [__r2],A
+ 0CCF 18                pop A
+ 0CD0 5300              mov [__r1],A
+ 0CD2 18                pop A
+ 0CD3 5300              mov [__r0],A
+ 0CD5 38FC              add SP,-4
+ 0CD7 52FC              mov A,[X-4]
+ 0CD9 0102              add A,2
+ 0CDB 5300              mov [__r5],A
+ 0CDD 52FB              mov A,[X-5]
+ 0CDF 0900              adc A,0
+ 0CE1 60D4              mov REG[0xd4],A
+ 0CE3 3E00              mvi A,[__r5]
+ 0CE5 5300              mov [__r4],A
+ 0CE7 3E00              mvi A,[__r5]
+ 0CE9 5300              mov [__r7],A
+ 0CEB 5100              mov A,[__r4]
+ 0CED 5300              mov [__r6],A
+ 0CEF 470080            tst [__r6],-128
+ 0CF2 A009              jz X10
+ 0CF4 5500FF            mov [__r5],-1
+ 0CF7 5500FF            mov [__r4],-1
+ 0CFA 800A              jmp X11
+ 0CFC           X10:
+ 0CFC 62D000            mov REG[0xd0],>__r0
+ 0CFF 550000            mov [__r5],0
+ 0D02 550000            mov [__r4],0
+ 0D05           X11:
+ 0D05 62D000            mov REG[0xd0],>__r0
+ 0D08 5100              mov A,[__r7]
+ 0D0A 0400              add [__r3],A
+ 0D0C 5100              mov A,[__r6]
+ 0D0E 0C00              adc [__r2],A
+ 0D10 5100              mov A,[__r5]
+ 0D12 0C00              adc [__r1],A
+ 0D14 5100              mov A,[__r4]
+ 0D16 0C00              adc [__r0],A
+ 0D18 5100              mov A,[__r3]
+ 0D1A 5300              mov [__r1],A
+ 0D1C 5100              mov A,[__r2]
+ 0D1E 5300              mov [__r0],A
+ 0D20                   .dbline -2
+ 0D20           L94:
+ 0D20 20                pop X
+ 0D21                   .dbline 0 ; func end
+ 0D21 7F                ret
+ 0D22                   .dbsym l wX -7 i
+ 0D22                   .dbsym l pxCorr -5 pS[.10]
+ 0D22                   .dbend
+ 0D22                   .dbfunc s Calc_Correct _Calc_Correct fV
+ 0D22                   .dbstruct 0 8 .13
+ 0D22                   .dbfield 0 wX0 i
+ 0D22                   .dbfield 2 wX1 i
+ 0D22                   .dbfield 4 wY0 i
+ 0D22                   .dbfield 6 wY1 i
+ 0D22                   .dbend
+ 0D22           ;           lTmp -> X+0
+ 0D22           ;         pxVect -> X-7
+ 0D22           ;         pxCorr -> X-5
+ 0D22           _Calc_Correct:
+ 0D22                   .dbline -1
+ 0D22 10                push X
+ 0D23 4F                mov X,SP
+ 0D24 3804              add SP,4
+ 0D26                   .dbline 375
+ 0D26           ; }
+ 0D26           ; 
+ 0D26           ; //-----------------------------------------------------------------------------
+ 0D26           ; //  FUNCTION NAME:    Calc_Correct()
+ 0D26           ; //
+ 0D26           ; //  DESCRIPTION:
+ 0D26           ; //
+ 0D26           ; //    Converts two-point calibration vector to slope and offset
+ 0D26           ; //
+ 0D26           ; //  ARGUMENTS:
+ 0D26           ; //    pxCorr  Correction data (slope and offset)
+ 0D26           ; //            pxVect  Calibration vector
+ 0D26           ; //
+ 0D26           ; //  RETURNS:
+ 0D26           ; //     none.
+ 0D26           ; //
+ 0D26           ; //-----------------------------------------------------------------------------
+ 0D26           ; static void Calc_Correct (CORRECT_DATA *pxCorr, CALIB_VECTOR *pxVect)
+ 0D26           ; {
+ 0D26                   .dbline 377
+ 0D26           ;       LONG lTmp;
+ 0D26           ;       lTmp = (LONG)pxVect->wY1-(LONG)pxVect->wY0;
+ 0D26 62D000            mov REG[0xd0],>__r0
+ 0D29 52FA              mov A,[X-6]
+ 0D2B 0104              add A,4
+ 0D2D 5300              mov [__r1],A
+ 0D2F 52F9              mov A,[X-7]
+ 0D31 0900              adc A,0
+ 0D33 60D4              mov REG[0xd4],A
+ 0D35 3E00              mvi A,[__r1]
+ 0D37 5300              mov [__r0],A
+ 0D39 3E00              mvi A,[__r1]
+ 0D3B 5300              mov [__r3],A
+ 0D3D 5100              mov A,[__r0]
+ 0D3F 5300              mov [__r2],A
+ 0D41 550000            mov [__r1],0
+ 0D44 550000            mov [__r0],0
+ 0D47 52FA              mov A,[X-6]
+ 0D49 0106              add A,6
+ 0D4B 5300              mov [__r5],A
+ 0D4D 52F9              mov A,[X-7]
+ 0D4F 0900              adc A,0
+ 0D51 60D4              mov REG[0xd4],A
+ 0D53 3E00              mvi A,[__r5]
+ 0D55 5300              mov [__r4],A
+ 0D57 3E00              mvi A,[__r5]
+ 0D59 5300              mov [__r7],A
+ 0D5B 5100              mov A,[__r4]
+ 0D5D 5300              mov [__r6],A
+ 0D5F 5100              mov A,[__r7]
+ 0D61 1200              sub A,[__r3]
+ 0D63 5403              mov [X+3],A
+ 0D65 5100              mov A,[__r6]
+ 0D67 1A00              sbb A,[__r2]
+ 0D69 5402              mov [X+2],A
+ 0D6B 5000              mov A,0
+ 0D6D 1A00              sbb A,[__r1]
+ 0D6F 5401              mov [X+1],A
+ 0D71 5000              mov A,0
+ 0D73 1A00              sbb A,[__r0]
+ 0D75 5400              mov [X+0],A
+ 0D77                   .dbline 378
+ 0D77           ;       lTmp *= (LONG)SLOPE_CORRECT;
+ 0D77 5200              mov A,[X+0]
+ 0D79 08                push A
+ 0D7A 5201              mov A,[X+1]
+ 0D7C 08                push A
+ 0D7D 5202              mov A,[X+2]
+ 0D7F 08                push A
+ 0D80 5203              mov A,[X+3]
+ 0D82 08                push A
+ 0D83 5000              mov A,0
+ 0D85 08                push A
+ 0D86 08                push A
+ 0D87 5027              mov A,39
+ 0D89 08                push A
+ 0D8A 5010              mov A,16
+ 0D8C 08                push A
+ 0D8D 7C0000            xcall __mul_32X32_32
+ 0D90 38FC              add SP,-4
+ 0D92 18                pop A
+ 0D93 5403              mov [X+3],A
+ 0D95 18                pop A
+ 0D96 5402              mov [X+2],A
+ 0D98 18                pop A
+ 0D99 5401              mov [X+1],A
+ 0D9B 18                pop A
+ 0D9C 5400              mov [X+0],A
+ 0D9E                   .dbline 379
+ 0D9E           ;       pxCorr->iSlope = lTmp/((LONG)pxVect->wX1-(LONG)pxVect->wX0);
+ 0D9E 52FA              mov A,[X-6]
+ 0DA0 5300              mov [__r1],A
+ 0DA2 52F9              mov A,[X-7]
+ 0DA4 60D4              mov REG[0xd4],A
+ 0DA6 3E00              mvi A,[__r1]
+ 0DA8 5300              mov [__r0],A
+ 0DAA 3E00              mvi A,[__r1]
+ 0DAC 5300              mov [__r3],A
+ 0DAE 5100              mov A,[__r0]
+ 0DB0 5300              mov [__r2],A
+ 0DB2 550000            mov [__r1],0
+ 0DB5 550000            mov [__r0],0
+ 0DB8 52FA              mov A,[X-6]
+ 0DBA 0102              add A,2
+ 0DBC 5300              mov [__r5],A
+ 0DBE 52F9              mov A,[X-7]
+ 0DC0 0900              adc A,0
+ 0DC2 60D4              mov REG[0xd4],A
+ 0DC4 3E00              mvi A,[__r5]
+ 0DC6 5300              mov [__r4],A
+ 0DC8 3E00              mvi A,[__r5]
+ 0DCA 5300              mov [__r7],A
+ 0DCC 5100              mov A,[__r4]
+ 0DCE 5300              mov [__r6],A
+ 0DD0 5100              mov A,[__r7]
+ 0DD2 1200              sub A,[__r3]
+ 0DD4 5300              mov [__r3],A
+ 0DD6 5100              mov A,[__r6]
+ 0DD8 1A00              sbb A,[__r2]
+ 0DDA 5300              mov [__r2],A
+ 0DDC 5000              mov A,0
+ 0DDE 1A00              sbb A,[__r1]
+ 0DE0 5300              mov [__r1],A
+ 0DE2 5000              mov A,0
+ 0DE4 1A00              sbb A,[__r0]
+ 0DE6 08                push A
+ 0DE7 5100              mov A,[__r1]
+ 0DE9 08                push A
+ 0DEA 5100              mov A,[__r2]
+ 0DEC 08                push A
+ 0DED 5100              mov A,[__r3]
+ 0DEF 08                push A
+ 0DF0 5200              mov A,[X+0]
+ 0DF2 08                push A
+ 0DF3 5201              mov A,[X+1]
+ 0DF5 08                push A
+ 0DF6 5202              mov A,[X+2]
+ 0DF8 08                push A
+ 0DF9 5203              mov A,[X+3]
+ 0DFB 08                push A
+ 0DFC 7C0000            xcall __divmod_32X32_32
+ 0DFF 18                pop A
+ 0E00 5300              mov [__r3],A
+ 0E02 18                pop A
+ 0E03 5300              mov [__r2],A
+ 0E05 18                pop A
+ 0E06 18                pop A
+ 0E07 38FC              add SP,-4
+ 0E09 5100              mov A,[__r3]
+ 0E0B 5300              mov [__r1],A
+ 0E0D 5100              mov A,[__r2]
+ 0E0F 5300              mov [__r0],A
+ 0E11 52FC              mov A,[X-4]
+ 0E13 5300              mov [__r3],A
+ 0E15 52FB              mov A,[X-5]
+ 0E17 60D5              mov REG[0xd5],A
+ 0E19 5100              mov A,[__r0]
+ 0E1B 3F00              mvi [__r3],A
+ 0E1D 5100              mov A,[__r1]
+ 0E1F 3F00              mvi [__r3],A
+ 0E21                   .dbline 380
+ 0E21           ;       pxCorr->iOffset = (LONG)pxVect->wY1-((LONG)((LONG)pxCorr->iSlope*pxVect->wX1)/(LONG)SLOPE_CORRECT);
+ 0E21 52FA              mov A,[X-6]
+ 0E23 0102              add A,2
+ 0E25 5300              mov [__r1],A
+ 0E27 52F9              mov A,[X-7]
+ 0E29 0900              adc A,0
+ 0E2B 60D4              mov REG[0xd4],A
+ 0E2D 3E00              mvi A,[__r1]
+ 0E2F 5300              mov [__r0],A
+ 0E31 3E00              mvi A,[__r1]
+ 0E33 5300              mov [__r3],A
+ 0E35 5100              mov A,[__r0]
+ 0E37 5300              mov [__r2],A
+ 0E39 550000            mov [__r1],0
+ 0E3C 550000            mov [__r0],0
+ 0E3F 52FC              mov A,[X-4]
+ 0E41 5300              mov [__r5],A
+ 0E43 52FB              mov A,[X-5]
+ 0E45 60D4              mov REG[0xd4],A
+ 0E47 3E00              mvi A,[__r5]
+ 0E49 5300              mov [__r4],A
+ 0E4B 3E00              mvi A,[__r5]
+ 0E4D 5300              mov [__r7],A
+ 0E4F 5100              mov A,[__r4]
+ 0E51 5300              mov [__r6],A
+ 0E53 470080            tst [__r6],-128
+ 0E56 A009              jz X12
+ 0E58 5500FF            mov [__r5],-1
+ 0E5B 5500FF            mov [__r4],-1
+ 0E5E 800A              jmp X13
+ 0E60           X12:
+ 0E60 62D000            mov REG[0xd0],>__r0
+ 0E63 550000            mov [__r5],0
+ 0E66 550000            mov [__r4],0
+ 0E69           X13:
+ 0E69 62D000            mov REG[0xd0],>__r0
+ 0E6C 5100              mov A,[__r0]
+ 0E6E 08                push A
+ 0E6F 5100              mov A,[__r1]
+ 0E71 08                push A
+ 0E72 5100              mov A,[__r2]
+ 0E74 08                push A
+ 0E75 5100              mov A,[__r3]
+ 0E77 08                push A
+ 0E78 5100              mov A,[__r4]
+ 0E7A 08                push A
+ 0E7B 5100              mov A,[__r5]
+ 0E7D 08                push A
+ 0E7E 5100              mov A,[__r6]
+ 0E80 08                push A
+ 0E81 5100              mov A,[__r7]
+ 0E83 08                push A
+ 0E84 7C0000            xcall __mul_32X32_32
+ 0E87 38FC              add SP,-4
+ 0E89 18                pop A
+ 0E8A 5300              mov [__r3],A
+ 0E8C 18                pop A
+ 0E8D 5300              mov [__r2],A
+ 0E8F 18                pop A
+ 0E90 5300              mov [__r1],A
+ 0E92 18                pop A
+ 0E93 5300              mov [__r0],A
+ 0E95 5000              mov A,0
+ 0E97 08                push A
+ 0E98 08                push A
+ 0E99 5027              mov A,39
+ 0E9B 08                push A
+ 0E9C 5010              mov A,16
+ 0E9E 08                push A
+ 0E9F 5100              mov A,[__r0]
+ 0EA1 08                push A
+ 0EA2 5100              mov A,[__r1]
+ 0EA4 08                push A
+ 0EA5 5100              mov A,[__r2]
+ 0EA7 08                push A
+ 0EA8 5100              mov A,[__r3]
+ 0EAA 08                push A
+ 0EAB 7C0000            xcall __divmod_32X32_32
+ 0EAE 18                pop A
+ 0EAF 5300              mov [__r3],A
+ 0EB1 18                pop A
+ 0EB2 5300              mov [__r2],A
+ 0EB4 18                pop A
+ 0EB5 18                pop A
+ 0EB6 38FC              add SP,-4
+ 0EB8 52FA              mov A,[X-6]
+ 0EBA 0106              add A,6
+ 0EBC 5300              mov [__r5],A
+ 0EBE 52F9              mov A,[X-7]
+ 0EC0 0900              adc A,0
+ 0EC2 60D4              mov REG[0xd4],A
+ 0EC4 3E00              mvi A,[__r5]
+ 0EC6 5300              mov [__r4],A
+ 0EC8 3E00              mvi A,[__r5]
+ 0ECA 5300              mov [__r7],A
+ 0ECC 5100              mov A,[__r4]
+ 0ECE 5300              mov [__r6],A
+ 0ED0 5100              mov A,[__r7]
+ 0ED2 1200              sub A,[__r3]
+ 0ED4 5300              mov [__r3],A
+ 0ED6 5100              mov A,[__r6]
+ 0ED8 1A00              sbb A,[__r2]
+ 0EDA 5300              mov [__r2],A
+ 0EDC 5100              mov A,[__r3]
+ 0EDE 5300              mov [__r1],A
+ 0EE0 5100              mov A,[__r2]
+ 0EE2 5300              mov [__r0],A
+ 0EE4 52FC              mov A,[X-4]
+ 0EE6 0102              add A,2
+ 0EE8 5300              mov [__r3],A
+ 0EEA 52FB              mov A,[X-5]
+ 0EEC 0900              adc A,0
+ 0EEE 60D5              mov REG[0xd5],A
+ 0EF0 5100              mov A,[__r0]
+ 0EF2 3F00              mvi [__r3],A
+ 0EF4 5100              mov A,[__r1]
+ 0EF6 3F00              mvi [__r3],A
+ 0EF8                   .dbline -2
+ 0EF8           L95:
+ 0EF8 38FC              add SP,-4
+ 0EFA 20                pop X
+ 0EFB                   .dbline 0 ; func end
+ 0EFB 7F                ret
+ 0EFC                   .dbsym l lTmp 0 L
+ 0EFC                   .dbsym l pxVect -7 pS[.13]
+ 0EFC                   .dbsym l pxCorr -5 pS[.10]
+ 0EFC                   .dbend
+ 0EFC                   .dbfunc s WaitLoadUser _WaitLoadUser fc
+ 0EFC           ;        pszText -> X-5
+ 0EFC           _WaitLoadUser:
+ 0EFC                   .dbline -1
+ 0EFC 10                push X
+ 0EFD 4F                mov X,SP
+ 0EFE                   .dbline 398
+ 0EFE           ; }
+ 0EFE           ; 
+ 0EFE           ; //-----------------------------------------------------------------------------
+ 0EFE           ; //  FUNCTION NAME:    WaitLoadUser()
+ 0EFE           ; //
+ 0EFE           ; //  DESCRIPTION:
+ 0EFE           ; //
+ 0EFE           ; //    Wait for load and user action
+ 0EFE           ; //
+ 0EFE           ; //  ARGUMENTS:
+ 0EFE           ; //    pszText Text in display
+ 0EFE           ; //
+ 0EFE           ; //  RETURNS:
+ 0EFE           ; //     FALSE user abort
+ 0EFE           ; //
+ 0EFE           ; //-----------------------------------------------------------------------------
+ 0EFE           ; static BOOL WaitLoadUser (const char *pszText)
+ 0EFE           ; {
+ 0EFE                   .dbline 399
+ 0EFE           ;       LCD_Position(0, 0);
+ 0EFE 10                push X
+ 0EFF 5000              mov A,0
+ 0F01 5C                mov X,A
+ 0F02 7C0000            xcall _LCD_Position
+ 0F05 20                pop X
+ 0F06                   .dbline 400
+ 0F06           ;       LCD_PrCString(gConfigCalibStr);
+ 0F06 10                push X
+ 0F07 5000              mov A,>_gConfigCalibStr
+ 0F09 08                push A
+ 0F0A 5000              mov A,<_gConfigCalibStr
+ 0F0C 5C                mov X,A
+ 0F0D 18                pop A
+ 0F0E 7C0000            xcall _LCD_PrCString
+ 0F11 20                pop X
+ 0F12                   .dbline 401
+ 0F12           ;       LCD_Position(1, 0);
+ 0F12 10                push X
+ 0F13 5700              mov X,0
+ 0F15 5001              mov A,1
+ 0F17 7C0000            xcall _LCD_Position
+ 0F1A 20                pop X
+ 0F1B                   .dbline 402
+ 0F1B           ;       LCD_PrCString(pszText);
+ 0F1B 10                push X
+ 0F1C 52FB              mov A,[X-5]
+ 0F1E 08                push A
+ 0F1F 52FC              mov A,[X-4]
+ 0F21 5C                mov X,A
+ 0F22 18                pop A
+ 0F23 7C0000            xcall _LCD_PrCString
+ 0F26 20                pop X
+ 0F27                   .dbline 403
+ 0F27           ;       BUZZ_Beep();
+ 0F27 7C0000            xcall _BUZZ_Beep
+ 0F2A                   .dbline 404
+ 0F2A           ;       if ( KEYPAD_WaitKey(TIME_WAIT_KEY_S) == KBD_UP )
+ 0F2A 501E              mov A,30
+ 0F2C 08                push A
+ 0F2D 7C0000            xcall _KEYPAD_WaitKey
+ 0F30 38FF              add SP,-1
+ 0F32 62D000            mov REG[0xd0],>__r0
+ 0F35 3905              cmp A,5
+ 0F37 B005              jnz L97
+ 0F39                   .dbline 405
+ 0F39           ;               return FALSE;
+ 0F39 5000              mov A,0
+ 0F3B 8032              xjmp L96
+ 0F3D           L97:
+ 0F3D                   .dbline 406
+ 0F3D           ;       DISP_Clear();
+ 0F3D 7C0000            xcall _DISP_Clear
+ 0F40                   .dbline 407
+ 0F40           ;       LCD_Position(0, 0);
+ 0F40 10                push X
+ 0F41 5000              mov A,0
+ 0F43 5C                mov X,A
+ 0F44 7C0000            xcall _LCD_Position
+ 0F47 20                pop X
+ 0F48                   .dbline 408
+ 0F48           ;       LCD_PrCString(gConfigCalibStr);
+ 0F48 10                push X
+ 0F49 5000              mov A,>_gConfigCalibStr
+ 0F4B 08                push A
+ 0F4C 5000              mov A,<_gConfigCalibStr
+ 0F4E 5C                mov X,A
+ 0F4F 18                pop A
+ 0F50 7C0000            xcall _LCD_PrCString
+ 0F53 20                pop X
+ 0F54                   .dbline 409
+ 0F54           ;       LCD_Position(1, 0);
+ 0F54 10                push X
+ 0F55 5700              mov X,0
+ 0F57 5001              mov A,1
+ 0F59 7C0000            xcall _LCD_Position
+ 0F5C 20                pop X
+ 0F5D                   .dbline 410
+ 0F5D           ;       LCD_PrCString(gInProgressStr);
+ 0F5D 10                push X
+ 0F5E 5000              mov A,>_gInProgressStr
+ 0F60 08                push A
+ 0F61 5000              mov A,<_gInProgressStr
+ 0F63 5C                mov X,A
+ 0F64 18                pop A
+ 0F65 7C0000            xcall _LCD_PrCString
+ 0F68 20                pop X
+ 0F69                   .dbline 412
+ 0F69           ; 
+ 0F69           ;       return TRUE;
+ 0F69 62D000            mov REG[0xd0],>__r0
+ 0F6C 5001              mov A,1
+ 0F6E                   .dbline -2
+ 0F6E           L96:
+ 0F6E 20                pop X
+ 0F6F                   .dbline 0 ; func end
+ 0F6F 7F                ret
+ 0F70                   .dbsym l pszText -5 pkc
+ 0F70                   .dbend
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\calibrate_reflectometer.c
+ 0000           _xCalVa:
+ 0000 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000  .word 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+ 003C 00000000000000000000      .word 0,0,0,0,0
+ 0046 00000000000000000000      .word 0,0,0,0,0
+ 0050 00000000000000000000      .word 0,0,0,0,0
+ 005A 00000000000000000000      .word 0,0,0,0,0
+ 0064 00000000000000000000      .word 0,0,0,0,0
+ 006E 0000              .byte 0,0
+ 0070                   .dbsym s xCalVa _xCalVa A[112:14]S[.13]
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\calibrate_reflectometer.c
+ 0000           _xCalVr:
+ 0000 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000  .word 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+ 003C 00000000000000000000      .word 0,0,0,0,0
+ 0046 00000000000000000000      .word 0,0,0,0,0
+ 0050 00000000000000000000      .word 0,0,0,0,0
+ 005A 00000000000000000000      .word 0,0,0,0,0
+ 0064 00000000000000000000      .word 0,0,0,0,0
+ 006E 0000              .byte 0,0
+ 0070                   .dbsym s xCalVr _xCalVr A[112:14]S[.13]
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\calibrate_reflectometer.c
+ 0000           _xCalVz:
+ 0000 000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000  .word 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+ 003C 00000000000000000000      .word 0,0,0,0,0
+ 0046 00000000000000000000      .word 0,0,0,0,0
+ 0050 00000000000000000000      .word 0,0,0,0,0
+ 005A 00000000000000000000      .word 0,0,0,0,0
+ 0064 00000000000000000000      .word 0,0,0,0,0
+ 006E 0000              .byte 0,0
+ 0070                   .dbsym s xCalVz _xCalVz A[112:14]S[.13]

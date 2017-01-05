@@ -1,0 +1,121 @@
+XH
+H 2 areas 25 global symbols
+M adcinc12.asm
+S ADCINC12_cTimerU Ref0000
+S ADCINC12_fIncr Ref0000
+S ADCINC12_iIncr Ref0000
+S ADCINC12_bIncrC Ref0000
+S ADCINC12_cCounterU Ref0000
+A text size 0 flags 0
+dbfile lib/adcinc12.asm
+dbfunc 0 ? 0 I
+dbfile memory.inc
+dbfunc 0 ? 0 I
+dbfile lib/adcinc12.asm
+dbfunc 0 ? 0 I
+dbfile C:/ARCHIV~1/Cypress/Common/CYPRES~3/tools/include/CY8C29~1/m8c.inc
+dbfunc 0 ? 0 I
+dbfile lib/adcinc12.asm
+dbfunc 0 ? 0 I
+dbfile ./lib/ADCINC12.inc
+dbfunc 0 ? 0 I
+A UserModules size 69 flags 0
+dbfile lib/adcinc12.asm
+dbfunc 0 ? 0 I
+dbline 54 0
+dbline 55 1
+dbline 56 2
+dbline 57 4
+dbline 58 5
+dbline 59 7
+dbline 5A 9
+dbline 5B B
+dbline 5C D
+dbline 5D E
+dbline 5E 11
+dbline 5F 13
+dbline 79 14
+dbline 7B 17
+dbline 9A 18
+dbline 9B 1B
+dbline 9C 1D
+dbline 9D 20
+dbline 9F 23
+dbline A1 26
+dbline A3 29
+dbline A4 2C
+dbline A5 2F
+dbline A6 32
+dbline A7 35
+dbline A8 38
+dbline AA 3B
+dbline C8 3C
+dbline C9 3F
+dbline CA 42
+dbline CB 45
+dbline CC 46
+dbline CE 47
+dbline CF 4A
+dbline D1 4D
+dbline D3 50
+dbline D5 53
+dbline F7 54
+dbline F8 57
+dbline FA 59
+dbline 11A 5A
+dbline 11B 5D
+dbline 11C 5F
+dbline 11E 61
+dbline 13B 62
+dbline 13C 65
+dbline 13E 68
+S ADCINC12_fIsData Def0054
+S ADCINC12_Stop Def0014
+S $sb$ADCINC12_fIsData Def0054
+S $se$ADCINC12_fIsData Def005A
+S _ADCINC12_ClearFlag Def0062
+S $sb$ADCINC12_Stop Def0014
+S $se$ADCINC12_Stop Def0018
+S ADCINC12_GetSamples Def0018
+S _ADCINC12_fIsData Def0054
+S ADCINC12_iGetData Def005A
+S _ADCINC12_Stop Def0014
+S ADCINC12_Start Def0000
+S $sb$ADCINC12_GetSamples Def0018
+S $se$ADCINC12_GetSamples Def003C
+S ADCINC12_fIsDataAvailable Def0054
+S $sb$ADCINC12_iGetData Def005A
+S $se$ADCINC12_iGetData Def0062
+S $sb$ADCINC12_Start Def0000
+S ADCINC12_StopAD Def003C
+S $se$ADCINC12_Start Def0014
+S ADCINC12_SetPower Def0000
+S $sb$ADCINC12_StopAD Def003C
+S $se$ADCINC12_StopAD Def0054
+S _ADCINC12_GetSamples Def0018
+S ADCINC12_ClearFlag Def0062
+S _ADCINC12_iGetData Def005A
+S _ADCINC12_Start Def0000
+S _ADCINC12_fIsDataAvailable Def0054
+S $sb$ADCINC12_ClearFlag Def0062
+S $se$ADCINC12_ClearFlag Def0069
+S _ADCINC12_StopAD Def003C
+S _ADCINC12_SetPower Def0000
+T 00 00 10 4F 21 03 08 5D 83 21 FC 2B 00 60 83 18
+R 00 00 00 01
+T 00 0E 20 70 3F 71 C0 7F 41 83 FC 7F 62 D0 00 00
+R 00 00 00 01 4B 0E 00 03
+T 00 1B 53 00 00 43 E1 01 43 E1 02 55 00 00 01 43
+R 00 00 00 01 0B 03 00 03 0B 0C 00 00
+T 00 27 82 20 43 83 10 55 00 00 E0 62 21 FF 62 25
+R 00 00 00 01 0B 08 00 04
+T 00 34 FF 62 23 01 55 00 00 00 7F 62 D0 00 00 62
+R 00 00 00 01 0B 07 00 01 4B 0D 00 03
+T 00 40 23 00 62 27 00 40 40 41 E1 FE 41 E1 FD 43
+R 00 00 00 01
+T 00 4E 82 20 43 83 10 7F 62 D0 00 00 51 00 00 7F
+R 00 00 00 01 4B 0A 00 03 0B 0D 00 01
+T 00 5A 62 D0 00 00 58 00 00 51 00 01 7F 62 D0
+R 00 00 00 01 4B 04 00 03 0B 07 00 02 0B 0A 00 02
+T 00 64 00 00 55 00 00 00 7F
+R 00 00 00 01 4B 02 00 03 0B 05 00 01

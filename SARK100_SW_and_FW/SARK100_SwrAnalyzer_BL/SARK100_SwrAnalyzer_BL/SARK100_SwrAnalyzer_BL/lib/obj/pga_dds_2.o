@@ -1,0 +1,75 @@
+XH
+H 2 areas E global symbols
+M pga_dds_2.asm
+A text size 0 flags 0
+dbfile lib/pga_dds_2.asm
+dbfunc 0 ? 0 I
+dbfile memory.inc
+dbfunc 0 ? 0 I
+dbfile lib/pga_dds_2.asm
+dbfunc 0 ? 0 I
+dbfile C:/ARCHIV~1/Cypress/Common/CYPRES~3/tools/include/CY8C29~1/m8c.inc
+dbfunc 0 ? 0 I
+dbfile lib/pga_dds_2.asm
+dbfunc 0 ? 0 I
+dbfile ./lib/PGA_DDS_2.inc
+dbfunc 0 ? 0 I
+A UserModules size 40 flags 0
+dbfile lib/pga_dds_2.asm
+dbfunc 0 ? 0 I
+dbline 6D 0
+dbline 6E 2
+dbline 70 3
+dbline 71 4
+dbline 72 6
+dbline 73 8
+dbline 74 A
+dbline 75 C
+dbline 76 F
+dbline 77 11
+dbline 96 12
+dbline 97 14
+dbline 99 15
+dbline 9A 16
+dbline 9B 18
+dbline 9C 1A
+dbline 9D 1D
+dbline 9E 1F
+dbline 9F 22
+dbline A0 24
+dbline A1 26
+dbline A2 29
+dbline A3 2B
+dbline A6 2C
+dbline A7 2F
+dbline A8 31
+dbline A9 33
+dbline AA 36
+dbline AB 39
+dbline AC 3B
+dbline C7 3C
+dbline C9 3F
+S _PGA_DDS_2_Stop Def003C
+S _PGA_DDS_2_SetGain Def0012
+S PGA_DDS_2_Start Def0000
+S $sb$PGA_DDS_2_Start Def0000
+S $se$PGA_DDS_2_Start Def0012
+S PGA_DDS_2_SetPower Def0000
+S _PGA_DDS_2_Start Def0000
+S _PGA_DDS_2_SetPower Def0000
+S PGA_DDS_2_Stop Def003C
+S PGA_DDS_2_SetGain Def0012
+S $sb$PGA_DDS_2_Stop Def003C
+S $se$PGA_DDS_2_Stop Def0040
+S $sb$PGA_DDS_2_SetGain Def0012
+S $se$PGA_DDS_2_SetGain Def003C
+T 00 00 21 03 4F 08 5D 7B 21 FC 2B 00 60 7B 18 70
+R 00 00 00 01
+T 00 0E 3F 71 C0 7F 21 FC 4F 08 5D 79 21 07 48 00
+R 00 00 00 01
+T 00 1C 04 B0 0E 41 78 FE 2B 00 60 79 18 70 3F 71
+R 00 00 00 01
+T 00 2A C0 7F 27 00 18 2B 00 60 79 43 78 01 18 70
+R 00 00 00 01
+T 00 38 3F 71 C0 7F 41 7B FC 7F
+R 00 00 00 01

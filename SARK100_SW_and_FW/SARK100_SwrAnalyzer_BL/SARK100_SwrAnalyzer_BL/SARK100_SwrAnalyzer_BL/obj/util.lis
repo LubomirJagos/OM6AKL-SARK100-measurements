@@ -1,0 +1,688 @@
+ 0000                   cpu LMM
+                        .module util.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./util.c
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\util.c
+ 0000                   .dbfunc e Delay_Ms _Delay_Ms fV
+ 0000           ;             ms -> X-5
+ 0000           _Delay_Ms::
+ 0000                   .dbline -1
+ 0000 10                push X
+ 0001 4F                mov X,SP
+ 0002                   .dbline 61
+ 0002           ; //*****************************************************************************/
+ 0002           ; //  This file is a part of the "SARK100 SWR Analyzer firmware"
+ 0002           ; //
+ 0002           ; //  Copyright © 2010 Melchor Varela - EA4FRB.  All rights reserved.
+ 0002           ; //  Melchor Varela, Madrid, Spain.
+ 0002           ; //  melchor.varela@gmail.com
+ 0002           ; //
+ 0002           ; //  "SARK100 SWR Analyzer firmware" is free software: you can redistribute it
+ 0002           ; //  and/or modify it under the terms of the GNU General Public License as
+ 0002           ; //  published by the Free Software Foundation, either version 3 of the License,
+ 0002           ; //  or (at your option) any later version.
+ 0002           ; //
+ 0002           ; //  "SARK100 SWR Analyzer firmware" is distributed in the hope that it will be
+ 0002           ; //  useful,  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 0002           ; //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ 0002           ; //  GNU General Public License for more details.
+ 0002           ; //
+ 0002           ; //  You should have received a copy of the GNU General Public License
+ 0002           ; //  along with "SARK100 SWR Analyzer firmware".  If not,
+ 0002           ; //  see <http://www.gnu.org/licenses/>.
+ 0002           ; //*****************************************************************************/
+ 0002           ; //*****************************************************************************/
+ 0002           ; //
+ 0002           ; //    PROJECT:        SARK100 SWR Analyzer
+ 0002           ; //    FILE NAME:      UTIL.C
+ 0002           ; //    AUTHOR:         EA4FRB - Melchor Varela
+ 0002           ; //
+ 0002           ; //    DESCRIPTION
+ 0002           ; //
+ 0002           ; //    Utility functions
+ 0002           ; //
+ 0002           ; //    HISTORY
+ 0002           ; //
+ 0002           ; //    NAME    DATE            REMARKS
+ 0002           ; //
+ 0002           ; //    MVM             DEC 2009        Creation
+ 0002           ; //
+ 0002           ; //*****************************************************************************/
+ 0002           ; 
+ 0002           ; #include <m8c.h>                      // Part specific constants and macros
+ 0002           ; #include "PSoCAPI.h"                  // PSoC API definitions for all User Modules
+ 0002           ; #include "psocgpioint.h"
+ 0002           ; #include "glb_data.h"
+ 0002           ; #include "util.h"
+ 0002           ; 
+ 0002           ; //-----------------------------------------------------------------------------
+ 0002           ; //  FUNCTION NAME:    Delay_Ms
+ 0002           ; //
+ 0002           ; //  DESCRIPTION:
+ 0002           ; //
+ 0002           ; //    Wait for a number of ms
+ 0002           ; //
+ 0002           ; //  ARGUMENTS:
+ 0002           ; //     ms     Milliseconds
+ 0002           ; //
+ 0002           ; //  RETURNS:
+ 0002           ; //     none.
+ 0002           ; //
+ 0002           ; //-----------------------------------------------------------------------------
+ 0002           ; void Delay_Ms(WORD ms)
+ 0002           ; {
+ 0002                   .dbline 62
+ 0002           ;       Timer16_Delay_WritePeriod((ms * 33)+1);
+ 0002 62D000            mov REG[0xd0],>__r0
+ 0005 52FB              mov A,[X-5]
+ 0007 08                push A
+ 0008 52FC              mov A,[X-4]
+ 000A 08                push A
+ 000B 5000              mov A,0
+ 000D 08                push A
+ 000E 5021              mov A,33
+ 0010 08                push A
+ 0011 7C0000            xcall __mul16
+ 0014 38FC              add SP,-4
+ 0016 5100              mov A,[__rX]
+ 0018 5300              mov [__r1],A
+ 001A 5100              mov A,[__rY]
+ 001C 5300              mov [__r0],A
+ 001E 060001            add [__r1],1
+ 0021 0E0000            adc [__r0],0
+ 0024 10                push X
+ 0025 5100              mov A,[__r0]
+ 0027 08                push A
+ 0028 5100              mov A,[__r1]
+ 002A 20                pop X
+ 002B 7C0000            xcall _Timer16_Delay_WritePeriod
+ 002E                   .dbline 63
+ 002E           ;       Timer16_Delay_Start();
+ 002E 7C0000            xcall _Timer16_Delay_Start
+ 0031 20                pop X
+ 0032           L14:
+ 0032                   .dbline 66
+ 0032           ; 
+ 0032           ;       while (Timer16_Delay_wReadTimer()!=0)
+ 0032           ;       {;}
+ 0032                   .dbline 66
+ 0032                   .dbline 66
+ 0032           L15:
+ 0032                   .dbline 65
+ 0032 10                push X
+ 0033 7C0000            xcall _Timer16_Delay_wReadTimer
+ 0036 62D000            mov REG[0xd0],>__r0
+ 0039 5A00              mov [__r0],X
+ 003B 20                pop X
+ 003C 3C0000            cmp [__r0],0
+ 003F BFF2              jnz L14
+ 0041 3900              cmp A,0
+ 0043 BFEE              jnz L14
+ 0045           X0:
+ 0045                   .dbline 67
+ 0045           ;       Timer16_Delay_Stop();
+ 0045 10                push X
+ 0046 7C0000            xcall _Timer16_Delay_Stop
+ 0049 20                pop X
+ 004A                   .dbline -2
+ 004A           L13:
+ 004A 20                pop X
+ 004B                   .dbline 0 ; func end
+ 004B 7F                ret
+ 004C                   .dbsym l ms -5 i
+ 004C                   .dbend
+ 004C                   .dbfunc e BcdToHex _BcdToHex fc
+ 004C           ;            bcd -> X-4
+ 004C           _BcdToHex::
+ 004C                   .dbline -1
+ 004C 10                push X
+ 004D 4F                mov X,SP
+ 004E                   .dbline 86
+ 004E           ; }
+ 004E           ; 
+ 004E           ; 
+ 004E           ; //-----------------------------------------------------------------------------
+ 004E           ; //  FUNCTION NAME: BcdToHex
+ 004E           ; //
+ 004E           ; //  DESCRIPTION:
+ 004E           ; //
+ 004E           ; //    Converts bcd coded byte to hexadecimal.
+ 004E           ; //
+ 004E           ; //  ARGUMENTS:
+ 004E           ; //    bcd = bcd value.
+ 004E           ; //
+ 004E           ; //  RETURNS:
+ 004E           ; //    Hexadecimal representation of bcd value.
+ 004E           ; //
+ 004E           ; //-----------------------------------------------------------------------------
+ 004E           ; BYTE BcdToHex ( BYTE bcd )
+ 004E           ; {
+ 004E                   .dbline 87
+ 004E           ;       return ((BYTE)((bcd&0xf0)>>4)*10)+(BYTE)(bcd&0x0f);
+ 004E 62D000            mov REG[0xd0],>__r0
+ 0051 52FC              mov A,[X-4]
+ 0053 21F0              and A,-16
+ 0055 67                asr A
+ 0056 67                asr A
+ 0057 67                asr A
+ 0058 67                asr A
+ 0059 210F              and A,15
+ 005B 60E8              mov REG[0xe8],A
+ 005D 62E90A            mov REG[0xe9],10
+ 0060 40                nop
+ 0061 5DEB              mov A,REG[0xeb]
+ 0063 5300              mov [__r0],A
+ 0065 52FC              mov A,[X-4]
+ 0067 210F              and A,15
+ 0069 0400              add [__r0],A
+ 006B 5100              mov A,[__r0]
+ 006D                   .dbline -2
+ 006D           L17:
+ 006D 20                pop X
+ 006E                   .dbline 0 ; func end
+ 006E 7F                ret
+ 006F                   .dbsym l bcd -4 c
+ 006F                   .dbend
+ 006F                   .dbfunc e HexToBcd _HexToBcd fc
+ 006F           ;            hex -> X-4
+ 006F           _HexToBcd::
+ 006F                   .dbline -1
+ 006F 10                push X
+ 0070 4F                mov X,SP
+ 0071                   .dbline 105
+ 0071           ; }
+ 0071           ; 
+ 0071           ; //-----------------------------------------------------------------------------
+ 0071           ; //  FUNCTION NAME: HexToBcd
+ 0071           ; //
+ 0071           ; //  DESCRIPTION:
+ 0071           ; //
+ 0071           ; //    Converts hexadecimal number to bcd.
+ 0071           ; //
+ 0071           ; //  ARGUMENTS:
+ 0071           ; //    hex = hexadecimal representation of bcd value.
+ 0071           ; //
+ 0071           ; //  RETURNS:
+ 0071           ; //    bcd value.
+ 0071           ; //
+ 0071           ; //-----------------------------------------------------------------------------
+ 0071           ; BYTE HexToBcd ( BYTE hex )
+ 0071           ; {
+ 0071                   .dbline 106
+ 0071           ;       return ((BYTE)(hex/10)<<4) | (BYTE)(hex%10);
+ 0071 62D000            mov REG[0xd0],>__r0
+ 0074 500A              mov A,10
+ 0076 08                push A
+ 0077 52FC              mov A,[X-4]
+ 0079 08                push A
+ 007A 7C0000            xcall __divmodu_8X8_8
+ 007D 18                pop A
+ 007E 38FF              add SP,-1
+ 0080 64                asl A
+ 0081 64                asl A
+ 0082 64                asl A
+ 0083 64                asl A
+ 0084 5300              mov [__r0],A
+ 0086 500A              mov A,10
+ 0088 08                push A
+ 0089 52FC              mov A,[X-4]
+ 008B 08                push A
+ 008C 7C0000            xcall __divmodu_8X8_8
+ 008F 38FF              add SP,-1
+ 0091 18                pop A
+ 0092 2C00              or [__r0],A
+ 0094 5100              mov A,[__r0]
+ 0096                   .dbline -2
+ 0096           L18:
+ 0096 20                pop X
+ 0097                   .dbline 0 ; func end
+ 0097 7F                ret
+ 0098                   .dbsym l hex -4 c
+ 0098                   .dbend
+ 0098                   .dbfunc e GetStep _GetStep fl
+ 0098           ;          bStep -> X-4
+ 0098           _GetStep::
+ 0098                   .dbline -1
+ 0098 10                push X
+ 0099 4F                mov X,SP
+ 009A 3802              add SP,2
+ 009C                   .dbline 124
+ 009C           ; }
+ 009C           ; 
+ 009C           ; //-----------------------------------------------------------------------------
+ 009C           ; //  FUNCTION NAME:    GetStep
+ 009C           ; //
+ 009C           ; //  DESCRIPTION:
+ 009C           ; //
+ 009C           ; //    Gets the step value in Hz from the step index value
+ 009C           ; //
+ 009C           ; //  ARGUMENTS:
+ 009C           ; //            bStep   Integer describing frequency step value
+ 009C           ; //
+ 009C           ; //  RETURNS:
+ 009C           ; //     Step value in Hz
+ 009C           ; //
+ 009C           ; //-----------------------------------------------------------------------------
+ 009C           ; DWORD GetStep (BYTE bStep)
+ 009C           ; {
+ 009C                   .dbline 125
+ 009C           ;       switch (bStep)
+ 009C 52FC              mov A,[X-4]
+ 009E 5401              mov [X+1],A
+ 00A0 560000            mov [X+0],0
+ 00A3 3D0000            cmp [X+0],0
+ 00A6 B006              jnz X1
+ 00A8 3D0100            cmp [X+1],0
+ 00AB A02B              jz L23
+ 00AD           X1:
+ 00AD 3D0000            cmp [X+0],0
+ 00B0 B006              jnz X2
+ 00B2 3D0101            cmp [X+1],1
+ 00B5 A032              jz L24
+ 00B7           X2:
+ 00B7 3D0000            cmp [X+0],0
+ 00BA B006              jnz X3
+ 00BC 3D0102            cmp [X+1],2
+ 00BF A039              jz L25
+ 00C1           X3:
+ 00C1 3D0000            cmp [X+0],0
+ 00C4 B006              jnz X4
+ 00C6 3D0103            cmp [X+1],3
+ 00C9 A040              jz L26
+ 00CB           X4:
+ 00CB 3D0000            cmp [X+0],0
+ 00CE B006              jnz X5
+ 00D0 3D0104            cmp [X+1],4
+ 00D3 A047              jz L27
+ 00D5           X5:
+ 00D5 8012              xjmp L20
+ 00D7           L23:
+ 00D7                   .dbline 128
+ 00D7           ;       {
+ 00D7           ;               case STEP_10HZ:
+ 00D7           ;                       return 10;
+ 00D7 62D000            mov REG[0xd0],>__r0
+ 00DA 550000            mov [__r0],0
+ 00DD 550000            mov [__r1],0
+ 00E0 550000            mov [__r2],0
+ 00E3 55000A            mov [__r3],10
+ 00E6 8043              xjmp L19
+ 00E8           L20:
+ 00E8           L24:
+ 00E8                   .dbline 131
+ 00E8           ;               default:
+ 00E8           ;               case STEP_100HZ:
+ 00E8           ;                       return 100;
+ 00E8 62D000            mov REG[0xd0],>__r0
+ 00EB 550000            mov [__r0],0
+ 00EE 550000            mov [__r1],0
+ 00F1 550000            mov [__r2],0
+ 00F4 550064            mov [__r3],100
+ 00F7 8032              xjmp L19
+ 00F9           L25:
+ 00F9                   .dbline 133
+ 00F9           ;               case STEP_1KHZ:
+ 00F9           ;                       return 1000;
+ 00F9 62D000            mov REG[0xd0],>__r0
+ 00FC 550000            mov [__r0],0
+ 00FF 550000            mov [__r1],0
+ 0102 550003            mov [__r2],3
+ 0105 5500E8            mov [__r3],-24
+ 0108 8021              xjmp L19
+ 010A           L26:
+ 010A                   .dbline 135
+ 010A           ;               case STEP_10KHZ:
+ 010A           ;                       return 10000;
+ 010A 62D000            mov REG[0xd0],>__r0
+ 010D 550000            mov [__r0],0
+ 0110 550000            mov [__r1],0
+ 0113 550027            mov [__r2],39
+ 0116 550010            mov [__r3],16
+ 0119 8010              xjmp L19
+ 011B           L27:
+ 011B                   .dbline 137
+ 011B           ;               case STEP_100KHZ:
+ 011B           ;                       return 100000;
+ 011B 62D000            mov REG[0xd0],>__r0
+ 011E 550000            mov [__r0],0
+ 0121 550001            mov [__r1],1
+ 0124 550086            mov [__r2],-122
+ 0127 5500A0            mov [__r3],-96
+ 012A                   .dbline -2
+ 012A           L19:
+ 012A 38FE              add SP,-2
+ 012C 20                pop X
+ 012D                   .dbline 0 ; func end
+ 012D 7F                ret
+ 012E                   .dbsym l bStep -4 c
+ 012E                   .dbend
+ 012E                   .dbfunc e GetUserIddle _GetUserIddle fc
+ 012E           ;     bUserIddle -> X-4
+ 012E           _GetUserIddle::
+ 012E                   .dbline -1
+ 012E 10                push X
+ 012F 4F                mov X,SP
+ 0130 3802              add SP,2
+ 0132                   .dbline 156
+ 0132           ;       }
+ 0132           ; }
+ 0132           ; 
+ 0132           ; //-----------------------------------------------------------------------------
+ 0132           ; //  FUNCTION NAME:    GetUserIddle
+ 0132           ; //
+ 0132           ; //  DESCRIPTION:
+ 0132           ; //
+ 0132           ; //    Gets the user iddle timeout from index
+ 0132           ; //
+ 0132           ; //  ARGUMENTS:
+ 0132           ; //            bUserIddle      User iddle index val
+ 0132           ; //
+ 0132           ; //  RETURNS:
+ 0132           ; //     Step value in Hz
+ 0132           ; //
+ 0132           ; //-----------------------------------------------------------------------------
+ 0132           ; BYTE GetUserIddle (BYTE bUserIddle)
+ 0132           ; {
+ 0132                   .dbline 157
+ 0132           ;       switch (bUserIddle)
+ 0132 52FC              mov A,[X-4]
+ 0134 5401              mov [X+1],A
+ 0136 560000            mov [X+0],0
+ 0139 3D0000            cmp [X+0],0
+ 013C B006              jnz X6
+ 013E 3D0100            cmp [X+1],0
+ 0141 A021              jz L32
+ 0143           X6:
+ 0143 3D0000            cmp [X+0],0
+ 0146 B006              jnz X7
+ 0148 3D0101            cmp [X+1],1
+ 014B A01E              jz L33
+ 014D           X7:
+ 014D 3D0000            cmp [X+0],0
+ 0150 B006              jnz X8
+ 0152 3D0102            cmp [X+1],2
+ 0155 A01B              jz L34
+ 0157           X8:
+ 0157 3D0000            cmp [X+0],0
+ 015A B006              jnz X9
+ 015C 3D0103            cmp [X+1],3
+ 015F A018              jz L35
+ 0161           X9:
+ 0161 8008              xjmp L29
+ 0163           L32:
+ 0163                   .dbline 160
+ 0163           ;       {
+ 0163           ;               case USER_IDDLE_NONE:
+ 0163           ;                       return 0;
+ 0163 62D000            mov REG[0xd0],>__r0
+ 0166 5000              mov A,0
+ 0168 8014              xjmp L28
+ 016A           L29:
+ 016A           L33:
+ 016A                   .dbline 163
+ 016A           ;               default:
+ 016A           ;               case USER_IDDLE_30S:
+ 016A           ;                       return 30;
+ 016A 62D000            mov REG[0xd0],>__r0
+ 016D 501E              mov A,30
+ 016F 800D              xjmp L28
+ 0171           L34:
+ 0171                   .dbline 165
+ 0171           ;               case USER_IDDLE_60S:
+ 0171           ;                       return 60;
+ 0171 62D000            mov REG[0xd0],>__r0
+ 0174 503C              mov A,60
+ 0176 8006              xjmp L28
+ 0178           L35:
+ 0178                   .dbline 167
+ 0178           ;               case USER_IDDLE_90S:
+ 0178           ;                       return 90;
+ 0178 62D000            mov REG[0xd0],>__r0
+ 017B 505A              mov A,90
+ 017D                   .dbline -2
+ 017D           L28:
+ 017D 38FE              add SP,-2
+ 017F 20                pop X
+ 0180                   .dbline 0 ; func end
+ 0180 7F                ret
+ 0181                   .dbsym l bUserIddle -4 c
+ 0181                   .dbend
+ 0181                   .dbfunc e GetBand _GetBand fc
+ 0181           ;          bBand -> X+0
+ 0181           ;         dwFreq -> X-7
+ 0181           _GetBand::
+ 0181                   .dbline -1
+ 0181 10                push X
+ 0182 4F                mov X,SP
+ 0183 3801              add SP,1
+ 0185                   .dbline 186
+ 0185           ;       }
+ 0185           ; }
+ 0185           ; 
+ 0185           ; //-----------------------------------------------------------------------------
+ 0185           ; //  FUNCTION NAME:    GetBand
+ 0185           ; //
+ 0185           ; //  DESCRIPTION:
+ 0185           ; //
+ 0185           ; //    Get band index for a given frequency
+ 0185           ; //
+ 0185           ; //  ARGUMENTS:
+ 0185           ; //     dwFreq         Frequency in Hz
+ 0185           ; //
+ 0185           ; //  RETURNS:
+ 0185           ; //     none.
+ 0185           ; //
+ 0185           ; //-----------------------------------------------------------------------------
+ 0185           ; BYTE GetBand (DWORD dwFreq)
+ 0185           ; {
+ 0185                   .dbline 189
+ 0185           ;       BYTE bBand;
+ 0185           ; 
+ 0185           ;       for (bBand=0; bBand<BAND_MAX; bBand++)
+ 0185 560000            mov [X+0],0
+ 0188 80D2              xjmp L40
+ 018A           L37:
+ 018A                   .dbline 190
+ 018A           ;       {
+ 018A                   .dbline 191
+ 018A           ;               if (dwFreq >= (g_xBandLimits[bBand].low*BAND_FREQ_MULT) &&
+ 018A 62D000            mov REG[0xd0],>__r0
+ 018D 5200              mov A,[X+0]
+ 018F 5300              mov [__r1],A
+ 0191 5000              mov A,0
+ 0193 08                push A
+ 0194 5100              mov A,[__r1]
+ 0196 08                push A
+ 0197 5000              mov A,0
+ 0199 08                push A
+ 019A 5006              mov A,6
+ 019C 08                push A
+ 019D 7C0000            xcall __mul16
+ 01A0 38FC              add SP,-4
+ 01A2 5100              mov A,[__rX]
+ 01A4 5300              mov [__r1],A
+ 01A6 5100              mov A,[__rY]
+ 01A8 5300              mov [__r0],A
+ 01AA 5100              mov A,[__r1]
+ 01AC 0100              add A,<_g_xBandLimits
+ 01AE 5300              mov [__r3],A
+ 01B0 5100              mov A,[__r0]
+ 01B2 0900              adc A,>_g_xBandLimits
+ 01B4 10                push X
+ 01B5 08                push A
+ 01B6 5800              mov X,[__r3]
+ 01B8 28                romx
+ 01B9 5300              mov [__r2],A
+ 01BB 18                pop A
+ 01BC 75                inc X
+ 01BD 0900              adc A,0
+ 01BF 28                romx
+ 01C0 20                pop X
+ 01C1 5300              mov [__r7],A
+ 01C3 5100              mov A,[__r2]
+ 01C5 5300              mov [__r6],A
+ 01C7 5000              mov A,0
+ 01C9 08                push A
+ 01CA 08                push A
+ 01CB 5100              mov A,[__r6]
+ 01CD 08                push A
+ 01CE 5100              mov A,[__r7]
+ 01D0 08                push A
+ 01D1 5000              mov A,0
+ 01D3 08                push A
+ 01D4 5001              mov A,1
+ 01D6 08                push A
+ 01D7 5086              mov A,-122
+ 01D9 08                push A
+ 01DA 50A0              mov A,-96
+ 01DC 08                push A
+ 01DD 7C0000            xcall __mul_32X32_32
+ 01E0 38FC              add SP,-4
+ 01E2 18                pop A
+ 01E3 5300              mov [__r7],A
+ 01E5 18                pop A
+ 01E6 5300              mov [__r6],A
+ 01E8 18                pop A
+ 01E9 5300              mov [__r5],A
+ 01EB 18                pop A
+ 01EC 5300              mov [__r4],A
+ 01EE 52FC              mov A,[X-4]
+ 01F0 1200              sub A,[__r7]
+ 01F2 52FB              mov A,[X-5]
+ 01F4 1A00              sbb A,[__r6]
+ 01F6 52FA              mov A,[X-6]
+ 01F8 1A00              sbb A,[__r5]
+ 01FA 52F9              mov A,[X-7]
+ 01FC 1A00              sbb A,[__r4]
+ 01FE C05A              jc L41
+ 0200           X10:
+ 0200 62D000            mov REG[0xd0],>__r0
+ 0203 060004            add [__r1],<_g_xBandLimits+4
+ 0206 0E0004            adc [__r0],>_g_xBandLimits+4
+ 0209 5100              mov A,[__r0]
+ 020B 10                push X
+ 020C 08                push A
+ 020D 5800              mov X,[__r1]
+ 020F 28                romx
+ 0210 5300              mov [__r0],A
+ 0212 18                pop A
+ 0213 75                inc X
+ 0214 0900              adc A,0
+ 0216 28                romx
+ 0217 20                pop X
+ 0218 5300              mov [__r3],A
+ 021A 5100              mov A,[__r0]
+ 021C 5300              mov [__r2],A
+ 021E 5000              mov A,0
+ 0220 08                push A
+ 0221 08                push A
+ 0222 5100              mov A,[__r2]
+ 0224 08                push A
+ 0225 5100              mov A,[__r3]
+ 0227 08                push A
+ 0228 5000              mov A,0
+ 022A 08                push A
+ 022B 5001              mov A,1
+ 022D 08                push A
+ 022E 5086              mov A,-122
+ 0230 08                push A
+ 0231 50A0              mov A,-96
+ 0233 08                push A
+ 0234 7C0000            xcall __mul_32X32_32
+ 0237 38FC              add SP,-4
+ 0239 18                pop A
+ 023A 5300              mov [__r3],A
+ 023C 18                pop A
+ 023D 5300              mov [__r2],A
+ 023F 18                pop A
+ 0240 5300              mov [__r1],A
+ 0242 18                pop A
+ 0243 5300              mov [__r0],A
+ 0245 52FC              mov A,[X-4]
+ 0247 1200              sub A,[__r3]
+ 0249 52FB              mov A,[X-5]
+ 024B 1A00              sbb A,[__r2]
+ 024D 52FA              mov A,[X-6]
+ 024F 1A00              sbb A,[__r1]
+ 0251 52F9              mov A,[X-7]
+ 0253 1A00              sbb A,[__r0]
+ 0255 D003              jnc L41
+ 0257           X11:
+ 0257                   .dbline 193
+ 0257           ;                       dwFreq < (g_xBandLimits[bBand].high*BAND_FREQ_MULT))
+ 0257           ;                       break;
+ 0257 8008              xjmp L39
+ 0259           L41:
+ 0259                   .dbline 194
+ 0259           ;       }
+ 0259           L38:
+ 0259                   .dbline 189
+ 0259 7700              inc [X+0]
+ 025B           L40:
+ 025B                   .dbline 189
+ 025B 3D000E            cmp [X+0],14
+ 025E CF2B              jc L37
+ 0260           X12:
+ 0260           L39:
+ 0260                   .dbline 195
+ 0260           ;       if (bBand>=BAND_MAX)
+ 0260 3D000E            cmp [X+0],14
+ 0263 C036              jc L44
+ 0265           X13:
+ 0265                   .dbline 196
+ 0265           ;       {
+ 0265                   .dbline 197
+ 0265           ;               if (dwFreq>FREQ_MAX)
+ 0265 5000              mov A,0
+ 0267 13FC              sub A,[X-4]
+ 0269 5087              mov A,-121
+ 026B 1BFB              sbb A,[X-5]
+ 026D 5093              mov A,-109
+ 026F 1BFA              sbb A,[X-6]
+ 0271 5003              mov A,3
+ 0273 1BF9              sbb A,[X-7]
+ 0275 D008              jnc L46
+ 0277           X14:
+ 0277                   .dbline 198
+ 0277           ;                       return -1;
+ 0277 62D000            mov REG[0xd0],>__r0
+ 027A 50FF              mov A,-1
+ 027C 8022              xjmp L36
+ 027E           L46:
+ 027E                   .dbline 199
+ 027E           ;               if (dwFreq<FREQ_MIN)
+ 027E 52FC              mov A,[X-4]
+ 0280 1140              sub A,64
+ 0282 52FB              mov A,[X-5]
+ 0284 1942              sbb A,66
+ 0286 52FA              mov A,[X-6]
+ 0288 190F              sbb A,15
+ 028A 52F9              mov A,[X-7]
+ 028C 1900              sbb A,0
+ 028E D008              jnc L48
+ 0290           X15:
+ 0290                   .dbline 200
+ 0290           ;                       return -1;
+ 0290 62D000            mov REG[0xd0],>__r0
+ 0293 50FF              mov A,-1
+ 0295 8009              xjmp L36
+ 0297           L48:
+ 0297                   .dbline 201
+ 0297           ;               bBand=BAND_MAX-1;
+ 0297 56000D            mov [X+0],13
+ 029A                   .dbline 202
+ 029A           ;       }
+ 029A           L44:
+ 029A                   .dbline 203
+ 029A           ;       return bBand;
+ 029A 5200              mov A,[X+0]
+ 029C 62D000            mov REG[0xd0],>__r0
+ 029F                   .dbline -2
+ 029F           L36:
+ 029F 38FF              add SP,-1
+ 02A1 20                pop X
+ 02A2                   .dbline 0 ; func end
+ 02A2 7F                ret
+ 02A3                   .dbsym l bBand 0 c
+ 02A3                   .dbsym l dwFreq -7 l
+ 02A3                   .dbend

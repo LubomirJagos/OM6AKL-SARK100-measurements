@@ -1,0 +1,223 @@
+XH
+H 2 areas A global symbols
+M keypad.c
+S _BUZZ_KeyClick Ref0000
+S _g_bIddleCounter Ref0000
+S __r0 Ref0000
+S _g_bSpeedKeyCounter Ref0000
+S _g_bDebounceCounter Ref0000
+A text size 1B1 flags 0
+dbfile ./keypad.c
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\keypad.c
+dbfunc e KEYPAD_Get 0 fc
+dbsym l bKey 0 c
+dbline FFFFFFFF 0
+dbline 4A 4
+dbline 4E 4
+dbline 4F C
+dbline 51 13
+dbline 52 1A
+dbline 53 27
+dbline 55 2A
+dbline 56 2F
+dbline 57 2F
+dbline 58 32
+dbline 5A 38
+dbline 5B 41
+dbline 5C 41
+dbline 5D 49
+dbline 5E 49
+dbline 5F 4E
+dbline 61 4E
+dbline 62 54
+dbline 63 57
+dbline 64 59
+dbline 65 5E
+dbline 67 5E
+dbline 68 64
+dbline 69 67
+dbline 6A 67
+dbline 6B 67
+dbline 6D 69
+dbline 6E 69
+dbline 6F 6F
+dbline 70 76
+dbline 71 76
+dbline 73 78
+dbline 74 7E
+dbline FFFFFFFE 83
+dbline 0 86
+dbfunc e KEYPAD_WaitKey 87 fc
+dbsym l bKey 0 c
+dbsym l bDelayS FFFFFFFC c
+dbline FFFFFFFF 87
+dbline 87 8B
+dbline 8A 8B
+dbline 8B 90
+dbline 8C 93
+dbline 8E 9C
+dbline 8F 9C
+dbline 90 9F
+dbline 91 A3
+dbline 92 A8
+dbline 93 A8
+dbline 94 B0
+dbline 95 B2
+dbline 96 B2
+dbline 96 B2
+dbline 97 B7
+dbline 98 BC
+dbline 9A BF
+dbline FFFFFFFE C6
+dbline 0 C9
+dbfunc e KEYPAD_Scan CA fc
+dbsym l bKey 0 c
+dbline FFFFFFFF CA
+dbline AC CE
+dbline AD CE
+dbline AF D1
+dbline B0 D4
+dbline B1 D7
+dbline B3 DA
+dbline B4 DD
+dbline B5 E9
+dbline B6 E9
+dbline B7 EC
+dbline B8 EC
+dbline B9 F8
+dbline BA F8
+dbline BB FB
+dbline BC FB
+dbline BE FE
+dbline BF 101
+dbline C0 10D
+dbline C1 10D
+dbline C2 110
+dbline C3 110
+dbline C4 11C
+dbline C5 11C
+dbline C6 11F
+dbline C7 11F
+dbline C9 122
+dbline CA 125
+dbline CB 131
+dbline CC 131
+dbline CD 134
+dbline CE 134
+dbline CF 140
+dbline D0 140
+dbline D1 145
+dbline D3 14A
+dbline D4 14D
+dbline D5 14D
+dbline D7 150
+dbline FFFFFFFE 155
+dbline 0 158
+dbfunc e KEYPAD_SysSuspend 159 fV
+dbsym l bSave_ABF_CR0 1 c
+dbsym l bSave_ARF_CR 0 c
+dbline FFFFFFFF 159
+dbline E9 15D
+dbline ED 15D
+dbline EF 15F
+dbline F0 162
+dbline F1 165
+dbline F3 168
+dbline F4 16C
+dbline F5 172
+dbline F6 177
+dbline F9 17C
+dbline FA 17F
+dbline FC 182
+dbline FF 187
+dbline 101 18A
+dbline 104 18D
+dbline 106 190
+dbline 108 192
+dbline 10A 195
+dbline 10C 198
+dbline 10F 19B
+dbline 111 19E
+dbline 113 1A1
+dbline 114 1A5
+dbline FFFFFFFE 1AB
+dbline 0 1B0
+S _KEYPAD_Scan Def00CA
+S _KEYPAD_WaitKey Def0087
+S _KEYPAD_Get Def0000
+S _KEYPAD_SysSuspend Def0159
+A data size 1 flags 20
+dbfile ./keypad.c
+dbsym s bLastKey 0 c
+T 00 00 00
+R 00 00 00 01
+T 00 00 10 4F 38 01 62 D0 00 00 3C 00 00 00 A0 08
+R 00 00 00 00 4B 08 00 04 0B 0B 00 04
+T 00 0C 62 D0 00 00 50 00 80 71 90 B5 62 D0 00 00
+R 00 00 00 00 4B 04 00 02 4B 0E 00 02
+T 00 18 54 00 90 AE 62 D0 00 00 53 00 00 52 00 3A
+R 00 00 00 00 4B 08 00 02 0B 0B 00 02
+T 00 24 00 00 A0 04 56 00 00 3D 00 00 A0 4A 7C
+R 00 00 00 00 0B 02 00 02
+T 00 30 00 00 62 D0 00 00 55 00 00 02 62 D0
+R 00 00 00 00 02 02 00 00 4B 06 00 04 0B 09 00 04
+T 00 3A 00 00 52 00 3A 00 00 B0 29 62 D0 00 00 3C
+R 00 00 00 00 49 02 00 01 09 07 00 01 4B 0D 00 03
+T 00 45 00 00 00 B0 36 3D 00 05 B0 0C 62 D0 00 00
+R 00 00 00 00 0B 02 00 03 4B 0E 00 04
+T 00 51 55 00 00 00 56 00 07 80 26 3D 00 06 B0 21
+R 00 00 00 00 0B 03 00 04
+T 00 5E 62 D0 00 00 55 00 00 00 56 00 08 80 16 62
+R 00 00 00 00 4B 04 00 04 0B 07 00 04
+T 00 6A D0 00 00 55 00 00 05 52 00 62 D0 00 00 53
+R 00 00 00 00 4B 03 00 03 0B 06 00 03 49 0D 00 01
+T 00 75 00 00 80 07 62 D0 00 00 55 00 00 00 52 00
+R 00 00 00 00 09 02 00 01 49 08 00 01 09 0B 00 01
+T 00 80 62 D0 00 00 38 FF 20 7F 10 4F 38 01 71 10
+R 00 00 00 00 4B 04 00 02
+T 00 8D 41 E0 F8 43 E0 05 52 FC 70 CF 62 D0 00 00
+R 00 00 00 00 4B 0E 00 01
+T 00 9A 53 00 00 43 FF 08 9F 5F 54 00 3D FC 00 A0
+R 00 00 00 00 0B 03 00 01
+T 00 A7 0B 62 D0 00 00 3C 00 00 00 B0 03 80 06 3D
+R 00 00 00 00 4B 05 00 01 0B 08 00 01
+T 00 B3 00 00 AF E6 71 10 41 E0 F8 43 E0 03 52 00
+R 00 00 00 00
+T 00 C1 70 CF 62 D0 00 00 38 FF 20 7F 10 4F 38 01
+R 00 00 00 00 4B 06 00 02
+T 00 CE 56 00 00 43 04 80 43 04 20 43 00 40 41 04
+R 00 00 00 00
+T 00 DC 7F 5D 04 62 D0 00 00 53 00 00 47 00 00 02
+R 00 00 00 00 4B 07 00 02 0B 0A 00 02 0B 0D 00 02
+T 00 E7 B0 04 56 00 01 5D 04 62 D0 00 00 53 00 00
+R 00 00 00 00 4B 0B 00 02 0B 0E 00 02
+T 00 F3 47 00 00 01 B0 04 56 00 03 43 04 80 41 04
+R 00 00 00 00 0B 03 00 02
+T 01 00 DF 5D 04 62 D0 00 00 53 00 00 47 00 00 02
+R 00 00 00 00 4B 07 00 02 0B 0A 00 02 0B 0D 00 02
+T 01 0B B0 04 56 00 04 5D 04 62 D0 00 00 53 00 00
+R 00 00 00 00 4B 0B 00 02 0B 0E 00 02
+T 01 17 47 00 00 01 B0 04 56 00 05 43 04 20 41 00
+R 00 00 00 00 0B 03 00 02
+T 01 24 BF 5D 04 62 D0 00 00 53 00 00 47 00 00 02
+R 00 00 00 00 4B 07 00 02 0B 0A 00 02 0B 0D 00 02
+T 01 2F B0 04 56 00 02 5D 04 62 D0 00 00 53 00 00
+R 00 00 00 00 4B 0B 00 02 0B 0E 00 02
+T 01 3B 47 00 00 01 B0 0E 3D 00 05 B0 06 56 00 09
+R 00 00 00 00 0B 03 00 02
+T 01 48 80 04 56 00 06 43 00 40 52 00 62 D0 00 00
+R 00 00 00 00 4B 0E 00 02
+T 01 55 38 FF 20 7F 10 4F 38 02 70 FE 41 04 7F 41
+R 00 00 00 00
+T 01 63 04 DF 41 00 BF 5D 63 54 00 71 10 5D 62 54
+R 00 00 00 00
+T 01 71 01 70 CF 41 63 F8 71 10 41 62 C3 43 06 03
+R 00 00 00 00
+T 01 7F 41 07 FC 70 CF 43 05 03 41 E0 BF 43 E0 20
+R 00 00 00 00
+T 01 8D 41 DA 20 71 01 43 FF 08 62 E2 00 41 05 FC
+R 00 00 00 00
+T 01 9B 41 E0 DF 43 E0 40 52 00 60 63 52 01 71 10
+R 00 00 00 00
+T 01 A9 60 62 70 CF 38 FE 20 7F
+R 00 00 00 00

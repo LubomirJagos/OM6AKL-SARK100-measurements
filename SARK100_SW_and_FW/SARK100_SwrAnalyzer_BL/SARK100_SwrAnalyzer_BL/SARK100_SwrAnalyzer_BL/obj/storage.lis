@@ -1,0 +1,518 @@
+ 0000                   cpu LMM
+                        .module storage.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./storage.c
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\storage.c
+ 0000                   .dbfunc e STR_SaveCalibration _STR_SaveCalibration fV
+ 0000           _STR_SaveCalibration::
+ 0000                   .dbline -1
+ 0000                   .dbline 90
+ 0000           ; //*****************************************************************************/
+ 0000           ; //  This file is a part of the "SARK100 SWR Analyzer firmware"
+ 0000           ; //
+ 0000           ; //  Copyright © 2010 Melchor Varela - EA4FRB.  All rights reserved.
+ 0000           ; //  Melchor Varela, Madrid, Spain.
+ 0000           ; //  melchor.varela@gmail.com
+ 0000           ; //
+ 0000           ; //  "SARK100 SWR Analyzer firmware" is free software: you can redistribute it
+ 0000           ; //  and/or modify it under the terms of the GNU General Public License as
+ 0000           ; //  published by the Free Software Foundation, either version 3 of the License,
+ 0000           ; //  or (at your option) any later version.
+ 0000           ; //
+ 0000           ; //  "SARK100 SWR Analyzer firmware" is distributed in the hope that it will be
+ 0000           ; //  useful,  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 0000           ; //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ 0000           ; //  GNU General Public License for more details.
+ 0000           ; //
+ 0000           ; //  You should have received a copy of the GNU General Public License
+ 0000           ; //  along with "SARK100 SWR Analyzer firmware".  If not,
+ 0000           ; //  see <http://www.gnu.org/licenses/>.
+ 0000           ; //*****************************************************************************/
+ 0000           ; //*****************************************************************************/
+ 0000           ; //
+ 0000           ; //    PROJECT:        SARK100 SWR Analyzer
+ 0000           ; //    FILE NAME:      STORAGE.C
+ 0000           ; //    AUTHOR:         EA4FRB - Melchor Varela
+ 0000           ; //
+ 0000           ; //    DESCRIPTION
+ 0000           ; //
+ 0000           ; //    EEPROM storage functions
+ 0000           ; //
+ 0000           ; //    HISTORY
+ 0000           ; //
+ 0000           ; //    NAME    DATE            REMARKS
+ 0000           ; //
+ 0000           ; //    MVM             DEC 2009        Creation
+ 0000           ; //
+ 0000           ; //*****************************************************************************/
+ 0000           ; #include <stdlib.h>
+ 0000           ; #include <string.h>
+ 0000           ; #include <m8c.h>
+ 0000           ; #include "PSoCAPI.h"
+ 0000           ; 
+ 0000           ; #include "glb_data.h"
+ 0000           ; 
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; //  Macros
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; #define offsetof(st, m) \
+ 0000           ;     ((size_t) ( (char *)&((st *)(0))->m - (char *)0 ))
+ 0000           ; 
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; //  Defines
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; #define MAGIC_NUMBER  0x55ab
+ 0000           ; 
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; //  Typedefs
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; typedef struct                                                        // Structure stored in EEPROM
+ 0000           ; {
+ 0000           ;                                                                               // Calibration data
+ 0000           ;       BRIDGE_CORRECT xBandCorrFactor[BAND_MAX];
+ 0000           ;       BYTE bGainDDS[BAND_MAX];
+ 0000           ;       BRIDGE_VOLTAGES xBridgeOffset;
+ 0000           ;       BYTE bIsCalibrated;
+ 0000           ; 
+ 0000           ;                                                                               // Configuration data
+ 0000           ;       CONFIG_DATA xConf;
+ 0000           ; 
+ 0000           ;                                                                               // Integrity control
+ 0000           ;       WORD wMagic;
+ 0000           ; } RECORD_DATA;
+ 0000           ; 
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; //  FUNCTION NAME:    STR_SaveCalibration
+ 0000           ; //
+ 0000           ; //  DESCRIPTION:
+ 0000           ; //
+ 0000           ; //    Save calibration data in EEPROM
+ 0000           ; //
+ 0000           ; //  ARGUMENTS:
+ 0000           ; //     none.
+ 0000           ; //
+ 0000           ; //  RETURNS:
+ 0000           ; //     none.
+ 0000           ; //
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; void STR_SaveCalibration ( void )
+ 0000           ; {
+ 0000                   .dbline 91
+ 0000           ;       E2PROM_bE2Write(offsetof(RECORD_DATA,xBandCorrFactor), (unsigned char*) &g_xBandCorrFactor[0], sizeof(g_xBandCorrFactor), 25);
+ 0000 10                push X
+ 0001 5019              mov A,25
+ 0003 08                push A
+ 0004 5000              mov A,0
+ 0006 08                push A
+ 0007 50A8              mov A,-88
+ 0009 08                push A
+ 000A 5000              mov A,>_g_xBandCorrFactor
+ 000C 08                push A
+ 000D 5000              mov A,<_g_xBandCorrFactor
+ 000F 08                push A
+ 0010 5000              mov A,0
+ 0012 08                push A
+ 0013 08                push A
+ 0014 7C0000            xcall _E2PROM_bE2Write
+ 0017 62D000            mov REG[0xd0],>__r0
+ 001A 38F9              add SP,-7
+ 001C 20                pop X
+ 001D                   .dbline 92
+ 001D           ;       E2PROM_bE2Write(offsetof(RECORD_DATA,bIsCalibrated), &g_bIsCalibrated, sizeof(g_bIsCalibrated), 25);
+ 001D 10                push X
+ 001E 5019              mov A,25
+ 0020 08                push A
+ 0021 5000              mov A,0
+ 0023 08                push A
+ 0024 5001              mov A,1
+ 0026 08                push A
+ 0027 5000              mov A,>_g_bIsCalibrated
+ 0029 08                push A
+ 002A 5000              mov A,<_g_bIsCalibrated
+ 002C 08                push A
+ 002D 5000              mov A,0
+ 002F 08                push A
+ 0030 50C6              mov A,-58
+ 0032 08                push A
+ 0033 7C0000            xcall _E2PROM_bE2Write
+ 0036 62D000            mov REG[0xd0],>__r0
+ 0039 38F9              add SP,-7
+ 003B 20                pop X
+ 003C                   .dbline 93
+ 003C           ;       E2PROM_bE2Write(offsetof(RECORD_DATA,bGainDDS), (unsigned char*) &g_bGainDDS[0], sizeof(g_bGainDDS), 25);
+ 003C 10                push X
+ 003D 5019              mov A,25
+ 003F 08                push A
+ 0040 5000              mov A,0
+ 0042 08                push A
+ 0043 500E              mov A,14
+ 0045 08                push A
+ 0046 5000              mov A,>_g_bGainDDS
+ 0048 08                push A
+ 0049 5000              mov A,<_g_bGainDDS
+ 004B 08                push A
+ 004C 5000              mov A,0
+ 004E 08                push A
+ 004F 50A8              mov A,-88
+ 0051 08                push A
+ 0052 7C0000            xcall _E2PROM_bE2Write
+ 0055 62D000            mov REG[0xd0],>__r0
+ 0058 38F9              add SP,-7
+ 005A 20                pop X
+ 005B                   .dbline -2
+ 005B           L14:
+ 005B                   .dbline 0 ; func end
+ 005B 7F                ret
+ 005C                   .dbend
+ 005C                   .dbfunc e STR_SaveConfig _STR_SaveConfig fV
+ 005C           _STR_SaveConfig::
+ 005C                   .dbline -1
+ 005C                   .dbline 111
+ 005C           ; }
+ 005C           ; 
+ 005C           ; //-----------------------------------------------------------------------------
+ 005C           ; //  FUNCTION NAME:    STR_SaveConfig
+ 005C           ; //
+ 005C           ; //  DESCRIPTION:
+ 005C           ; //
+ 005C           ; //    Save configuration data
+ 005C           ; //
+ 005C           ; //  ARGUMENTS:
+ 005C           ; //     none.
+ 005C           ; //
+ 005C           ; //  RETURNS:
+ 005C           ; //     none.
+ 005C           ; //
+ 005C           ; //-----------------------------------------------------------------------------
+ 005C           ; void STR_SaveConfig ( void )
+ 005C           ; {
+ 005C                   .dbline 112
+ 005C           ;       E2PROM_bE2Write(offsetof(RECORD_DATA,xConf), (unsigned char*)&g_xConf, sizeof(g_xConf), 25);
+ 005C 10                push X
+ 005D 5019              mov A,25
+ 005F 08                push A
+ 0060 5000              mov A,0
+ 0062 08                push A
+ 0063 5002              mov A,2
+ 0065 08                push A
+ 0066 5000              mov A,>_g_xConf
+ 0068 08                push A
+ 0069 5000              mov A,<_g_xConf
+ 006B 08                push A
+ 006C 5000              mov A,0
+ 006E 08                push A
+ 006F 50C7              mov A,-57
+ 0071 08                push A
+ 0072 7C0000            xcall _E2PROM_bE2Write
+ 0075 62D000            mov REG[0xd0],>__r0
+ 0078 38F9              add SP,-7
+ 007A 20                pop X
+ 007B                   .dbline -2
+ 007B           L15:
+ 007B                   .dbline 0 ; func end
+ 007B 7F                ret
+ 007C                   .dbend
+ 007C                   .dbfunc e STR_Restore _STR_Restore fV
+ 007C           ;            cRc -> X+3
+ 007C           ;          magic -> X+1
+ 007C           ;          bBand -> X+0
+ 007C           _STR_Restore::
+ 007C                   .dbline -1
+ 007C 10                push X
+ 007D 4F                mov X,SP
+ 007E 3804              add SP,4
+ 0080                   .dbline 129
+ 0080           ; }
+ 0080           ; //-----------------------------------------------------------------------------
+ 0080           ; //  FUNCTION NAME:    STR_Restore
+ 0080           ; //
+ 0080           ; //  DESCRIPTION:
+ 0080           ; //
+ 0080           ; //    Restores EEPROM data. In case of not initialized set defaults
+ 0080           ; //
+ 0080           ; //  ARGUMENTS:
+ 0080           ; //     none.
+ 0080           ; //
+ 0080           ; //  RETURNS:
+ 0080           ; //     none.
+ 0080           ; //
+ 0080           ; //-----------------------------------------------------------------------------
+ 0080           ; void STR_Restore ( void )
+ 0080           ; {
+ 0080                   .dbline 134
+ 0080           ;       WORD magic;
+ 0080           ;       BYTE bBand;
+ 0080           ;       CHAR cRc;
+ 0080           ; 
+ 0080           ;       E2PROM_E2Read(offsetof(RECORD_DATA,wMagic), (unsigned char*) &magic, sizeof(WORD));
+ 0080 10                push X
+ 0081 5000              mov A,0
+ 0083 08                push A
+ 0084 5002              mov A,2
+ 0086 08                push A
+ 0087 62D000            mov REG[0xd0],>__r0
+ 008A 5A00              mov [__r1],X
+ 008C 060001            add [__r1],1
+ 008F 5007              mov A,7
+ 0091 08                push A
+ 0092 5100              mov A,[__r1]
+ 0094 08                push A
+ 0095 5000              mov A,0
+ 0097 08                push A
+ 0098 50C9              mov A,-55
+ 009A 08                push A
+ 009B 7C0000            xcall _E2PROM_E2Read
+ 009E 38FA              add SP,-6
+ 00A0 20                pop X
+ 00A1                   .dbline 135
+ 00A1           ;       if (magic != MAGIC_NUMBER)
+ 00A1 3D0155            cmp [X+1],85
+ 00A4 B006              jnz X0
+ 00A6 3D02AB            cmp [X+2],-85
+ 00A9 A0F6              jz L17
+ 00AB           X0:
+ 00AB                   .dbline 136
+ 00AB           ;       {
+ 00AB                   .dbline 138
+ 00AB           ;                                                                               // Set defaults
+ 00AB           ;               for (bBand=0;bBand<BAND_MAX;bBand++)
+ 00AB 560000            mov [X+0],0
+ 00AE 80AC              xjmp L22
+ 00B0           L19:
+ 00B0                   .dbline 139
+ 00B0           ;               {
+ 00B0                   .dbline 140
+ 00B0           ;                       g_xBandCorrFactor[bBand] = g_xDefBandSettings[bBand].xBridgeCorrect;
+ 00B0 62D000            mov REG[0xd0],>__r0
+ 00B3 5200              mov A,[X+0]
+ 00B5 5300              mov [__r1],A
+ 00B7 5000              mov A,0
+ 00B9 08                push A
+ 00BA 5100              mov A,[__r1]
+ 00BC 08                push A
+ 00BD 5000              mov A,0
+ 00BF 08                push A
+ 00C0 500D              mov A,13
+ 00C2 08                push A
+ 00C3 7C0000            xcall __mul16
+ 00C6 38FC              add SP,-4
+ 00C8 5100              mov A,[__rX]
+ 00CA 5300              mov [__r1],A
+ 00CC 5100              mov A,[__rY]
+ 00CE 5300              mov [__r0],A
+ 00D0 060001            add [__r1],<_g_xDefBandSettings+1
+ 00D3 0E0001            adc [__r0],>_g_xDefBandSettings+1
+ 00D6 5200              mov A,[X+0]
+ 00D8 5300              mov [__r3],A
+ 00DA 5000              mov A,0
+ 00DC 08                push A
+ 00DD 5100              mov A,[__r3]
+ 00DF 08                push A
+ 00E0 5000              mov A,0
+ 00E2 08                push A
+ 00E3 500C              mov A,12
+ 00E5 08                push A
+ 00E6 7C0000            xcall __mul16
+ 00E9 38FC              add SP,-4
+ 00EB 5100              mov A,[__rX]
+ 00ED 5300              mov [__r3],A
+ 00EF 5100              mov A,[__rY]
+ 00F1 5300              mov [__r2],A
+ 00F3 060000            add [__r3],<_g_xBandCorrFactor
+ 00F6 0E0000            adc [__r2],>_g_xBandCorrFactor
+ 00F9 5100              mov A,[__r2]
+ 00FB 60D5              mov REG[0xd5],A
+ 00FD 10                push X
+ 00FE 550000            mov [__rX],0
+ 0101 5100              mov A,[__r0]
+ 0103 5800              mov X,[__r1]
+ 0105           X1:
+ 0105 08                push A
+ 0106 28                romx
+ 0107 62D000            mov REG[0xd0],>__r0
+ 010A 3F00              mvi [__r3],A
+ 010C 18                pop A
+ 010D 75                inc X
+ 010E 0900              adc A,0
+ 0110 7600              inc [__rX]
+ 0112 3C000C            cmp [__rX],12
+ 0115 BFEF              jnz X1
+ 0117 20                pop X
+ 0118                   .dbline 141
+ 0118           ;                       g_bGainDDS[bBand] =     g_xDefBandSettings[bBand].bGain;
+ 0118 5200              mov A,[X+0]
+ 011A 5300              mov [__r1],A
+ 011C 5000              mov A,0
+ 011E 08                push A
+ 011F 5100              mov A,[__r1]
+ 0121 08                push A
+ 0122 5000              mov A,0
+ 0124 08                push A
+ 0125 500D              mov A,13
+ 0127 08                push A
+ 0128 7C0000            xcall __mul16
+ 012B 38FC              add SP,-4
+ 012D 5100              mov A,[__rX]
+ 012F 5300              mov [__r1],A
+ 0131 5100              mov A,[__rY]
+ 0133 5300              mov [__r0],A
+ 0135 060000            add [__r1],<_g_xDefBandSettings
+ 0138 0E0000            adc [__r0],>_g_xDefBandSettings
+ 013B 5100              mov A,[__r0]
+ 013D 10                push X
+ 013E 5800              mov X,[__r1]
+ 0140 28                romx
+ 0141 20                pop X
+ 0142 5300              mov [__r0],A
+ 0144 5200              mov A,[X+0]
+ 0146 5300              mov [__r3],A
+ 0148 550000            mov [__r2],0
+ 014B 060000            add [__r3],<_g_bGainDDS
+ 014E 0E0000            adc [__r2],>_g_bGainDDS
+ 0151 5100              mov A,[__r2]
+ 0153 60D5              mov REG[0xd5],A
+ 0155 5100              mov A,[__r0]
+ 0157 3F00              mvi [__r3],A
+ 0159                   .dbline 142
+ 0159           ;               }
+ 0159           L20:
+ 0159                   .dbline 138
+ 0159 7700              inc [X+0]
+ 015B           L22:
+ 015B                   .dbline 138
+ 015B 3D000E            cmp [X+0],14
+ 015E CF51              jc L19
+ 0160           X2:
+ 0160                   .dbline 144
+ 0160           ; 
+ 0160           ;               g_bIsCalibrated = FALSE;
+ 0160 62D000            mov REG[0xd0],>_g_bIsCalibrated
+ 0163 550000            mov [_g_bIsCalibrated],0
+ 0166                   .dbline 146
+ 0166           ; 
+ 0166           ;               STR_SaveCalibration();
+ 0166 9E98              xcall _STR_SaveCalibration
+ 0168                   .dbline 148
+ 0168           ; 
+ 0168           ;               g_xConf.bUserIddle = USER_IDDLE_90S;
+ 0168 62D000            mov REG[0xd0],>_g_xConf
+ 016B 550103            mov [_g_xConf+1],3
+ 016E                   .dbline 149
+ 016E           ;               g_xConf.bStep = STEP_10KHZ;
+ 016E 550003            mov [_g_xConf],3
+ 0171                   .dbline 150
+ 0171           ;               STR_SaveConfig();
+ 0171 9EE9              xcall _STR_SaveConfig
+ 0173                   .dbline 152
+ 0173           ; 
+ 0173           ;               magic = MAGIC_NUMBER;
+ 0173 5602AB            mov [X+2],-85
+ 0176 560155            mov [X+1],85
+ 0179                   .dbline 153
+ 0179           ;               E2PROM_bE2Write(offsetof(RECORD_DATA,wMagic), (unsigned char*) &magic, sizeof(magic), 25);
+ 0179 10                push X
+ 017A 5019              mov A,25
+ 017C 08                push A
+ 017D 5000              mov A,0
+ 017F 08                push A
+ 0180 5002              mov A,2
+ 0182 08                push A
+ 0183 62D000            mov REG[0xd0],>__r0
+ 0186 5A00              mov [__r1],X
+ 0188 060001            add [__r1],1
+ 018B 5007              mov A,7
+ 018D 08                push A
+ 018E 5100              mov A,[__r1]
+ 0190 08                push A
+ 0191 5000              mov A,0
+ 0193 08                push A
+ 0194 50C9              mov A,-55
+ 0196 08                push A
+ 0197 7C0000            xcall _E2PROM_bE2Write
+ 019A 62D000            mov REG[0xd0],>__r0
+ 019D 38F9              add SP,-7
+ 019F 20                pop X
+ 01A0                   .dbline 154
+ 01A0           ;       }
+ 01A0           L17:
+ 01A0                   .dbline 155
+ 01A0           ;       E2PROM_E2Read(offsetof(RECORD_DATA,xBandCorrFactor), (unsigned char*) &g_xBandCorrFactor[0], sizeof(g_xBandCorrFactor));
+ 01A0 10                push X
+ 01A1 5000              mov A,0
+ 01A3 08                push A
+ 01A4 50A8              mov A,-88
+ 01A6 08                push A
+ 01A7 5000              mov A,>_g_xBandCorrFactor
+ 01A9 08                push A
+ 01AA 5000              mov A,<_g_xBandCorrFactor
+ 01AC 08                push A
+ 01AD 5000              mov A,0
+ 01AF 08                push A
+ 01B0 08                push A
+ 01B1 7C0000            xcall _E2PROM_E2Read
+ 01B4 38FA              add SP,-6
+ 01B6 20                pop X
+ 01B7                   .dbline 156
+ 01B7           ;       E2PROM_E2Read(offsetof(RECORD_DATA,bIsCalibrated), &g_bIsCalibrated, sizeof(g_bIsCalibrated));
+ 01B7 10                push X
+ 01B8 5000              mov A,0
+ 01BA 08                push A
+ 01BB 5001              mov A,1
+ 01BD 08                push A
+ 01BE 5000              mov A,>_g_bIsCalibrated
+ 01C0 08                push A
+ 01C1 5000              mov A,<_g_bIsCalibrated
+ 01C3 08                push A
+ 01C4 5000              mov A,0
+ 01C6 08                push A
+ 01C7 50C6              mov A,-58
+ 01C9 08                push A
+ 01CA 7C0000            xcall _E2PROM_E2Read
+ 01CD 38FA              add SP,-6
+ 01CF 20                pop X
+ 01D0                   .dbline 157
+ 01D0           ;       E2PROM_E2Read(offsetof(RECORD_DATA,bGainDDS), (unsigned char*)&g_bGainDDS[0], sizeof(g_bGainDDS));
+ 01D0 10                push X
+ 01D1 5000              mov A,0
+ 01D3 08                push A
+ 01D4 500E              mov A,14
+ 01D6 08                push A
+ 01D7 5000              mov A,>_g_bGainDDS
+ 01D9 08                push A
+ 01DA 5000              mov A,<_g_bGainDDS
+ 01DC 08                push A
+ 01DD 5000              mov A,0
+ 01DF 08                push A
+ 01E0 50A8              mov A,-88
+ 01E2 08                push A
+ 01E3 7C0000            xcall _E2PROM_E2Read
+ 01E6 38FA              add SP,-6
+ 01E8 20                pop X
+ 01E9                   .dbline 158
+ 01E9           ;       E2PROM_E2Read(offsetof(RECORD_DATA,xConf), (unsigned char*)&g_xConf, sizeof(g_xConf));
+ 01E9 10                push X
+ 01EA 5000              mov A,0
+ 01EC 08                push A
+ 01ED 5002              mov A,2
+ 01EF 08                push A
+ 01F0 5000              mov A,>_g_xConf
+ 01F2 08                push A
+ 01F3 5000              mov A,<_g_xConf
+ 01F5 08                push A
+ 01F6 5000              mov A,0
+ 01F8 08                push A
+ 01F9 50C7              mov A,-57
+ 01FB 08                push A
+ 01FC 7C0000            xcall _E2PROM_E2Read
+ 01FF 38FA              add SP,-6
+ 0201 20                pop X
+ 0202                   .dbline -2
+ 0202           L16:
+ 0202 38FC              add SP,-4
+ 0204 20                pop X
+ 0205                   .dbline 0 ; func end
+ 0205 7F                ret
+ 0206                   .dbsym l cRc 3 C
+ 0206                   .dbsym l magic 1 i
+ 0206                   .dbsym l bBand 0 c
+ 0206                   .dbend

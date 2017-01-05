@@ -1,0 +1,241 @@
+XH
+H C areas 3A global symbols
+M msg_eng.c
+A text size 0 flags 0
+dbfile ./msg_eng.c
+A lit size 1CE flags 0
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+dbsym e gBlankStr 0 A[17:17]kc
+dbsym e gWelcome1Str 11 A[17:17]kc
+dbsym e gWelcome2Str 22 A[17:17]kc
+dbsym e gConfigPcLinkStr 33 A[8:8]kc
+dbsym e gConfigStepStr 3B A[10:10]kc
+dbsym e gConfigIddleStr 45 A[16:16]kc
+dbsym e gConfigCalibStr 55 A[10:10]kc
+dbsym e gConfigSwLoadStr 5F A[14:14]kc
+dbsym e gModeSwrStr 6D A[4:4]kc
+dbsym e gModeImpStr 71 A[4:4]kc
+dbsym e gModeCapStr 75 A[4:4]kc
+dbsym e gModeIndStr 79 A[4:4]kc
+dbsym e gModeOffStr 7D A[4:4]kc
+dbsym e gStep10HzStr 81 A[5:5]kc
+dbsym e gStep100HzStr 86 A[6:6]kc
+dbsym e gStep1KhzStr 8C A[5:5]kc
+dbsym e gStep10KhzStr 91 A[6:6]kc
+dbsym e gStep100KhzStr 97 A[7:7]kc
+dbsym e gIddleOffStr 9E A[4:4]kc
+dbsym e gIddle30SStr A2 A[5:5]kc
+dbsym e gIddle60SStr A7 A[5:5]kc
+dbsym e gIddle90SStr AC A[5:5]kc
+dbsym e gBand160MStr B1 A[5:5]kc
+dbsym e gBand80MStr B6 A[4:4]kc
+dbsym e gBand40MStr BA A[4:4]kc
+dbsym e gBand30MStr BE A[4:4]kc
+dbsym e gBand25MStr C2 A[4:4]kc
+dbsym e gBand20MStr C6 A[4:4]kc
+dbsym e gBand17MStr CA A[4:4]kc
+dbsym e gBand15MStr CE A[4:4]kc
+dbsym e gBand12MStr D2 A[4:4]kc
+dbsym e gBand11MStr D6 A[4:4]kc
+dbsym e gBand10MStr DA A[4:4]kc
+dbsym e gBand8MStr DE A[3:3]kc
+dbsym e gBand7MStr E1 A[3:3]kc
+dbsym e gBand6MStr E4 A[3:3]kc
+dbsym e gModeScanStr E7 A[5:5]kc
+dbsym e gErrorAdjustVfStr EC A[17:17]kc
+dbsym e gInProgressStr FD A[15:15]kc
+dbsym e gDoneStr 10C A[15:15]kc
+dbsym e gOpenLoadStr 11B A[17:17]kc
+dbsym e gShortLoadStr 12C A[14:14]kc
+dbsym e g50OhmLoadStr 13A A[17:17]kc
+dbsym e g150OhmLoadStr 14B A[17:17]kc
+dbsym e g274OhmLoadStr 15C A[17:17]kc
+dbsym e gErrorUncalibratedStr 16D A[17:17]kc
+dbsym e gPressAnyKeyStr 17E A[17:17]kc
+dbsym e gNotImplementedStr 18F A[16:16]kc
+dbsym e gConfirmStr 19F A[10:10]kc
+dbsym e gErrNoMatchingStr 1A9 A[16:16]kc
+dbsym e gBandWidthStr 1B9 A[4:4]kc
+dbsym e gBandLitStr 1BD A[6:6]kc
+dbsym e gSwLoadingStr 1C3 A[11:11]kc
+S _g50OhmLoadStr Def013A
+S _gModeScanStr Def00E7
+S _gInProgressStr Def00FD
+S _gErrNoMatchingStr Def01A9
+S _gOpenLoadStr Def011B
+S _gBand10MStr Def00DA
+S _gBand11MStr Def00D6
+S _gBand20MStr Def00C6
+S _gBand12MStr Def00D2
+S _gBand30MStr Def00BE
+S _gBand40MStr Def00BA
+S _gBand15MStr Def00CE
+S _gBand25MStr Def00C2
+S _gBand17MStr Def00CA
+S _gBand80MStr Def00B6
+S _gStep10KhzStr Def0091
+S _gErrorAdjustVfStr Def00EC
+S _gConfigCalibStr Def0055
+S _gConfigIddleStr Def0045
+S _g150OhmLoadStr Def014B
+S _g274OhmLoadStr Def015C
+S _gBand160MStr Def00B1
+S _gStep100KhzStr Def0097
+S _gPressAnyKeyStr Def017E
+S _gBandWidthStr Def01B9
+S _gDoneStr Def010C
+S _gSwLoadingStr Def01C3
+S _gShortLoadStr Def012C
+S _gConfigPcLinkStr Def0033
+S _gIddle30SStr Def00A2
+S _gModeCapStr Def0075
+S _gIddle60SStr Def00A7
+S _gBandLitStr Def01BD
+S _gIddle90SStr Def00AC
+S _gModeOffStr Def007D
+S _gModeIndStr Def0079
+S _gConfigSwLoadStr Def005F
+S _gNotImplementedStr Def018F
+S _gModeImpStr Def0071
+S _gStep10HzStr Def0081
+S _gModeSwrStr Def006D
+S _gConfirmStr Def019F
+S _gErrorUncalibratedStr Def016D
+S _gBlankStr Def0000
+S _gStep100HzStr Def0086
+S _gConfigStepStr Def003B
+S _gBand6MStr Def00E4
+S _gBand7MStr Def00E1
+S _gBand8MStr Def00DE
+S _gStep1KhzStr Def008C
+S _gIddleOffStr Def009E
+S _gWelcome1Str Def0011
+S _gWelcome2Str Def0022
+A data size A flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+dbsym e gConfigStr 0 A[10:5]pkc
+S _gConfigStr Def0000
+A data size 0 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+A data size A flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+dbsym e gModeStr 0 A[10:5]pkc
+S _gModeStr Def0000
+A data size 0 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+A data size A flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+dbsym e gStepStr 0 A[10:5]pkc
+S _gStepStr Def0000
+A data size 0 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+A data size 8 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+dbsym e gIddleStr 0 A[8:4]pkc
+S _gIddleStr Def0000
+A data size 0 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+A data size 1C flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+dbsym e gBandStr 0 A[28:14]pkc
+S _gBandStr Def0000
+A data size 0 flags 20
+dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+T 00 00 20 20 20 20 20 20 20 20 20 20 20 20 20 20
+R 00 00 00 01
+T 00 0E 20 20 00 53 41 52 4B 31 30 30 20 41 4E 41
+R 00 00 00 01
+T 00 1C 4C 59 5A 45 52 00 28 63 29 45 41 34 46 52
+R 00 00 00 01
+T 00 2A 42 20 31 31 20 56 31 33 00 50 43 20 4C 69
+R 00 00 00 01
+T 00 38 6E 6B 00 53 74 65 70 20 53 69 7A 65 00 53
+R 00 00 00 01
+T 00 46 75 73 70 65 6E 64 20 54 69 6D 65 6F 75 74
+R 00 00 00 01
+T 00 54 00 43 61 6C 69 62 72 61 74 65 00 53 6F 66
+R 00 00 00 01
+T 00 62 74 77 61 72 65 20 4C 6F 61 64 00
+R 00 00 00 01
+T 00 00 00 33 00 3B 00 45
+R 00 00 00 02 00 02 00 01 00 04 00 01 00 06 00 01
+T 00 06 00 55 00 5F
+R 00 00 00 02 00 02 00 01 00 04 00 01
+T 00 6D 53 57 52 00 49 4D 50 00 43 41 50 00 49 4E
+R 00 00 00 01
+T 00 7B 44 00 4F 46 46 00
+R 00 00 00 01
+T 00 00 00 6D 00 71 00 75
+R 00 00 00 04 00 02 00 01 00 04 00 01 00 06 00 01
+T 00 06 00 79 00 7D
+R 00 00 00 04 00 02 00 01 00 04 00 01
+T 00 81 31 30 48 7A 00 31 30 30 48 7A 00 31 4B 68
+R 00 00 00 01
+T 00 8F 7A 00 31 30 4B 68 7A 00 31 30 30 4B 68 7A
+R 00 00 00 01
+T 00 9D 00
+R 00 00 00 01
+T 00 00 00 81 00 86 00 8C
+R 00 00 00 06 00 02 00 01 00 04 00 01 00 06 00 01
+T 00 06 00 91 00 97
+R 00 00 00 06 00 02 00 01 00 04 00 01
+T 00 9E 4F 66 66 00 33 30 20 53 00 36 30 20 53 00
+R 00 00 00 01
+T 00 AC 39 30 20 53 00
+R 00 00 00 01
+T 00 00 00 9E 00 A2 00 A7
+R 00 00 00 08 00 02 00 01 00 04 00 01 00 06 00 01
+T 00 06 00 AC
+R 00 00 00 08 00 02 00 01
+T 00 B1 31 36 30 4D 00 38 30 4D 00 34 30 4D 00 33
+R 00 00 00 01
+T 00 BF 30 4D 00 32 35 4D 00 32 30 4D 00 31 37 4D
+R 00 00 00 01
+T 00 CD 00 31 35 4D 00 31 32 4D 00 31 31 4D 00 31
+R 00 00 00 01
+T 00 DB 30 4D 00 38 4D 00 37 4D 00 36 4D 00
+R 00 00 00 01
+T 00 00 00 B1 00 B6 00 BA
+R 00 00 00 0A 00 02 00 01 00 04 00 01 00 06 00 01
+T 00 06 00 BE 00 C2 00 C6
+R 00 00 00 0A 00 02 00 01 00 04 00 01 00 06 00 01
+T 00 0C 00 CA 00 CE 00 D2
+R 00 00 00 0A 00 02 00 01 00 04 00 01 00 06 00 01
+T 00 12 00 D6 00 DA 00 DE
+R 00 00 00 0A 00 02 00 01 00 04 00 01 00 06 00 01
+T 00 18 00 E1 00 E4
+R 00 00 00 0A 00 02 00 01 00 04 00 01
+T 00 E7 53 43 41 4E 00 45 72 72 6F 72 20 56 66 20
+R 00 00 00 01
+T 00 F5 4C 65 76 65 6C 20 20 00 49 6E 20 70 72 6F
+R 00 00 00 01
+T 01 03 67 72 65 73 73 2E 2E 2E 00 44 6F 6E 65 20
+R 00 00 00 01
+T 01 11 20 20 20 20 20 20 20 20 20 00 44 69 73 63
+R 00 00 00 01
+T 01 1F 6F 6E 6E 65 63 74 20 4C 6F 61 64 20 00 53
+R 00 00 00 01
+T 01 2D 68 6F 72 74 2D 63 69 72 63 75 69 74 00 43
+R 00 00 00 01
+T 01 3B 6F 6E 6E 20 35 30 20 F4 20 6C 6F 61 64 20
+R 00 00 00 01
+T 01 49 20 00 43 6F 6E 6E 20 31 35 30 20 F4 20 6C
+R 00 00 00 01
+T 01 57 6F 61 64 20 00 43 6F 6E 6E 20 32 37 34 20
+R 00 00 00 01
+T 01 65 F4 20 6C 6F 61 64 20 00 55 6E 63 61 6C 69
+R 00 00 00 01
+T 01 73 62 72 61 74 65 64 20 21 21 20 00 50 72 65
+R 00 00 00 01
+T 01 81 73 73 20 61 6E 79 20 6B 65 79 20 20 20 00
+R 00 00 00 01
+T 01 8F 4E 6F 74 20 49 6D 70 6C 65 6D 65 6E 74 65
+R 00 00 00 01
+T 01 9D 64 00 43 6F 6E 66 69 72 6D 20 3F 00 45 72
+R 00 00 00 01
+T 01 AB 72 20 4E 6F 20 4D 61 74 63 68 69 6E 67 00
+R 00 00 00 01
+T 01 B9 42 57 3A 00 42 41 4E 44 3A 00 53 57 20 4C
+R 00 00 00 01
+T 01 C7 6F 61 64 69 6E 67 00
+R 00 00 00 01

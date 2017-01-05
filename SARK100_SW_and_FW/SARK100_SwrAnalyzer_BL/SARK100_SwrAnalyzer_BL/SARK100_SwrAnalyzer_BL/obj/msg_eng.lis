@@ -1,0 +1,243 @@
+ 0000                   cpu LMM
+                        .module msg_eng.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./msg_eng.c
+                        .area lit(rom, con, rel)
+ 0000           _gBlankStr::
+ 0000 20202020202020202020202020202020  .byte 32,32,32,32,32,32,32,32,32,32,32,32,32,32,32,32
+ 0010 00                .byte 0
+ 0011                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+ 0011                   .dbsym e gBlankStr _gBlankStr A[17:17]kc
+ 0011           _gWelcome1Str::
+ 0011 5341524B31303020414E414C595A4552  .byte 'S,'A,'R,'K,49,48,48,32,'A,'N,'A,'L,'Y,'Z,'E,'R
+ 0021 00                .byte 0
+ 0022                   .dbsym e gWelcome1Str _gWelcome1Str A[17:17]kc
+ 0022           _gWelcome2Str::
+ 0022 28632945413446524220313120563133  .byte 40,'c,41,'E,'A,52,'F,'R,'B,32,49,49,32,'V,49,51
+ 0032 00                .byte 0
+ 0033                   .dbsym e gWelcome2Str _gWelcome2Str A[17:17]kc
+ 0033           _gConfigPcLinkStr::
+ 0033 5043204C696E6B00  .byte 'P,'C,32,'L,'i,'n,'k,0
+ 003B                   .dbsym e gConfigPcLinkStr _gConfigPcLinkStr A[8:8]kc
+ 003B           _gConfigStepStr::
+ 003B 537465702053697A6500      .byte 'S,'t,'e,'p,32,'S,'i,'z,'e,0
+ 0045                   .dbsym e gConfigStepStr _gConfigStepStr A[10:10]kc
+ 0045           _gConfigIddleStr::
+ 0045 53757370656E642054696D656F757400  .byte 'S,'u,'s,'p,'e,'n,'d,32,'T,'i,'m,'e,'o,'u,'t,0
+ 0055                   .dbsym e gConfigIddleStr _gConfigIddleStr A[16:16]kc
+ 0055           _gConfigCalibStr::
+ 0055 43616C69627261746500      .byte 'C,'a,'l,'i,'b,'r,'a,'t,'e,0
+ 005F                   .dbsym e gConfigCalibStr _gConfigCalibStr A[10:10]kc
+ 005F           _gConfigSwLoadStr::
+ 005F 536F667477617265204C6F616400      .byte 'S,'o,'f,'t,'w,'a,'r,'e,32,'L,'o,'a,'d,0
+ 006D                   .dbsym e gConfigSwLoadStr _gConfigSwLoadStr A[14:14]kc
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+ 0000           _gConfigStr::
+ 0000 0033              .word _gConfigPcLinkStr
+ 0002 003B              .word _gConfigStepStr
+ 0004 0045              .word _gConfigIddleStr
+ 0006 0055              .word _gConfigCalibStr
+ 0008 005F              .word _gConfigSwLoadStr
+ 000A                   .dbsym e gConfigStr _gConfigStr A[10:5]pkc
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+                        .area lit(rom, con, rel)
+ 006D           _gModeSwrStr::
+ 006D 53575200          .byte 'S,'W,'R,0
+ 0071                   .dbsym e gModeSwrStr _gModeSwrStr A[4:4]kc
+ 0071           _gModeImpStr::
+ 0071 494D5000          .byte 'I,'M,'P,0
+ 0075                   .dbsym e gModeImpStr _gModeImpStr A[4:4]kc
+ 0075           _gModeCapStr::
+ 0075 43415000          .byte 'C,'A,'P,0
+ 0079                   .dbsym e gModeCapStr _gModeCapStr A[4:4]kc
+ 0079           _gModeIndStr::
+ 0079 494E4400          .byte 'I,'N,'D,0
+ 007D                   .dbsym e gModeIndStr _gModeIndStr A[4:4]kc
+ 007D           _gModeOffStr::
+ 007D 4F464600          .byte 'O,'F,'F,0
+ 0081                   .dbsym e gModeOffStr _gModeOffStr A[4:4]kc
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+ 0000           _gModeStr::
+ 0000 006D              .word _gModeSwrStr
+ 0002 0071              .word _gModeImpStr
+ 0004 0075              .word _gModeCapStr
+ 0006 0079              .word _gModeIndStr
+ 0008 007D              .word _gModeOffStr
+ 000A                   .dbsym e gModeStr _gModeStr A[10:5]pkc
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+                        .area lit(rom, con, rel)
+ 0081           _gStep10HzStr::
+ 0081 3130487A00        .byte 49,48,'H,'z,0
+ 0086                   .dbsym e gStep10HzStr _gStep10HzStr A[5:5]kc
+ 0086           _gStep100HzStr::
+ 0086 313030487A00      .byte 49,48,48,'H,'z,0
+ 008C                   .dbsym e gStep100HzStr _gStep100HzStr A[6:6]kc
+ 008C           _gStep1KhzStr::
+ 008C 314B687A00        .byte 49,'K,'h,'z,0
+ 0091                   .dbsym e gStep1KhzStr _gStep1KhzStr A[5:5]kc
+ 0091           _gStep10KhzStr::
+ 0091 31304B687A00      .byte 49,48,'K,'h,'z,0
+ 0097                   .dbsym e gStep10KhzStr _gStep10KhzStr A[6:6]kc
+ 0097           _gStep100KhzStr::
+ 0097 3130304B687A00    .byte 49,48,48,'K,'h,'z,0
+ 009E                   .dbsym e gStep100KhzStr _gStep100KhzStr A[7:7]kc
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+ 0000           _gStepStr::
+ 0000 0081              .word _gStep10HzStr
+ 0002 0086              .word _gStep100HzStr
+ 0004 008C              .word _gStep1KhzStr
+ 0006 0091              .word _gStep10KhzStr
+ 0008 0097              .word _gStep100KhzStr
+ 000A                   .dbsym e gStepStr _gStepStr A[10:5]pkc
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+                        .area lit(rom, con, rel)
+ 009E           _gIddleOffStr::
+ 009E 4F666600          .byte 'O,'f,'f,0
+ 00A2                   .dbsym e gIddleOffStr _gIddleOffStr A[4:4]kc
+ 00A2           _gIddle30SStr::
+ 00A2 3330205300        .byte 51,48,32,'S,0
+ 00A7                   .dbsym e gIddle30SStr _gIddle30SStr A[5:5]kc
+ 00A7           _gIddle60SStr::
+ 00A7 3630205300        .byte 54,48,32,'S,0
+ 00AC                   .dbsym e gIddle60SStr _gIddle60SStr A[5:5]kc
+ 00AC           _gIddle90SStr::
+ 00AC 3930205300        .byte 57,48,32,'S,0
+ 00B1                   .dbsym e gIddle90SStr _gIddle90SStr A[5:5]kc
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+ 0000           _gIddleStr::
+ 0000 009E              .word _gIddleOffStr
+ 0002 00A2              .word _gIddle30SStr
+ 0004 00A7              .word _gIddle60SStr
+ 0006 00AC              .word _gIddle90SStr
+ 0008                   .dbsym e gIddleStr _gIddleStr A[8:4]pkc
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+                        .area lit(rom, con, rel)
+ 00B1           _gBand160MStr::
+ 00B1 3136304D00        .byte 49,54,48,'M,0
+ 00B6                   .dbsym e gBand160MStr _gBand160MStr A[5:5]kc
+ 00B6           _gBand80MStr::
+ 00B6 38304D00          .byte 56,48,'M,0
+ 00BA                   .dbsym e gBand80MStr _gBand80MStr A[4:4]kc
+ 00BA           _gBand40MStr::
+ 00BA 34304D00          .byte 52,48,'M,0
+ 00BE                   .dbsym e gBand40MStr _gBand40MStr A[4:4]kc
+ 00BE           _gBand30MStr::
+ 00BE 33304D00          .byte 51,48,'M,0
+ 00C2                   .dbsym e gBand30MStr _gBand30MStr A[4:4]kc
+ 00C2           _gBand25MStr::
+ 00C2 32354D00          .byte 50,53,'M,0
+ 00C6                   .dbsym e gBand25MStr _gBand25MStr A[4:4]kc
+ 00C6           _gBand20MStr::
+ 00C6 32304D00          .byte 50,48,'M,0
+ 00CA                   .dbsym e gBand20MStr _gBand20MStr A[4:4]kc
+ 00CA           _gBand17MStr::
+ 00CA 31374D00          .byte 49,55,'M,0
+ 00CE                   .dbsym e gBand17MStr _gBand17MStr A[4:4]kc
+ 00CE           _gBand15MStr::
+ 00CE 31354D00          .byte 49,53,'M,0
+ 00D2                   .dbsym e gBand15MStr _gBand15MStr A[4:4]kc
+ 00D2           _gBand12MStr::
+ 00D2 31324D00          .byte 49,50,'M,0
+ 00D6                   .dbsym e gBand12MStr _gBand12MStr A[4:4]kc
+ 00D6           _gBand11MStr::
+ 00D6 31314D00          .byte 49,49,'M,0
+ 00DA                   .dbsym e gBand11MStr _gBand11MStr A[4:4]kc
+ 00DA           _gBand10MStr::
+ 00DA 31304D00          .byte 49,48,'M,0
+ 00DE                   .dbsym e gBand10MStr _gBand10MStr A[4:4]kc
+ 00DE           _gBand8MStr::
+ 00DE 384D00            .byte 56,'M,0
+ 00E1                   .dbsym e gBand8MStr _gBand8MStr A[3:3]kc
+ 00E1           _gBand7MStr::
+ 00E1 374D00            .byte 55,'M,0
+ 00E4                   .dbsym e gBand7MStr _gBand7MStr A[3:3]kc
+ 00E4           _gBand6MStr::
+ 00E4 364D00            .byte 54,'M,0
+ 00E7                   .dbsym e gBand6MStr _gBand6MStr A[3:3]kc
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+ 0000           _gBandStr::
+ 0000 00B1              .word _gBand160MStr
+ 0002 00B6              .word _gBand80MStr
+ 0004 00BA              .word _gBand40MStr
+ 0006 00BE              .word _gBand30MStr
+ 0008 00C2              .word _gBand25MStr
+ 000A 00C6              .word _gBand20MStr
+ 000C 00CA              .word _gBand17MStr
+ 000E 00CE              .word _gBand15MStr
+ 0010 00D2              .word _gBand12MStr
+ 0012 00D6              .word _gBand11MStr
+ 0014 00DA              .word _gBand10MStr
+ 0016 00DE              .word _gBand8MStr
+ 0018 00E1              .word _gBand7MStr
+ 001A 00E4              .word _gBand6MStr
+ 001C                   .dbsym e gBandStr _gBandStr A[28:14]pkc
+                        .area data(ram, con, rel)
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\msg_eng.c
+                        .area lit(rom, con, rel)
+ 00E7           _gModeScanStr::
+ 00E7 5343414E00        .byte 'S,'C,'A,'N,0
+ 00EC                   .dbsym e gModeScanStr _gModeScanStr A[5:5]kc
+ 00EC           _gErrorAdjustVfStr::
+ 00EC 4572726F72205666204C6576656C2020  .byte 'E,'r,'r,'o,'r,32,'V,'f,32,'L,'e,'v,'e,'l,32,32
+ 00FC 00                .byte 0
+ 00FD                   .dbsym e gErrorAdjustVfStr _gErrorAdjustVfStr A[17:17]kc
+ 00FD           _gInProgressStr::
+ 00FD 496E2070726F67726573732E2E2E00    .byte 'I,'n,32,'p,'r,'o,'g,'r,'e,'s,'s,46,46,46,0
+ 010C                   .dbsym e gInProgressStr _gInProgressStr A[15:15]kc
+ 010C           _gDoneStr::
+ 010C 446F6E652020202020202020202000    .byte 'D,'o,'n,'e,32,32,32,32,32,32,32,32,32,32,0
+ 011B                   .dbsym e gDoneStr _gDoneStr A[15:15]kc
+ 011B           _gOpenLoadStr::
+ 011B 446973636F6E6E656374204C6F616420  .byte 'D,'i,'s,'c,'o,'n,'n,'e,'c,'t,32,'L,'o,'a,'d,32
+ 012B 00                .byte 0
+ 012C                   .dbsym e gOpenLoadStr _gOpenLoadStr A[17:17]kc
+ 012C           _gShortLoadStr::
+ 012C 53686F72742D6369726375697400      .byte 'S,'h,'o,'r,'t,45,'c,'i,'r,'c,'u,'i,'t,0
+ 013A                   .dbsym e gShortLoadStr _gShortLoadStr A[14:14]kc
+ 013A           _g50OhmLoadStr::
+ 013A 436F6E6E20353020F4206C6F61642020  .byte 'C,'o,'n,'n,32,53,48,32,244,32,'l,'o,'a,'d,32,32
+ 014A 00                .byte 0
+ 014B                   .dbsym e g50OhmLoadStr _g50OhmLoadStr A[17:17]kc
+ 014B           _g150OhmLoadStr::
+ 014B 436F6E6E2031353020F4206C6F616420  .byte 'C,'o,'n,'n,32,49,53,48,32,244,32,'l,'o,'a,'d,32
+ 015B 00                .byte 0
+ 015C                   .dbsym e g150OhmLoadStr _g150OhmLoadStr A[17:17]kc
+ 015C           _g274OhmLoadStr::
+ 015C 436F6E6E2032373420F4206C6F616420  .byte 'C,'o,'n,'n,32,50,55,52,32,244,32,'l,'o,'a,'d,32
+ 016C 00                .byte 0
+ 016D                   .dbsym e g274OhmLoadStr _g274OhmLoadStr A[17:17]kc
+ 016D           _gErrorUncalibratedStr::
+ 016D 556E63616C6962726174656420212120  .byte 'U,'n,'c,'a,'l,'i,'b,'r,'a,'t,'e,'d,32,33,33,32
+ 017D 00                .byte 0
+ 017E                   .dbsym e gErrorUncalibratedStr _gErrorUncalibratedStr A[17:17]kc
+ 017E           _gPressAnyKeyStr::
+ 017E 507265737320616E79206B6579202020  .byte 'P,'r,'e,'s,'s,32,'a,'n,'y,32,'k,'e,'y,32,32,32
+ 018E 00                .byte 0
+ 018F                   .dbsym e gPressAnyKeyStr _gPressAnyKeyStr A[17:17]kc
+ 018F           _gNotImplementedStr::
+ 018F 4E6F7420496D706C656D656E74656400  .byte 'N,'o,'t,32,'I,'m,'p,'l,'e,'m,'e,'n,'t,'e,'d,0
+ 019F                   .dbsym e gNotImplementedStr _gNotImplementedStr A[16:16]kc
+ 019F           _gConfirmStr::
+ 019F 436F6E6669726D203F00      .byte 'C,'o,'n,'f,'i,'r,'m,32,63,0
+ 01A9                   .dbsym e gConfirmStr _gConfirmStr A[10:10]kc
+ 01A9           _gErrNoMatchingStr::
+ 01A9 457272204E6F204D61746368696E6700  .byte 'E,'r,'r,32,'N,'o,32,'M,'a,'t,'c,'h,'i,'n,'g,0
+ 01B9                   .dbsym e gErrNoMatchingStr _gErrNoMatchingStr A[16:16]kc
+ 01B9           _gBandWidthStr::
+ 01B9 42573A00          .byte 'B,'W,58,0
+ 01BD                   .dbsym e gBandWidthStr _gBandWidthStr A[4:4]kc
+ 01BD           _gBandLitStr::
+ 01BD 42414E443A00      .byte 'B,'A,'N,'D,58,0
+ 01C3                   .dbsym e gBandLitStr _gBandLitStr A[6:6]kc
+ 01C3           _gSwLoadingStr::
+ 01C3 5357204C6F6164696E6700    .byte 'S,'W,32,'L,'o,'a,'d,'i,'n,'g,0
+ 01CE                   .dbsym e gSwLoadingStr _gSwLoadingStr A[11:11]kc

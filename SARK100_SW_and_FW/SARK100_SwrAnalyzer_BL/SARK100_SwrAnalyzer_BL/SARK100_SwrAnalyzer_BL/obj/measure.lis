@@ -1,0 +1,509 @@
+ 0000                   cpu LMM
+                        .module measure.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./measure.c
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\measure.c
+ 0000                   .dbfunc e Do_Measure _Do_Measure fV
+ 0000           _Do_Measure::
+ 0000                   .dbline -1
+ 0000                   .dbline 74
+ 0000           ; //*****************************************************************************/
+ 0000           ; //  This file is a part of the "SARK100 SWR Analyzer firmware"
+ 0000           ; //
+ 0000           ; //  Copyright © 2010 Melchor Varela - EA4FRB.  All rights reserved.
+ 0000           ; //  Melchor Varela, Madrid, Spain.
+ 0000           ; //  melchor.varela@gmail.com
+ 0000           ; //
+ 0000           ; //  "SARK100 SWR Analyzer firmware" is free software: you can redistribute it
+ 0000           ; //  and/or modify it under the terms of the GNU General Public License as
+ 0000           ; //  published by the Free Software Foundation, either version 3 of the License,
+ 0000           ; //  or (at your option) any later version.
+ 0000           ; //
+ 0000           ; //  "SARK100 SWR Analyzer firmware" is distributed in the hope that it will be
+ 0000           ; //  useful,  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 0000           ; //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ 0000           ; //  GNU General Public License for more details.
+ 0000           ; //
+ 0000           ; //  You should have received a copy of the GNU General Public License
+ 0000           ; //  along with "SARK100 SWR Analyzer firmware".  If not,
+ 0000           ; //  see <http://www.gnu.org/licenses/>.
+ 0000           ; //*****************************************************************************/
+ 0000           ; //*****************************************************************************/
+ 0000           ; //
+ 0000           ; //    PROJECT:        SARK100 SWR Analyzer
+ 0000           ; //    FILE NAME:      MEASURE.C
+ 0000           ; //    AUTHOR:         EA4FRB - Melchor Varela
+ 0000           ; //
+ 0000           ; //    DESCRIPTION
+ 0000           ; //
+ 0000           ; //    Measure reflectometer voltages
+ 0000           ; //
+ 0000           ; //    HISTORY
+ 0000           ; //
+ 0000           ; //    NAME    DATE            REMARKS
+ 0000           ; //
+ 0000           ; //    MVM             DEC2009         Creation
+ 0000           ; //
+ 0000           ; //*****************************************************************************/
+ 0000           ; 
+ 0000           ; #include <m8c.h>                                      // Part specific constants and macros
+ 0000           ; #include <math.h>
+ 0000           ; 
+ 0000           ; #include "PSoCAPI.h"
+ 0000           ; #include "psocgpioint.h"
+ 0000           ; #include "util.h"
+ 0000           ; 
+ 0000           ; #include "measure.h"
+ 0000           ; #include "glb_data.h"
+ 0000           ; 
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; //  Defines
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; #define NUM_AVE_SAMPLES                       8               // Maximum 16
+ 0000           ; 
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; //  Prototypes
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; static DWORD TakeSample (void);
+ 0000           ; 
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; //  FUNCTION NAME:    Do_Measure
+ 0000           ; //
+ 0000           ; //  DESCRIPTION:
+ 0000           ; //
+ 0000           ; //    Measure reflectometer voltages.
+ 0000           ; //
+ 0000           ; //  ARGUMENTS:
+ 0000           ; //
+ 0000           ; //  RETURNS:
+ 0000           ; //     g_xBridgeMeasure
+ 0000           ; //
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; void Do_Measure ( void )
+ 0000           ; {
+ 0000                   .dbline 76
+ 0000           ;                                                                               // Read Vf
+ 0000           ;       AMUX4_ADC_InputSelect(AMUX4_ADC_PORT0_1);
+ 0000 10                push X
+ 0001 5000              mov A,0
+ 0003 7C0000            xcall _AMUX4_ADC_InputSelect
+ 0006 20                pop X
+ 0007                   .dbline 77
+ 0007           ;       g_xBridgeMeasure.Vf = TakeSample();
+ 0007 90CB              xcall _TakeSample
+ 0009 62D000            mov REG[0xd0],>__r0
+ 000C 5100              mov A,[__r0]
+ 000E 08                push A
+ 000F 5100              mov A,[__r1]
+ 0011 08                push A
+ 0012 5100              mov A,[__r2]
+ 0014 08                push A
+ 0015 5100              mov A,[__r3]
+ 0017 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 001A 5303              mov [_g_xBridgeMeasure+3],A
+ 001C 18                pop A
+ 001D 5302              mov [_g_xBridgeMeasure+2],A
+ 001F 18                pop A
+ 0020 5301              mov [_g_xBridgeMeasure+1],A
+ 0022 18                pop A
+ 0023 5300              mov [_g_xBridgeMeasure],A
+ 0025                   .dbline 80
+ 0025           ; 
+ 0025           ;                                                                               // Read Va
+ 0025           ;       AMUX4_ADC_InputSelect(AMUX4_ADC_PORT0_7);
+ 0025 10                push X
+ 0026 5003              mov A,3
+ 0028 7C0000            xcall _AMUX4_ADC_InputSelect
+ 002B 20                pop X
+ 002C                   .dbline 81
+ 002C           ;       g_xBridgeMeasure.Va = TakeSample();
+ 002C 90A6              xcall _TakeSample
+ 002E 62D000            mov REG[0xd0],>__r0
+ 0031 5100              mov A,[__r0]
+ 0033 08                push A
+ 0034 5100              mov A,[__r1]
+ 0036 08                push A
+ 0037 5100              mov A,[__r2]
+ 0039 08                push A
+ 003A 5100              mov A,[__r3]
+ 003C 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 003F 530B              mov [_g_xBridgeMeasure+8+3],A
+ 0041 18                pop A
+ 0042 530A              mov [_g_xBridgeMeasure+8+2],A
+ 0044 18                pop A
+ 0045 5309              mov [_g_xBridgeMeasure+8+1],A
+ 0047 18                pop A
+ 0048 5308              mov [_g_xBridgeMeasure+8],A
+ 004A                   .dbline 84
+ 004A           ; 
+ 004A           ;                                                                               // Read Vz
+ 004A           ;       AMUX4_ADC_InputSelect(AMUX4_ADC_PORT0_5);
+ 004A 10                push X
+ 004B 5002              mov A,2
+ 004D 7C0000            xcall _AMUX4_ADC_InputSelect
+ 0050 20                pop X
+ 0051                   .dbline 85
+ 0051           ;       g_xBridgeMeasure.Vz = TakeSample();
+ 0051 9081              xcall _TakeSample
+ 0053 62D000            mov REG[0xd0],>__r0
+ 0056 5100              mov A,[__r0]
+ 0058 08                push A
+ 0059 5100              mov A,[__r1]
+ 005B 08                push A
+ 005C 5100              mov A,[__r2]
+ 005E 08                push A
+ 005F 5100              mov A,[__r3]
+ 0061 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 0064 530F              mov [_g_xBridgeMeasure+12+3],A
+ 0066 18                pop A
+ 0067 530E              mov [_g_xBridgeMeasure+12+2],A
+ 0069 18                pop A
+ 006A 530D              mov [_g_xBridgeMeasure+12+1],A
+ 006C 18                pop A
+ 006D 530C              mov [_g_xBridgeMeasure+12],A
+ 006F                   .dbline 89
+ 006F           ; 
+ 006F           ;                                                                               // Read Vr
+ 006F           ;                                                                               // Gain is set to double because dynamic range is half
+ 006F           ;       PGA_ADC_SetGain(PGA_ADC_G5_33);
+ 006F 10                push X
+ 0070 5028              mov A,40
+ 0072 7C0000            xcall _PGA_ADC_SetGain
+ 0075 20                pop X
+ 0076                   .dbline 90
+ 0076           ;       Delay_Ms(1);
+ 0076 5000              mov A,0
+ 0078 08                push A
+ 0079 5001              mov A,1
+ 007B 08                push A
+ 007C 7C0000            xcall _Delay_Ms
+ 007F 38FE              add SP,-2
+ 0081                   .dbline 91
+ 0081           ;       AMUX4_ADC_InputSelect(AMUX4_ADC_PORT0_3);
+ 0081 10                push X
+ 0082 5001              mov A,1
+ 0084 7C0000            xcall _AMUX4_ADC_InputSelect
+ 0087 20                pop X
+ 0088                   .dbline 92
+ 0088           ;       g_xBridgeMeasure.Vr = TakeSample();
+ 0088 904A              xcall _TakeSample
+ 008A 62D000            mov REG[0xd0],>__r0
+ 008D 5100              mov A,[__r0]
+ 008F 08                push A
+ 0090 5100              mov A,[__r1]
+ 0092 08                push A
+ 0093 5100              mov A,[__r2]
+ 0095 08                push A
+ 0096 5100              mov A,[__r3]
+ 0098 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 009B 5307              mov [_g_xBridgeMeasure+4+3],A
+ 009D 18                pop A
+ 009E 5306              mov [_g_xBridgeMeasure+4+2],A
+ 00A0 18                pop A
+ 00A1 5305              mov [_g_xBridgeMeasure+4+1],A
+ 00A3 18                pop A
+ 00A4 5304              mov [_g_xBridgeMeasure+4],A
+ 00A6                   .dbline 94
+ 00A6           ; 
+ 00A6           ;       PGA_ADC_SetGain(PGA_ADC_G2_67);         // Restores gain
+ 00A6 10                push X
+ 00A7 5058              mov A,88
+ 00A9 7C0000            xcall _PGA_ADC_SetGain
+ 00AC 20                pop X
+ 00AD                   .dbline -2
+ 00AD           L13:
+ 00AD                   .dbline 0 ; func end
+ 00AD 7F                ret
+ 00AE                   .dbend
+ 00AE                   .dbfunc e Do_MeasureRfLevel _Do_MeasureRfLevel fV
+ 00AE           _Do_MeasureRfLevel::
+ 00AE                   .dbline -1
+ 00AE                   .dbline 110
+ 00AE           ; }
+ 00AE           ; //-----------------------------------------------------------------------------
+ 00AE           ; //  FUNCTION NAME:    Do_MeasureRfLevel
+ 00AE           ; //
+ 00AE           ; //  DESCRIPTION:
+ 00AE           ; //
+ 00AE           ; //    Measure Rf Level
+ 00AE           ; //
+ 00AE           ; //  ARGUMENTS:
+ 00AE           ; //
+ 00AE           ; //  RETURNS:
+ 00AE           ; //     g_xBridgeMeasure
+ 00AE           ; //
+ 00AE           ; //-----------------------------------------------------------------------------
+ 00AE           ; void Do_MeasureRfLevel ( void )
+ 00AE           ; {
+ 00AE                   .dbline 112
+ 00AE           ;                                                                               // Read Vz
+ 00AE           ;       AMUX4_ADC_InputSelect(AMUX4_ADC_PORT0_5);
+ 00AE 10                push X
+ 00AF 5002              mov A,2
+ 00B1 7C0000            xcall _AMUX4_ADC_InputSelect
+ 00B4 20                pop X
+ 00B5                   .dbline 113
+ 00B5           ;       g_xBridgeMeasure.Vz = TakeSample();
+ 00B5 901D              xcall _TakeSample
+ 00B7 62D000            mov REG[0xd0],>__r0
+ 00BA 5100              mov A,[__r0]
+ 00BC 08                push A
+ 00BD 5100              mov A,[__r1]
+ 00BF 08                push A
+ 00C0 5100              mov A,[__r2]
+ 00C2 08                push A
+ 00C3 5100              mov A,[__r3]
+ 00C5 62D000            mov REG[0xd0],>_g_xBridgeMeasure
+ 00C8 530F              mov [_g_xBridgeMeasure+12+3],A
+ 00CA 18                pop A
+ 00CB 530E              mov [_g_xBridgeMeasure+12+2],A
+ 00CD 18                pop A
+ 00CE 530D              mov [_g_xBridgeMeasure+12+1],A
+ 00D0 18                pop A
+ 00D1 530C              mov [_g_xBridgeMeasure+12],A
+ 00D3                   .dbline -2
+ 00D3           L17:
+ 00D3                   .dbline 0 ; func end
+ 00D3 7F                ret
+ 00D4                   .dbend
+ 00D4                   .dbfunc s TakeSample _TakeSample fl
+ 00D4           ;          wZero -> X+3
+ 00D4           ;           wVal -> X+1
+ 00D4           ;             ii -> X+0
+ 00D4           _TakeSample:
+ 00D4                   .dbline -1
+ 00D4 10                push X
+ 00D5 4F                mov X,SP
+ 00D6 3805              add SP,5
+ 00D8                   .dbline 131
+ 00D8           ; }
+ 00D8           ; 
+ 00D8           ; //-----------------------------------------------------------------------------
+ 00D8           ; //  FUNCTION NAME:    TakeSample
+ 00D8           ; //
+ 00D8           ; //  DESCRIPTION:
+ 00D8           ; //
+ 00D8           ; //    Takes sample from ADC using correlated double sampling
+ 00D8           ; //
+ 00D8           ; //  ARGUMENTS:
+ 00D8           ; //     none.
+ 00D8           ; //
+ 00D8           ; //  RETURNS:
+ 00D8           ; //     Measured value
+ 00D8           ; //
+ 00D8           ; //-----------------------------------------------------------------------------
+ 00D8           ; static DWORD TakeSample (void)
+ 00D8           ; {
+ 00D8                   .dbline 132
+ 00D8           ;       WORD wVal = 0;
+ 00D8 560200            mov [X+2],0
+ 00DB 560100            mov [X+1],0
+ 00DE                   .dbline 136
+ 00DE           ;       WORD wZero;
+ 00DE           ;       BYTE ii;
+ 00DE           ;                                                                               // Correlated double sampling
+ 00DE           ;       PGA_ADC_GAIN_CR1 &= ~1;                         // Set input to RefLO
+ 00DE 4172FE            and REG[0x72],-2
+ 00E1                   .dbline 137
+ 00E1           ;       ADCINC12_GetSamples(1);
+ 00E1 10                push X
+ 00E2 5001              mov A,1
+ 00E4 7C0000            xcall _ADCINC12_GetSamples
+ 00E7 20                pop X
+ 00E8           L20:
+ 00E8                   .dbline 139
+ 00E8           ;                                                                               // Wait for data to be ready.
+ 00E8           ;       while(ADCINC12_fIsDataAvailable() == 0);
+ 00E8           L21:
+ 00E8                   .dbline 139
+ 00E8 10                push X
+ 00E9 7C0000            xcall _ADCINC12_fIsDataAvailable
+ 00EC 62D000            mov REG[0xd0],>__r0
+ 00EF 20                pop X
+ 00F0 3900              cmp A,0
+ 00F2 AFF5              jz L20
+ 00F4                   .dbline 140
+ 00F4           ;       wZero = (ADCINC12_iGetData()+2048);
+ 00F4 10                push X
+ 00F5 7C0000            xcall _ADCINC12_iGetData
+ 00F8 62D000            mov REG[0xd0],>__r0
+ 00FB 5300              mov [__r1],A
+ 00FD 5A00              mov [__r0],X
+ 00FF 20                pop X
+ 0100 060000            add [__r1],0
+ 0103 0E0008            adc [__r0],8
+ 0106 5100              mov A,[__r1]
+ 0108 5404              mov [X+4],A
+ 010A 5100              mov A,[__r0]
+ 010C 5403              mov [X+3],A
+ 010E                   .dbline 141
+ 010E           ;       ADCINC12_ClearFlag();
+ 010E 10                push X
+ 010F 7C0000            xcall _ADCINC12_ClearFlag
+ 0112 20                pop X
+ 0113                   .dbline 143
+ 0113           ; 
+ 0113           ;       PGA_ADC_GAIN_CR1 |= 1;                          // Set input to PortInp
+ 0113 437201            or REG[0x72],1
+ 0116                   .dbline 145
+ 0116           ; 
+ 0116           ;       if (g_bScanning == FALSE)                       // If not scanning do some averaging
+ 0116 62D000            mov REG[0xd0],>_g_bScanning
+ 0119 3C0000            cmp [_g_bScanning],0
+ 011C B053              jnz L23
+ 011E                   .dbline 146
+ 011E           ;       {
+ 011E                   .dbline 147
+ 011E           ;               ADCINC12_GetSamples(NUM_AVE_SAMPLES);
+ 011E 10                push X
+ 011F 5008              mov A,8
+ 0121 7C0000            xcall _ADCINC12_GetSamples
+ 0124 20                pop X
+ 0125                   .dbline 148
+ 0125           ;               for (ii=0;ii<NUM_AVE_SAMPLES;ii++)
+ 0125 560000            mov [X+0],0
+ 0128 802E              xjmp L28
+ 012A           L29:
+ 012A                   .dbline 151
+ 012A           ;               {
+ 012A           ;                                                                               // Wait for data to be ready.
+ 012A           ;                       while(ADCINC12_fIsDataAvailable() == 0);
+ 012A           L30:
+ 012A                   .dbline 151
+ 012A 10                push X
+ 012B 7C0000            xcall _ADCINC12_fIsDataAvailable
+ 012E 62D000            mov REG[0xd0],>__r0
+ 0131 20                pop X
+ 0132 3900              cmp A,0
+ 0134 AFF5              jz L29
+ 0136                   .dbline 152
+ 0136           ;                       wVal += (ADCINC12_iGetData()+2048);
+ 0136 10                push X
+ 0137 7C0000            xcall _ADCINC12_iGetData
+ 013A 62D000            mov REG[0xd0],>__r0
+ 013D 5300              mov [__r1],A
+ 013F 5A00              mov [__r0],X
+ 0141 20                pop X
+ 0142 060000            add [__r1],0
+ 0145 0E0008            adc [__r0],8
+ 0148 5100              mov A,[__r1]
+ 014A 0502              add [X+2],A
+ 014C 5100              mov A,[__r0]
+ 014E 0D01              adc [X+1],A
+ 0150                   .dbline 153
+ 0150           ;                       ADCINC12_ClearFlag();
+ 0150 10                push X
+ 0151 7C0000            xcall _ADCINC12_ClearFlag
+ 0154 20                pop X
+ 0155                   .dbline 154
+ 0155           ;               }
+ 0155           L26:
+ 0155                   .dbline 148
+ 0155 7700              inc [X+0]
+ 0157           L28:
+ 0157                   .dbline 148
+ 0157 3D0008            cmp [X+0],8
+ 015A CFCF              jc L30
+ 015C           X0:
+ 015C                   .dbline 155
+ 015C           ;               wVal /= NUM_AVE_SAMPLES;
+ 015C 70FB              and F,-5
+ 015E 6F01              rrc [X+1]
+ 0160 6F02              rrc [X+2]
+ 0162 70FB              and F,-5
+ 0164 6F01              rrc [X+1]
+ 0166 6F02              rrc [X+2]
+ 0168 70FB              and F,-5
+ 016A 6F01              rrc [X+1]
+ 016C 6F02              rrc [X+2]
+ 016E                   .dbline 156
+ 016E           ;       }
+ 016E 8033              xjmp L24
+ 0170           L23:
+ 0170                   .dbline 158
+ 0170           ;       else
+ 0170           ;       {
+ 0170                   .dbline 159
+ 0170           ;               ADCINC12_GetSamples(1);
+ 0170 10                push X
+ 0171 5001              mov A,1
+ 0173 7C0000            xcall _ADCINC12_GetSamples
+ 0176 20                pop X
+ 0177           L32:
+ 0177                   .dbline 161
+ 0177           ;                                                                               // Wait for data to be ready.
+ 0177           ;               while(ADCINC12_fIsDataAvailable() == 0);
+ 0177           L33:
+ 0177                   .dbline 161
+ 0177 10                push X
+ 0178 7C0000            xcall _ADCINC12_fIsDataAvailable
+ 017B 62D000            mov REG[0xd0],>__r0
+ 017E 20                pop X
+ 017F 3900              cmp A,0
+ 0181 AFF5              jz L32
+ 0183                   .dbline 162
+ 0183           ;               wVal = (ADCINC12_iGetData()+2048);
+ 0183 10                push X
+ 0184 7C0000            xcall _ADCINC12_iGetData
+ 0187 62D000            mov REG[0xd0],>__r0
+ 018A 5300              mov [__r1],A
+ 018C 5A00              mov [__r0],X
+ 018E 20                pop X
+ 018F 060000            add [__r1],0
+ 0192 0E0008            adc [__r0],8
+ 0195 5100              mov A,[__r1]
+ 0197 5402              mov [X+2],A
+ 0199 5100              mov A,[__r0]
+ 019B 5401              mov [X+1],A
+ 019D                   .dbline 163
+ 019D           ;               ADCINC12_ClearFlag();
+ 019D 10                push X
+ 019E 7C0000            xcall _ADCINC12_ClearFlag
+ 01A1 20                pop X
+ 01A2                   .dbline 164
+ 01A2           ;       }
+ 01A2           L24:
+ 01A2                   .dbline 166
+ 01A2           ; 
+ 01A2           ;       if (wVal >= wZero)
+ 01A2 5202              mov A,[X+2]
+ 01A4 1304              sub A,[X+4]
+ 01A6 5201              mov A,[X+1]
+ 01A8 1B03              sbb A,[X+3]
+ 01AA C020              jc L35
+ 01AC           X1:
+ 01AC                   .dbline 167
+ 01AC           ;               return wVal-wZero;
+ 01AC 62D000            mov REG[0xd0],>__r0
+ 01AF 5202              mov A,[X+2]
+ 01B1 1304              sub A,[X+4]
+ 01B3 5300              mov [__r1],A
+ 01B5 5201              mov A,[X+1]
+ 01B7 1B03              sbb A,[X+3]
+ 01B9 5300              mov [__r0],A
+ 01BB 5100              mov A,[__r1]
+ 01BD 5300              mov [__r3],A
+ 01BF 5100              mov A,[__r0]
+ 01C1 5300              mov [__r2],A
+ 01C3 550000            mov [__r1],0
+ 01C6 550000            mov [__r0],0
+ 01C9 8010              xjmp L19
+ 01CB           L35:
+ 01CB                   .dbline 169
+ 01CB           ;       else
+ 01CB           ;               return 0;
+ 01CB 62D000            mov REG[0xd0],>__r0
+ 01CE 550000            mov [__r0],0
+ 01D1 550000            mov [__r1],0
+ 01D4 550000            mov [__r2],0
+ 01D7 550000            mov [__r3],0
+ 01DA                   .dbline -2
+ 01DA           L19:
+ 01DA 38FB              add SP,-5
+ 01DC 20                pop X
+ 01DD                   .dbline 0 ; func end
+ 01DD 7F                ret
+ 01DE                   .dbsym l wZero 3 i
+ 01DE                   .dbsym l wVal 1 i
+ 01DE                   .dbsym l ii 0 c
+ 01DE                   .dbend

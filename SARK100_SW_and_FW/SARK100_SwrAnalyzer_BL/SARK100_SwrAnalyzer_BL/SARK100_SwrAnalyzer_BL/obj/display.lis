@@ -1,0 +1,991 @@
+ 0000                   cpu LMM
+                        .module display.c
+                        .area text(rom, con, rel)
+ 0000                   .dbfile ./display.c
+ 0000                   .dbfile C:\pchome\SWRANA~1\prj\SARK10~1\SARK10~1\SARK10~1\display.c
+ 0000                   .dbfunc e DISP_Setup _DISP_Setup fV
+ 0000           _DISP_Setup::
+ 0000                   .dbline -1
+ 0000                   .dbline 63
+ 0000           ; //*****************************************************************************/
+ 0000           ; //  This file is a part of the "SARK100 SWR Analyzer firmware"
+ 0000           ; //
+ 0000           ; //  Copyright © 2010 Melchor Varela - EA4FRB.  All rights reserved.
+ 0000           ; //  Melchor Varela, Madrid, Spain.
+ 0000           ; //  melchor.varela@gmail.com
+ 0000           ; //
+ 0000           ; //  "SARK100 SWR Analyzer firmware" is free software: you can redistribute it
+ 0000           ; //  and/or modify it under the terms of the GNU General Public License as
+ 0000           ; //  published by the Free Software Foundation, either version 3 of the License,
+ 0000           ; //  or (at your option) any later version.
+ 0000           ; //
+ 0000           ; //  "SARK100 SWR Analyzer firmware" is distributed in the hope that it will be
+ 0000           ; //  useful,  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ 0000           ; //  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ 0000           ; //  GNU General Public License for more details.
+ 0000           ; //
+ 0000           ; //  You should have received a copy of the GNU General Public License
+ 0000           ; //  along with "SARK100 SWR Analyzer firmware".  If not,
+ 0000           ; //  see <http://www.gnu.org/licenses/>.
+ 0000           ; //*****************************************************************************/
+ 0000           ; //*****************************************************************************/
+ 0000           ; //
+ 0000           ; //    PROJECT:        SARK100 SWR Analyzer
+ 0000           ; //    FILE NAME:      DISPLAY.C
+ 0000           ; //    AUTHOR:         Melchor Varela
+ 0000           ; //
+ 0000           ; //    DESCRIPTION
+ 0000           ; //
+ 0000           ; //    Display utility functions
+ 0000           ; //
+ 0000           ; //    HISTORY
+ 0000           ; //
+ 0000           ; //    NAME    DATE            REMARKS
+ 0000           ; //
+ 0000           ; //    MVM             DEC 2009        Creation
+ 0000           ; //
+ 0000           ; //*****************************************************************************/
+ 0000           ; #include <stdlib.h>
+ 0000           ; #include <string.h>
+ 0000           ; #include "m8c.h"
+ 0000           ; #include "Lcd.h"
+ 0000           ; #include "Util.h"
+ 0000           ; #include "Display.h"
+ 0000           ; #include "Msg_generic.h"
+ 0000           ; #include "glb_data.h"
+ 0000           ; 
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; //  FUNCTION NAME: DISP_Setup
+ 0000           ; //
+ 0000           ; //  DESCRIPTION:
+ 0000           ; //
+ 0000           ; //    Setup display controller and create icons from bitmap data.
+ 0000           ; //
+ 0000           ; //  ARGUMENTS:
+ 0000           ; //      none.
+ 0000           ; //
+ 0000           ; //  RETURNS:
+ 0000           ; //    none.
+ 0000           ; //
+ 0000           ; //-----------------------------------------------------------------------------
+ 0000           ; void DISP_Setup ( void )
+ 0000           ; {
+ 0000                   .dbline 64
+ 0000           ;       LCD_Start();
+ 0000 10                push X
+ 0001 7C0000            xcall _LCD_Start
+ 0004 20                pop X
+ 0005                   .dbline 65
+ 0005           ;       LCD_InitBG(LCD_SOLID_BG);
+ 0005 10                push X
+ 0006 5000              mov A,0
+ 0008 7C0000            xcall _LCD_InitBG
+ 000B 20                pop X
+ 000C                   .dbline -2
+ 000C           L13:
+ 000C                   .dbline 0 ; func end
+ 000C 7F                ret
+ 000D                   .dbend
+ 000D                   .dbfunc e DISP_Frequency _DISP_Frequency fV
+ 000D           ;         szFreq -> X+15
+ 000D           ;         szText -> X+4
+ 000D           ;             ii -> X+2
+ 000D           ;             jj -> X+0
+ 000D           ;         dwFreq -> X-7
+ 000D           _DISP_Frequency::
+ 000D                   .dbline -1
+ 000D 10                push X
+ 000E 4F                mov X,SP
+ 000F 3818              add SP,24
+ 0011                   .dbline 82
+ 0011           ; }
+ 0011           ; //-----------------------------------------------------------------------------
+ 0011           ; //  FUNCTION NAME: DISP_Frequency
+ 0011           ; //
+ 0011           ; //  DESCRIPTION:
+ 0011           ; //
+ 0011           ; //    Display VFO frequency in the current cursor position
+ 0011           ; //
+ 0011           ; //  ARGUMENTS:
+ 0011           ; //    dwFreq  Frequency in hertz
+ 0011           ; //
+ 0011           ; //  RETURNS:
+ 0011           ; //    none.
+ 0011           ; //
+ 0011           ; //-----------------------------------------------------------------------------
+ 0011           ; void DISP_Frequency ( DWORD dwFreq )
+ 0011           ; {
+ 0011                   .dbline 87
+ 0011           ;       char szFreq[9];
+ 0011           ;       char szText[11];
+ 0011           ;       int ii, jj;
+ 0011           ; 
+ 0011           ;       ultoa(szFreq, dwFreq, 10);
+ 0011 5000              mov A,0
+ 0013 08                push A
+ 0014 500A              mov A,10
+ 0016 08                push A
+ 0017 52F9              mov A,[X-7]
+ 0019 08                push A
+ 001A 52FA              mov A,[X-6]
+ 001C 08                push A
+ 001D 52FB              mov A,[X-5]
+ 001F 08                push A
+ 0020 52FC              mov A,[X-4]
+ 0022 08                push A
+ 0023 62D000            mov REG[0xd0],>__r0
+ 0026 5A00              mov [__r1],X
+ 0028 06000F            add [__r1],15
+ 002B 5007              mov A,7
+ 002D 08                push A
+ 002E 5100              mov A,[__r1]
+ 0030 08                push A
+ 0031 7C0000            xcall _ultoa
+ 0034                   .dbline 88
+ 0034           ;       szText[10] = 0;
+ 0034 560E00            mov [X+14],0
+ 0037                   .dbline 89
+ 0037           ;       for (ii=strlen(szFreq)-1, jj=9;ii>=0;ii--,jj--)
+ 0037 62D000            mov REG[0xd0],>__r0
+ 003A 5A00              mov [__r1],X
+ 003C 06000F            add [__r1],15
+ 003F 5007              mov A,7
+ 0041 08                push A
+ 0042 5100              mov A,[__r1]
+ 0044 08                push A
+ 0045 7C0000            xcall _strlenLMM
+ 0048 38F6              add SP,-10
+ 004A 62D000            mov REG[0xd0],>__r0
+ 004D 160001            sub [__r1],1
+ 0050 1E0000            sbb [__r0],0
+ 0053 5100              mov A,[__r1]
+ 0055 5403              mov [X+3],A
+ 0057 5100              mov A,[__r0]
+ 0059 5402              mov [X+2],A
+ 005B 560109            mov [X+1],9
+ 005E 560000            mov [X+0],0
+ 0061 80BE              xjmp L19
+ 0063           L16:
+ 0063                   .dbline 90
+ 0063           ;       {
+ 0063                   .dbline 91
+ 0063           ;               szText[jj] = szFreq[ii];
+ 0063 62D000            mov REG[0xd0],>__r0
+ 0066 550007            mov [__r0],7
+ 0069 5A00              mov [__r1],X
+ 006B 06000F            add [__r1],15
+ 006E 5203              mov A,[X+3]
+ 0070 0200              add A,[__r1]
+ 0072 5300              mov [__r1],A
+ 0074 5202              mov A,[X+2]
+ 0076 0A00              adc A,[__r0]
+ 0078 60D4              mov REG[0xd4],A
+ 007A 3E00              mvi A,[__r1]
+ 007C 5300              mov [__r0],A
+ 007E 550007            mov [__r2],7
+ 0081 5A00              mov [__r3],X
+ 0083 060004            add [__r3],4
+ 0086 5201              mov A,[X+1]
+ 0088 0200              add A,[__r3]
+ 008A 5300              mov [__r3],A
+ 008C 5200              mov A,[X+0]
+ 008E 0A00              adc A,[__r2]
+ 0090 60D5              mov REG[0xd5],A
+ 0092 5100              mov A,[__r0]
+ 0094 3F00              mvi [__r3],A
+ 0096                   .dbline 92
+ 0096           ;               if ((jj==7) && (ii!=0))
+ 0096 3D0000            cmp [X+0],0
+ 0099 B03D              jnz L20
+ 009B 3D0107            cmp [X+1],7
+ 009E B038              jnz L20
+ 00A0           X0:
+ 00A0 3D0200            cmp [X+2],0
+ 00A3 B006              jnz X1
+ 00A5 3D0300            cmp [X+3],0
+ 00A8 A02E              jz L20
+ 00AA           X1:
+ 00AA                   .dbline 93
+ 00AA           ;                       szText[--jj] = '.';
+ 00AA 62D000            mov REG[0xd0],>__r0
+ 00AD 5201              mov A,[X+1]
+ 00AF 1101              sub A,1
+ 00B1 5300              mov [__r1],A
+ 00B3 5200              mov A,[X+0]
+ 00B5 1900              sbb A,0
+ 00B7 5300              mov [__r0],A
+ 00B9 5100              mov A,[__r1]
+ 00BB 5401              mov [X+1],A
+ 00BD 5100              mov A,[__r0]
+ 00BF 5400              mov [X+0],A
+ 00C1 5A00              mov [__r3],X
+ 00C3 060004            add [__r3],4
+ 00C6 5100              mov A,[__r3]
+ 00C8 0400              add [__r1],A
+ 00CA 0E0007            adc [__r0],7
+ 00CD 5100              mov A,[__r0]
+ 00CF 60D5              mov REG[0xd5],A
+ 00D1 502E              mov A,46
+ 00D3 3F00              mvi [__r1],A
+ 00D5 8040              xjmp L21
+ 00D7           L20:
+ 00D7                   .dbline 94
+ 00D7           ;               else if ((jj==3) && (ii!=0))
+ 00D7 3D0000            cmp [X+0],0
+ 00DA B03B              jnz L22
+ 00DC 3D0103            cmp [X+1],3
+ 00DF B036              jnz L22
+ 00E1           X2:
+ 00E1 3D0200            cmp [X+2],0
+ 00E4 B006              jnz X3
+ 00E6 3D0300            cmp [X+3],0
+ 00E9 A02C              jz L22
+ 00EB           X3:
+ 00EB                   .dbline 95
+ 00EB           ;                       szText[--jj] = ',';
+ 00EB 62D000            mov REG[0xd0],>__r0
+ 00EE 5201              mov A,[X+1]
+ 00F0 1101              sub A,1
+ 00F2 5300              mov [__r1],A
+ 00F4 5200              mov A,[X+0]
+ 00F6 1900              sbb A,0
+ 00F8 5300              mov [__r0],A
+ 00FA 5100              mov A,[__r1]
+ 00FC 5401              mov [X+1],A
+ 00FE 5100              mov A,[__r0]
+ 0100 5400              mov [X+0],A
+ 0102 5A00              mov [__r3],X
+ 0104 060004            add [__r3],4
+ 0107 5100              mov A,[__r3]
+ 0109 0400              add [__r1],A
+ 010B 0E0007            adc [__r0],7
+ 010E 5100              mov A,[__r0]
+ 0110 60D5              mov REG[0xd5],A
+ 0112 502C              mov A,44
+ 0114 3F00              mvi [__r1],A
+ 0116           L22:
+ 0116           L21:
+ 0116                   .dbline 96
+ 0116           ;       }
+ 0116           L17:
+ 0116                   .dbline 89
+ 0116 7B03              dec [X+3]
+ 0118 1F0200            sbb [X+2],0
+ 011B 7B01              dec [X+1]
+ 011D 1F0000            sbb [X+0],0
+ 0120           L19:
+ 0120                   .dbline 89
+ 0120 5203              mov A,[X+3]
+ 0122 1100              sub A,0
+ 0124 5202              mov A,[X+2]
+ 0126 3180              xor A,-128
+ 0128 1980              sbb A,(0 ^ 0x80)
+ 012A DF38              jnc L16
+ 012C           X4:
+ 012C                   .dbline 97
+ 012C           ;       for (;jj!=-1; jj--)
+ 012C 8021              xjmp L27
+ 012E           L24:
+ 012E                   .dbline 98
+ 012E           ;       {
+ 012E                   .dbline 99
+ 012E           ;               szText[jj] = ' ';
+ 012E 62D000            mov REG[0xd0],>__r0
+ 0131 550007            mov [__r0],7
+ 0134 5A00              mov [__r1],X
+ 0136 060004            add [__r1],4
+ 0139 5201              mov A,[X+1]
+ 013B 0200              add A,[__r1]
+ 013D 5300              mov [__r1],A
+ 013F 5200              mov A,[X+0]
+ 0141 0A00              adc A,[__r0]
+ 0143 60D5              mov REG[0xd5],A
+ 0145 5020              mov A,32
+ 0147 3F00              mvi [__r1],A
+ 0149                   .dbline 100
+ 0149           ;       }
+ 0149           L25:
+ 0149                   .dbline 97
+ 0149 7B01              dec [X+1]
+ 014B 1F0000            sbb [X+0],0
+ 014E           L27:
+ 014E                   .dbline 97
+ 014E 3D00FF            cmp [X+0],-1
+ 0151 BFDC              jnz L24
+ 0153 3D01FF            cmp [X+1],-1
+ 0156 BFD7              jnz L24
+ 0158           X5:
+ 0158                   .dbline 101
+ 0158           ;       LCD_PrString(szText);
+ 0158 62D000            mov REG[0xd0],>__r0
+ 015B 5A00              mov [__r1],X
+ 015D 060004            add [__r1],4
+ 0160 10                push X
+ 0161 5007              mov A,7
+ 0163 08                push A
+ 0164 5100              mov A,[__r1]
+ 0166 5C                mov X,A
+ 0167 18                pop A
+ 0168 7C0000            xcall _LCD_PrString
+ 016B 20                pop X
+ 016C                   .dbline -2
+ 016C           L14:
+ 016C 38E8              add SP,-24
+ 016E 20                pop X
+ 016F                   .dbline 0 ; func end
+ 016F 7F                ret
+ 0170                   .dbsym l szFreq 15 A[9:9]c
+ 0170                   .dbsym l szText 4 A[11:11]c
+ 0170                   .dbsym l ii 2 I
+ 0170                   .dbsym l jj 0 I
+ 0170                   .dbsym l dwFreq -7 l
+ 0170                   .dbend
+ 0170                   .dbfunc e DISP_Swr _DISP_Swr fV
+ 0170           ;          szSwr -> X+0
+ 0170           ;           wSwr -> X-5
+ 0170           _DISP_Swr::
+ 0170                   .dbline -1
+ 0170 10                push X
+ 0171 4F                mov X,SP
+ 0172 3804              add SP,4
+ 0174                   .dbline 119
+ 0174           ; }
+ 0174           ; 
+ 0174           ; //-----------------------------------------------------------------------------
+ 0174           ; //  FUNCTION NAME: DISP_Swr
+ 0174           ; //
+ 0174           ; //  DESCRIPTION:
+ 0174           ; //
+ 0174           ; //    Display SWR value
+ 0174           ; //
+ 0174           ; //  ARGUMENTS:
+ 0174           ; //            wSwr    SWR value
+ 0174           ; //
+ 0174           ; //  RETURNS:
+ 0174           ; //    none.
+ 0174           ; //
+ 0174           ; //-----------------------------------------------------------------------------
+ 0174           ; void DISP_Swr ( WORD wSwr )
+ 0174           ; {
+ 0174                   .dbline 122
+ 0174           ;       char szSwr[4];
+ 0174           ; 
+ 0174           ;       if (wSwr>=SWR_MAX)
+ 0174 52FC              mov A,[X-4]
+ 0176 11E7              sub A,-25
+ 0178 52FB              mov A,[X-5]
+ 017A 1903              sbb A,3
+ 017C C00F              jc L29
+ 017E           X6:
+ 017E                   .dbline 123
+ 017E           ;       {
+ 017E                   .dbline 124
+ 017E           ;               LCD_PrCString(">10");
+ 017E 10                push X
+ 017F 501E              mov A,>L31
+ 0181 08                push A
+ 0182 501E              mov A,<L31
+ 0184 5C                mov X,A
+ 0185 18                pop A
+ 0186 7C0000            xcall _LCD_PrCString
+ 0189 20                pop X
+ 018A                   .dbline 125
+ 018A           ;               return;
+ 018A 8035              xjmp L28
+ 018C           L29:
+ 018C                   .dbline 127
+ 018C           ;       }
+ 018C           ;       itoa(szSwr, wSwr, 10);
+ 018C 5000              mov A,0
+ 018E 08                push A
+ 018F 500A              mov A,10
+ 0191 08                push A
+ 0192 52FB              mov A,[X-5]
+ 0194 08                push A
+ 0195 52FC              mov A,[X-4]
+ 0197 08                push A
+ 0198 62D000            mov REG[0xd0],>__r0
+ 019B 5007              mov A,7
+ 019D 08                push A
+ 019E 10                push X
+ 019F 7C0000            xcall _itoa
+ 01A2 38FA              add SP,-6
+ 01A4                   .dbline 128
+ 01A4           ;       LCD_Write_Data( szSwr[0] );
+ 01A4 10                push X
+ 01A5 5200              mov A,[X+0]
+ 01A7 7C0000            xcall _LCD_Write_Data
+ 01AA 20                pop X
+ 01AB                   .dbline 129
+ 01AB           ;       LCD_Write_Data( '.' );
+ 01AB 10                push X
+ 01AC 502E              mov A,46
+ 01AE 7C0000            xcall _LCD_Write_Data
+ 01B1 20                pop X
+ 01B2                   .dbline 130
+ 01B2           ;       LCD_Write_Data( szSwr[1] );
+ 01B2 10                push X
+ 01B3 5201              mov A,[X+1]
+ 01B5 7C0000            xcall _LCD_Write_Data
+ 01B8 20                pop X
+ 01B9                   .dbline 131
+ 01B9           ;       LCD_Write_Data( szSwr[2] );
+ 01B9 10                push X
+ 01BA 5202              mov A,[X+2]
+ 01BC 7C0000            xcall _LCD_Write_Data
+ 01BF 20                pop X
+ 01C0                   .dbline -2
+ 01C0           L28:
+ 01C0 38FC              add SP,-4
+ 01C2 20                pop X
+ 01C3                   .dbline 0 ; func end
+ 01C3 7F                ret
+ 01C4                   .dbsym l szSwr 0 A[4:4]c
+ 01C4                   .dbsym l wSwr -5 i
+ 01C4                   .dbend
+ 01C4                   .dbfunc e DISP_ImpedanceComplex _DISP_ImpedanceComplex fV
+ 01C4           ;         szText -> X+0
+ 01C4           ;          bSign -> X-8
+ 01C4           ;             wX -> X-7
+ 01C4           ;             wR -> X-5
+ 01C4           _DISP_ImpedanceComplex::
+ 01C4                   .dbline -1
+ 01C4 10                push X
+ 01C5 4F                mov X,SP
+ 01C6 3810              add SP,16
+ 01C8                   .dbline 151
+ 01C8           ; }
+ 01C8           ; 
+ 01C8           ; //-----------------------------------------------------------------------------
+ 01C8           ; //  FUNCTION NAME: DISP_ImpedanceComplez
+ 01C8           ; //
+ 01C8           ; //  DESCRIPTION:
+ 01C8           ; //
+ 01C8           ; //    Display impedance
+ 01C8           ; //
+ 01C8           ; //  ARGUMENTS:
+ 01C8           ; //            wR                      Resistance
+ 01C8           ; //            wX                      Reactance
+ 01C8           ; //            bSign           Sign of impedance
+ 01C8           ; //
+ 01C8           ; //  RETURNS:
+ 01C8           ; //    none.
+ 01C8           ; //
+ 01C8           ; //-----------------------------------------------------------------------------
+ 01C8           ; void DISP_ImpedanceComplex ( WORD wR, WORD wX, BYTE bSign )
+ 01C8           ; {
+ 01C8                   .dbline 154
+ 01C8           ;       char szText[16];
+ 01C8           ; 
+ 01C8           ;       itoa(szText, wR, 10);
+ 01C8 5000              mov A,0
+ 01CA 08                push A
+ 01CB 500A              mov A,10
+ 01CD 08                push A
+ 01CE 52FB              mov A,[X-5]
+ 01D0 08                push A
+ 01D1 52FC              mov A,[X-4]
+ 01D3 08                push A
+ 01D4 62D000            mov REG[0xd0],>__r0
+ 01D7 5007              mov A,7
+ 01D9 08                push A
+ 01DA 10                push X
+ 01DB 7C0000            xcall _itoa
+ 01DE 38FA              add SP,-6
+ 01E0                   .dbline 155
+ 01E0           ;       LCD_PrString(szText);
+ 01E0 62D000            mov REG[0xd0],>__r0
+ 01E3 10                push X
+ 01E4 5007              mov A,7
+ 01E6 08                push A
+ 01E7 18                pop A
+ 01E8 7C0000            xcall _LCD_PrString
+ 01EB 20                pop X
+ 01EC                   .dbline 156
+ 01EC           ;       LCD_Write_Data( bSign );
+ 01EC 10                push X
+ 01ED 52F8              mov A,[X-8]
+ 01EF 7C0000            xcall _LCD_Write_Data
+ 01F2 20                pop X
+ 01F3                   .dbline 157
+ 01F3           ;       LCD_Write_Data( 'j' );
+ 01F3 10                push X
+ 01F4 506A              mov A,106
+ 01F6 7C0000            xcall _LCD_Write_Data
+ 01F9 20                pop X
+ 01FA                   .dbline 158
+ 01FA           ;       itoa(szText, wX, 10);
+ 01FA 5000              mov A,0
+ 01FC 08                push A
+ 01FD 500A              mov A,10
+ 01FF 08                push A
+ 0200 52F9              mov A,[X-7]
+ 0202 08                push A
+ 0203 52FA              mov A,[X-6]
+ 0205 08                push A
+ 0206 62D000            mov REG[0xd0],>__r0
+ 0209 5007              mov A,7
+ 020B 08                push A
+ 020C 10                push X
+ 020D 7C0000            xcall _itoa
+ 0210 38FA              add SP,-6
+ 0212                   .dbline 159
+ 0212           ;       LCD_PrString(szText);
+ 0212 62D000            mov REG[0xd0],>__r0
+ 0215 10                push X
+ 0216 5007              mov A,7
+ 0218 08                push A
+ 0219 18                pop A
+ 021A 7C0000            xcall _LCD_PrString
+ 021D 20                pop X
+ 021E                   .dbline -2
+ 021E           L34:
+ 021E 38F0              add SP,-16
+ 0220 20                pop X
+ 0221                   .dbline 0 ; func end
+ 0221 7F                ret
+ 0222                   .dbsym l szText 0 A[16:16]c
+ 0222                   .dbsym l bSign -8 c
+ 0222                   .dbsym l wX -7 i
+ 0222                   .dbsym l wR -5 i
+ 0222                   .dbend
+ 0222                   .dbfunc e DISP_Capacitance _DISP_Capacitance fV
+ 0222           ;            szC -> X+0
+ 0222           ;             wC -> X-5
+ 0222           _DISP_Capacitance::
+ 0222                   .dbline -1
+ 0222 10                push X
+ 0223 4F                mov X,SP
+ 0224 3810              add SP,16
+ 0226                   .dbline 177
+ 0226           ; }
+ 0226           ; 
+ 0226           ; //-----------------------------------------------------------------------------
+ 0226           ; //  FUNCTION NAME: DISP_Capacitance
+ 0226           ; //
+ 0226           ; //  DESCRIPTION:
+ 0226           ; //
+ 0226           ; //    Display capacitance
+ 0226           ; //
+ 0226           ; //  ARGUMENTS:
+ 0226           ; //            wC              Capacitance in 10xpF
+ 0226           ; //
+ 0226           ; //  RETURNS:
+ 0226           ; //    none.
+ 0226           ; //
+ 0226           ; //-----------------------------------------------------------------------------
+ 0226           ; void DISP_Capacitance ( WORD wC )
+ 0226           ; {
+ 0226                   .dbline 180
+ 0226           ;       char szC[16];
+ 0226           ; 
+ 0226           ;       LCD_PrCString("C = ");
+ 0226 10                push X
+ 0227 5019              mov A,>L36
+ 0229 08                push A
+ 022A 5019              mov A,<L36
+ 022C 5C                mov X,A
+ 022D 18                pop A
+ 022E 7C0000            xcall _LCD_PrCString
+ 0231 20                pop X
+ 0232                   .dbline 181
+ 0232           ;       itoa(szC, wC/10, 10);
+ 0232 5000              mov A,0
+ 0234 08                push A
+ 0235 500A              mov A,10
+ 0237 08                push A
+ 0238 62D000            mov REG[0xd0],>__r0
+ 023B 5000              mov A,0
+ 023D 08                push A
+ 023E 500A              mov A,10
+ 0240 08                push A
+ 0241 52FB              mov A,[X-5]
+ 0243 08                push A
+ 0244 52FC              mov A,[X-4]
+ 0246 08                push A
+ 0247 7C0000            xcall __divmodu_16X16_16
+ 024A 18                pop A
+ 024B 5300              mov [__r1],A
+ 024D 18                pop A
+ 024E 38FE              add SP,-2
+ 0250 08                push A
+ 0251 5100              mov A,[__r1]
+ 0253 08                push A
+ 0254 5007              mov A,7
+ 0256 08                push A
+ 0257 10                push X
+ 0258 7C0000            xcall _itoa
+ 025B 38FA              add SP,-6
+ 025D                   .dbline 182
+ 025D           ;       LCD_PrString(szC);
+ 025D 62D000            mov REG[0xd0],>__r0
+ 0260 10                push X
+ 0261 5007              mov A,7
+ 0263 08                push A
+ 0264 18                pop A
+ 0265 7C0000            xcall _LCD_PrString
+ 0268 20                pop X
+ 0269                   .dbline 183
+ 0269           ;       LCD_Write_Data( '.' );
+ 0269 10                push X
+ 026A 502E              mov A,46
+ 026C 7C0000            xcall _LCD_Write_Data
+ 026F 20                pop X
+ 0270                   .dbline 184
+ 0270           ;       itoa(szC, wC%10, 10);
+ 0270 5000              mov A,0
+ 0272 08                push A
+ 0273 500A              mov A,10
+ 0275 08                push A
+ 0276 62D000            mov REG[0xd0],>__r0
+ 0279 5000              mov A,0
+ 027B 08                push A
+ 027C 500A              mov A,10
+ 027E 08                push A
+ 027F 52FB              mov A,[X-5]
+ 0281 08                push A
+ 0282 52FC              mov A,[X-4]
+ 0284 08                push A
+ 0285 7C0000            xcall __divmodu_16X16_16
+ 0288 38FE              add SP,-2
+ 028A 18                pop A
+ 028B 5300              mov [__r1],A
+ 028D 18                pop A
+ 028E 08                push A
+ 028F 5100              mov A,[__r1]
+ 0291 08                push A
+ 0292 5007              mov A,7
+ 0294 08                push A
+ 0295 10                push X
+ 0296 7C0000            xcall _itoa
+ 0299 38FA              add SP,-6
+ 029B                   .dbline 185
+ 029B           ;       LCD_PrString(szC);
+ 029B 62D000            mov REG[0xd0],>__r0
+ 029E 10                push X
+ 029F 5007              mov A,7
+ 02A1 08                push A
+ 02A2 18                pop A
+ 02A3 7C0000            xcall _LCD_PrString
+ 02A6 20                pop X
+ 02A7                   .dbline 186
+ 02A7           ;       LCD_PrCString("pF");
+ 02A7 10                push X
+ 02A8 5016              mov A,>L37
+ 02AA 08                push A
+ 02AB 5016              mov A,<L37
+ 02AD 5C                mov X,A
+ 02AE 18                pop A
+ 02AF 7C0000            xcall _LCD_PrCString
+ 02B2 20                pop X
+ 02B3                   .dbline -2
+ 02B3           L35:
+ 02B3 38F0              add SP,-16
+ 02B5 20                pop X
+ 02B6                   .dbline 0 ; func end
+ 02B6 7F                ret
+ 02B7                   .dbsym l szC 0 A[16:16]c
+ 02B7                   .dbsym l wC -5 i
+ 02B7                   .dbend
+ 02B7                   .dbfunc e DISP_Inductance _DISP_Inductance fV
+ 02B7           ;            szL -> X+0
+ 02B7           ;             wL -> X-5
+ 02B7           _DISP_Inductance::
+ 02B7                   .dbline -1
+ 02B7 10                push X
+ 02B8 4F                mov X,SP
+ 02B9 3810              add SP,16
+ 02BB                   .dbline 204
+ 02BB           ; }
+ 02BB           ; 
+ 02BB           ; //-----------------------------------------------------------------------------
+ 02BB           ; //  FUNCTION NAME: DISP_Inductance
+ 02BB           ; //
+ 02BB           ; //  DESCRIPTION:
+ 02BB           ; //
+ 02BB           ; //    Display inductance
+ 02BB           ; //
+ 02BB           ; //  ARGUMENTS:
+ 02BB           ; //            wL              Inductance in 10xuH
+ 02BB           ; //
+ 02BB           ; //  RETURNS:
+ 02BB           ; //    none.
+ 02BB           ; //
+ 02BB           ; //-----------------------------------------------------------------------------
+ 02BB           ; void DISP_Inductance ( WORD wL )
+ 02BB           ; {
+ 02BB                   .dbline 207
+ 02BB           ;       char szL[16];
+ 02BB           ; 
+ 02BB           ;       LCD_PrCString("L = ");
+ 02BB 10                push X
+ 02BC 5011              mov A,>L39
+ 02BE 08                push A
+ 02BF 5011              mov A,<L39
+ 02C1 5C                mov X,A
+ 02C2 18                pop A
+ 02C3 7C0000            xcall _LCD_PrCString
+ 02C6 20                pop X
+ 02C7                   .dbline 208
+ 02C7           ;       itoa(szL, wL/10, 10);
+ 02C7 5000              mov A,0
+ 02C9 08                push A
+ 02CA 500A              mov A,10
+ 02CC 08                push A
+ 02CD 62D000            mov REG[0xd0],>__r0
+ 02D0 5000              mov A,0
+ 02D2 08                push A
+ 02D3 500A              mov A,10
+ 02D5 08                push A
+ 02D6 52FB              mov A,[X-5]
+ 02D8 08                push A
+ 02D9 52FC              mov A,[X-4]
+ 02DB 08                push A
+ 02DC 7C0000            xcall __divmodu_16X16_16
+ 02DF 18                pop A
+ 02E0 5300              mov [__r1],A
+ 02E2 18                pop A
+ 02E3 38FE              add SP,-2
+ 02E5 08                push A
+ 02E6 5100              mov A,[__r1]
+ 02E8 08                push A
+ 02E9 5007              mov A,7
+ 02EB 08                push A
+ 02EC 10                push X
+ 02ED 7C0000            xcall _itoa
+ 02F0 38FA              add SP,-6
+ 02F2                   .dbline 209
+ 02F2           ;       LCD_PrString(szL);
+ 02F2 62D000            mov REG[0xd0],>__r0
+ 02F5 10                push X
+ 02F6 5007              mov A,7
+ 02F8 08                push A
+ 02F9 18                pop A
+ 02FA 7C0000            xcall _LCD_PrString
+ 02FD 20                pop X
+ 02FE                   .dbline 210
+ 02FE           ;       LCD_Write_Data( '.' );
+ 02FE 10                push X
+ 02FF 502E              mov A,46
+ 0301 7C0000            xcall _LCD_Write_Data
+ 0304 20                pop X
+ 0305                   .dbline 211
+ 0305           ;       itoa(szL, wL%10, 10);
+ 0305 5000              mov A,0
+ 0307 08                push A
+ 0308 500A              mov A,10
+ 030A 08                push A
+ 030B 62D000            mov REG[0xd0],>__r0
+ 030E 5000              mov A,0
+ 0310 08                push A
+ 0311 500A              mov A,10
+ 0313 08                push A
+ 0314 52FB              mov A,[X-5]
+ 0316 08                push A
+ 0317 52FC              mov A,[X-4]
+ 0319 08                push A
+ 031A 7C0000            xcall __divmodu_16X16_16
+ 031D 38FE              add SP,-2
+ 031F 18                pop A
+ 0320 5300              mov [__r1],A
+ 0322 18                pop A
+ 0323 08                push A
+ 0324 5100              mov A,[__r1]
+ 0326 08                push A
+ 0327 5007              mov A,7
+ 0329 08                push A
+ 032A 10                push X
+ 032B 7C0000            xcall _itoa
+ 032E 38FA              add SP,-6
+ 0330                   .dbline 212
+ 0330           ;       LCD_PrString(szL);
+ 0330 62D000            mov REG[0xd0],>__r0
+ 0333 10                push X
+ 0334 5007              mov A,7
+ 0336 08                push A
+ 0337 18                pop A
+ 0338 7C0000            xcall _LCD_PrString
+ 033B 20                pop X
+ 033C                   .dbline 213
+ 033C           ;       LCD_PrCString("uH");
+ 033C 10                push X
+ 033D 500E              mov A,>L40
+ 033F 08                push A
+ 0340 500E              mov A,<L40
+ 0342 5C                mov X,A
+ 0343 18                pop A
+ 0344 7C0000            xcall _LCD_PrCString
+ 0347 20                pop X
+ 0348                   .dbline -2
+ 0348           L38:
+ 0348 38F0              add SP,-16
+ 034A 20                pop X
+ 034B                   .dbline 0 ; func end
+ 034B 7F                ret
+ 034C                   .dbsym l szL 0 A[16:16]c
+ 034C                   .dbsym l wL -5 i
+ 034C                   .dbend
+ 034C                   .dbfunc e DISP_Impedance _DISP_Impedance fV
+ 034C           ;            szZ -> X+0
+ 034C           ;             wZ -> X-5
+ 034C           _DISP_Impedance::
+ 034C                   .dbline -1
+ 034C 10                push X
+ 034D 4F                mov X,SP
+ 034E 3810              add SP,16
+ 0350                   .dbline 231
+ 0350           ; }
+ 0350           ; 
+ 0350           ; //-----------------------------------------------------------------------------
+ 0350           ; //  FUNCTION NAME: DISP_Impedance
+ 0350           ; //
+ 0350           ; //  DESCRIPTION:
+ 0350           ; //
+ 0350           ; //    Displays impedance modulus
+ 0350           ; //
+ 0350           ; //  ARGUMENTS:
+ 0350           ; //            wZ              Impedance modulus
+ 0350           ; //
+ 0350           ; //  RETURNS:
+ 0350           ; //    none.
+ 0350           ; //
+ 0350           ; //-----------------------------------------------------------------------------
+ 0350           ; void DISP_Impedance ( WORD wZ )
+ 0350           ; {
+ 0350                   .dbline 235
+ 0350           ;       char szZ[16];
+ 0350           ; 
+ 0350           ; 
+ 0350           ;       LCD_PrCString("Z = ");
+ 0350 10                push X
+ 0351 5009              mov A,>L42
+ 0353 08                push A
+ 0354 5009              mov A,<L42
+ 0356 5C                mov X,A
+ 0357 18                pop A
+ 0358 7C0000            xcall _LCD_PrCString
+ 035B 20                pop X
+ 035C                   .dbline 236
+ 035C           ;       if (wZ>2000)
+ 035C 50D0              mov A,-48
+ 035E 13FC              sub A,[X-4]
+ 0360 5007              mov A,7
+ 0362 1BFB              sbb A,[X-5]
+ 0364 D00F              jnc L43
+ 0366           X7:
+ 0366                   .dbline 237
+ 0366           ;       {
+ 0366                   .dbline 238
+ 0366           ;               LCD_PrCString(">2000");
+ 0366 10                push X
+ 0367 5003              mov A,>L45
+ 0369 08                push A
+ 036A 5003              mov A,<L45
+ 036C 5C                mov X,A
+ 036D 18                pop A
+ 036E 7C0000            xcall _LCD_PrCString
+ 0371 20                pop X
+ 0372                   .dbline 239
+ 0372           ;       }
+ 0372 8031              xjmp L44
+ 0374           L43:
+ 0374                   .dbline 241
+ 0374           ;       else
+ 0374           ;       {
+ 0374                   .dbline 242
+ 0374           ;               itoa(szZ, wZ, 10);
+ 0374 5000              mov A,0
+ 0376 08                push A
+ 0377 500A              mov A,10
+ 0379 08                push A
+ 037A 52FB              mov A,[X-5]
+ 037C 08                push A
+ 037D 52FC              mov A,[X-4]
+ 037F 08                push A
+ 0380 62D000            mov REG[0xd0],>__r0
+ 0383 5007              mov A,7
+ 0385 08                push A
+ 0386 10                push X
+ 0387 7C0000            xcall _itoa
+ 038A 38FA              add SP,-6
+ 038C                   .dbline 243
+ 038C           ;               LCD_PrString(szZ);
+ 038C 62D000            mov REG[0xd0],>__r0
+ 038F 10                push X
+ 0390 5007              mov A,7
+ 0392 08                push A
+ 0393 18                pop A
+ 0394 7C0000            xcall _LCD_PrString
+ 0397 20                pop X
+ 0398                   .dbline 244
+ 0398           ;               LCD_PrCString(" \xf4");
+ 0398 10                push X
+ 0399 5000              mov A,>L46
+ 039B 08                push A
+ 039C 5000              mov A,<L46
+ 039E 5C                mov X,A
+ 039F 18                pop A
+ 03A0 7C0000            xcall _LCD_PrCString
+ 03A3 20                pop X
+ 03A4                   .dbline 245
+ 03A4           ;       }
+ 03A4           L44:
+ 03A4                   .dbline -2
+ 03A4           L41:
+ 03A4 38F0              add SP,-16
+ 03A6 20                pop X
+ 03A7                   .dbline 0 ; func end
+ 03A7 7F                ret
+ 03A8                   .dbsym l szZ 0 A[16:16]c
+ 03A8                   .dbsym l wZ -5 i
+ 03A8                   .dbend
+ 03A8                   .dbfunc e DISP_Clear _DISP_Clear fV
+ 03A8           _DISP_Clear::
+ 03A8                   .dbline -1
+ 03A8                   .dbline 263
+ 03A8           ; }
+ 03A8           ; 
+ 03A8           ; //-----------------------------------------------------------------------------
+ 03A8           ; //  FUNCTION NAME: DISP_Clear
+ 03A8           ; //
+ 03A8           ; //  DESCRIPTION:
+ 03A8           ; //
+ 03A8           ; //    Clears the screen
+ 03A8           ; //
+ 03A8           ; //  ARGUMENTS:
+ 03A8           ; //
+ 03A8           ; //
+ 03A8           ; //  RETURNS:
+ 03A8           ; //    none.
+ 03A8           ; //
+ 03A8           ; //-----------------------------------------------------------------------------
+ 03A8           ; void DISP_Clear (void)
+ 03A8           ; {
+ 03A8                   .dbline 264
+ 03A8           ;       LCD_Control(LCD_CLEAR);
+ 03A8 10                push X
+ 03A9 5001              mov A,1
+ 03AB 7C0000            xcall _LCD_Control
+ 03AE 20                pop X
+ 03AF                   .dbline -2
+ 03AF           L47:
+ 03AF                   .dbline 0 ; func end
+ 03AF 7F                ret
+ 03B0                   .dbend
+                        .area lit(rom, con, rel)
+ 0000           L46:
+ 0000 20F400            .byte 32,244,0
+ 0003           L45:
+ 0003 3E3230303000      .byte 62,50,48,48,48,0
+ 0009           L42:
+ 0009 5A203D2000        .byte 'Z,32,61,32,0
+ 000E           L40:
+ 000E 754800            .byte 'u,'H,0
+ 0011           L39:
+ 0011 4C203D2000        .byte 'L,32,61,32,0
+ 0016           L37:
+ 0016 704600            .byte 'p,'F,0
+ 0019           L36:
+ 0019 43203D2000        .byte 'C,32,61,32,0
+ 001E           L31:
+ 001E 3E313000          .byte 62,49,48,0
